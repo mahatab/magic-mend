@@ -14,6 +14,12 @@ Decisions, deviations from the spec, and ideas that are not in the spec.
 - **Environment.** The engine removes `CLAUDECODE`, `CLAUDE_CODE_*`, and `CLAUDE_AGENT_SDK_*` variables a parent Claude Code session may have set, then sets `DISABLE_AUTOUPDATER=1` and `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`.
 - **Sign-in check.** The wizard runs `claude auth status`, which prints only `loggedIn` and the method. The app never opens credential files.
 
+- **Hotkey default (Ctrl+Alt+R).** It does not clash with a default shortcut in Chrome, Edge, or WhatsApp. In Word and Outlook it normally types the registered sign, so while Magic Mend runs that symbol shortcut is taken; AutoCorrect (R) still works. On keyboard layouts where Ctrl+Alt acts as AltGr and Ctrl+Alt+R types a character (for example Polish), the wizard and Settings warn and suggest Ctrl+Shift+Space. The check asks the active keyboard layout directly.
+- **Enter in the follow-up box.** Kept as the spec default. The end-to-end test sends a real Enter key while the popup is in front and confirms nothing reaches the app underneath.
+- **Modifier wait.** Capture waits for Ctrl, Alt, Shift, and Win to be released, not the hotkey letter. Windows can report a letter as held long after it was released (after a lock screen, for example), which blocked capture for 10 seconds in testing. A held letter cannot turn Ctrl+C into another shortcut.
+- **Mac popup.** Tauri has no non-activating panel, so the spec fallback is used: the popup activates, and Replace re-activates the original app before Cmd+V.
+- **Test hooks.** `MAGIC_MEND_DATA_DIR` points the app at a throwaway folder for automated tests. The test window, fake claude, and harness are separate binaries that are not part of the installer.
+
 ## Deviations
 
 - **Window corners on Windows 11.** With acrylic turned on, Windows draws the frame, and its rounded corner radius is 8 px, not 16 px. When acrylic is not available (Windows 10) the popup draws its own 16 px corners on a solid background.

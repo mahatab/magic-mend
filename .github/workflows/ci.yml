@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      mac:
+        description: "Also build and test on macOS"
+        type: boolean
+        default: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx vitest run
+      - run: npx vite build
+      - run: cargo test --lib
+        working-directory: src-tauri
+      - run: cargo clippy --lib --bins -- -D warnings
+        working-directory: src-tauri
+
+  macos:
+    if: github.event_name == 'workflow_dispatch' && inputs.mac
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: npm ci
+      - run: npx vitest run
+      - run: npx vite build
+      - run: cargo test --lib
+        working-directory: src-tauri
+      - run: npx tauri build --bundles app

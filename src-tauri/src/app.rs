@@ -161,10 +161,12 @@ fn hotkey_pressed(app: &AppHandle) {
         }
     }
     let vk = hotkey::parse(&s.hotkey).and_then(|h| h.virtual_key());
+    let mut clipboard_warning = false;
     let capture = match &fg {
         Some(w) if w.elevated => Capture::Unreadable { reason: ADMIN_MESSAGE.into() },
         _ => {
             let (c, t) = selection::capture(vk);
+            clipboard_warning = t.unrestorable > 0;
             logging::event(
                 "capture",
                 &[("release_ms", &t.release_ms.to_string()), ("copy_ms", &t.copy_ms.to_string()), ("total_ms", &t.total_ms.to_string())],
@@ -179,7 +181,8 @@ fn hotkey_pressed(app: &AppHandle) {
     let engine_error = st.engine.lock().unwrap().begin_session().err();
     let id = st.session_ids.fetch_add(1, Ordering::SeqCst) + 1;
     *st.session.lock().unwrap() = Some(PopupSession { id, target: fg.clone(), own_window, target_focused: false });
-    let payload = popup_payload(id, &s, fg.as_ref(), own_window, capture, &channel_name, engine_error);
+    let mut payload = popup_payload(id, &s, fg.as_ref(), own_window, capture, &channel_name, engine_error);
+    payload.clipboard_warning = clipboard_warning;
     show_popup(app, fg.as_ref().map(|w| w.handle), &s.popup_position, &payload);
     logging::timing("popup_visible", pressed_at.elapsed().as_millis());
 }
@@ -210,6 +213,7 @@ struct PopupPayload {
     engine_error: Option<String>,
     no_contractions: bool,
     no_em_dashes: bool,
+    clipboard_warning: bool,
 }
 
 fn popup_payload(
@@ -247,6 +251,7 @@ fn popup_payload(
         engine_error: engine_error.map(|k| k.message().to_string()),
         no_contractions: s.no_contractions,
         no_em_dashes: s.no_em_dashes,
+        clipboard_warning: false,
     }
 }
 

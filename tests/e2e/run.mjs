@@ -178,6 +178,19 @@ async function main() {
     return `one spare after Replace; next popup visible in ${visibleMs} ms (includes key and helper overhead), drafts in ${firstDraftMs} ms`;
   });
 
+  await test("edge", "Original window closed: Replace turns into Copy only", async () => {
+    const p = await openOn(app, "window closed check", "tclosed");
+    await waitDrafts(app, 2);
+    p.close();
+    const label = await waitFor(
+      () => app.popup.eval(`(() => { const b = document.querySelector('.card .btn-primary'); return b && b.disabled && b.textContent === 'Copy only' ? b.textContent : null })()`),
+      { what: "Copy only", timeout: 4000 },
+    );
+    const reason = await app.popup.eval(`document.querySelector('.reason')?.textContent`);
+    await closePopup(app);
+    return `"${label}" with "${reason}"`;
+  });
+
   await test("17", "Held hotkey still captures and sends no stray shortcut", async () => {
     const p = await startPad("held modifiers check", "t17");
     await sleep(150);

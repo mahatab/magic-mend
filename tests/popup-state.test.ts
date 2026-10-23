@@ -60,6 +60,11 @@ describe("opening", () => {
     expect(shouldAutoStart(s)).toBe(false);
   });
 
+  it("warns when the clipboard cannot be fully restored", () => {
+    const s = fromPayload(payload({ clipboard_warning: true }));
+    expect(s.notice).toContain("cannot fully restore");
+  });
+
   it("engine error at open is shown and blocks auto start", () => {
     const s = fromPayload(payload({ engine_error: "Claude is not signed in." }));
     expect(s.error?.message).toBe("Claude is not signed in.");

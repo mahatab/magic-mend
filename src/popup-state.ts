@@ -35,6 +35,7 @@ export interface OpenPayload {
   engine_error: string | null;
   no_contractions: boolean;
   no_em_dashes: boolean;
+  clipboard_warning?: boolean;
 }
 
 export interface Request {
@@ -119,6 +120,9 @@ export function fromPayload(p: OpenPayload): PopupState {
     s.needsLongConfirm = p.capture.text.length > p.long_text_limit;
   } else if (p.capture.kind === "unreadable") {
     s.notice = p.capture.reason;
+  }
+  if (p.clipboard_warning && p.capture.kind === "text") {
+    s.notice = "Your clipboard holds something Magic Mend cannot fully restore, such as a drawing. Replace may leave only part of it.";
   }
   if (p.engine_error) {
     s.error = { kind: "engine", message: p.engine_error };

@@ -27,6 +27,23 @@ const app = document.getElementById("app")!;
 let state: PopupState = initialState();
 let debounce: number | undefined;
 let resizeRaf = 0;
+let watch: number | undefined;
+
+/** Checks once a second that the original window still exists and whether it took focus. */
+function watchTarget() {
+  window.clearInterval(watch);
+  if (!state.payload?.target.present) return;
+  watch = window.setInterval(async () => {
+    const r = await invoke<{ alive: boolean; focused: boolean }>("target_status");
+    if (!r) return;
+    if (r.alive !== state.targetAlive || (r.focused && !state.targetFocused)) {
+      state.targetAlive = r.alive;
+      state.targetFocused = state.targetFocused || r.focused;
+      renderTarget();
+      renderDrafts();
+    }
+  }, 1000);
+}
 
 // ---------------------------------------------------------------------------------------------
 // Helpers
@@ -411,6 +428,7 @@ async function doReplace(text: string, btn: HTMLButtonElement) {
 
 function closePopup() {
   window.clearTimeout(debounce);
+  window.clearInterval(watch);
   state = initialState();
   app.classList.remove("open");
   void invoke("close_popup");
@@ -444,6 +462,7 @@ function open(p: OpenPayload) {
   // Keyboard focus lands on the first chip, so Esc and Tab work at once.
   const first = (state.editable ? app.querySelector("#orig-input") : app.querySelector(".tone-row .chip[aria-checked='true']")) as HTMLElement | null;
   (first ?? app).focus();
+  watchTarget();
   if (shouldAutoStart(state)) startRequest();
 }
 
@@ -472,6 +491,7 @@ void listen("popup:target-focused", () => {
   renderDrafts();
 });
 void listen("popup:closed", () => {
+  window.clearInterval(watch);
   state = initialState();
   app.classList.remove("open");
 });

@@ -58,6 +58,7 @@ pub fn capture(extra_vk: Option<u16>) -> (Capture, CaptureTimings) {
     }
     t.release_ms = start.elapsed().as_millis() as u64;
     let snapshot = imp::save_clipboard();
+    t.unrestorable = snapshot.unrestorable;
     let before = imp::clipboard_seq();
     if !imp::send_copy() {
         imp::restore_clipboard(&snapshot);
@@ -86,4 +87,6 @@ pub struct CaptureTimings {
     pub release_ms: u64,
     pub copy_ms: u64,
     pub total_ms: u64,
+    /// Clipboard formats that could not be saved, so Replace may not bring them back.
+    pub unrestorable: usize,
 }
