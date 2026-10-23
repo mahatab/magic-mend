@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magic Mend Build Spec</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1d1f24;
+    --muted: #5b6270;
+    --line: #dfe2e8;
+    --code-bg: #f4f5f8;
+    --accent: #5b6cff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --fg: #e8eaee;
+      --muted: #9aa1ae;
+      --line: #2b2f38;
+      --code-bg: #1c1f26;
+      --accent: #8a96ff;
+    }
+  }
+  html { background: var(--bg); }
+  body {
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    max-width: 860px;
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.6 -apple-system, "Segoe UI Variable", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 8px; }
+  h2 { font-size: 1.4rem; margin: 2.2em 0 0.6em; padding-top: 0.6em; border-top: 1px solid var(--line); }
+  p, li { margin: 0.5em 0; }
+  ul, ol { padding-left: 1.4em; }
+  a { color: var(--accent); }
+  .meta { color: var(--muted); margin-bottom: 1.2em; }
+  code { font-family: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace; font-size: 0.92em; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 5px; }
+  pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; overflow-x: auto; margin: 1em 0; }
+  pre code { background: none; padding: 0; font-size: 0.88em; line-height: 1.5; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.95em; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); }
+</style>
+</head>
+<body>
+
+<h1>Magic Mend Build Spec</h1>
+<div class="meta">2026-10-23</div>
+
+<p>Magic Mend is a small tray app for Windows first and Mac next. Select text in any app, press a hotkey, pick a tone in a polished popup, and replace the text with a human-sounding rewrite from the user's own Claude login. It never sends a message for the user.</p>
+
+<p><strong>Name:</strong> Magic Mend. Repo and folder name: <code>magic-mend</code>. The tray tooltip reads "Magic Mend, press Ctrl+Alt+R" (Ctrl+Option+R on Mac). The popup header shows the Magic Mend name with a small icon of a needle and thread with a sparkle. Magic Mend shortens to MM, a nod to M² Labs.</p>
+
+<h2 id="goal-and-hard-rules">Goal and hard rules</h2>
+<p>The goal is to cut rephrasing from six steps (open Claude, start a new chat, paste, ask, copy, paste back) to three: select, press the hotkey, click Replace.</p>
+<p>These rules can never be broken, and every milestone must be tested against them:</p>
+<ol>
+  <li><strong>Never send a message.</strong> The app never presses Enter, Send, or any submit control in another app. Its only keyboard output into another app is the paste shortcut (Ctrl+V or Cmd+V) after the user clicks Replace.</li>
+  <li><strong>Replace and Copy are mouse buttons only.</strong> No keyboard shortcut triggers either one. Enter inside the popup's own follow-up box only submits the follow-up inside the popup.</li>
+  <li><strong>Use only the official, unmodified <code>claude</code> command, already signed in by the user.</strong> Never read, copy, or store login tokens or credentials. Never imitate Claude Code requests or change request headers. Personal use, one user, and every call starts from a hotkey press.</li>
+  <li><strong>No telemetry, no accounts, no network calls</strong> except what the <code>claude</code> command makes by itself.</li>
+  <li><strong>Output rules are always on:</strong> sound human, no contractions, no em dashes, never invent facts, and keep names, numbers, dates, and links exactly as written.</li>
+  <li><strong>Protect the clipboard.</strong> Restore the user's original clipboard after any internal copy or paste step. The only exception is the Copy button, which intentionally leaves the draft on the clipboard.</li>
+</ol>
+<p>Why rule 3 matters: Anthropic blocks third-party tools that reuse subscription logins, and it paused a plan to move <code>claude -p</code> usage into a separate monthly credit. Today, <code>claude -p</code> still draws from the plan's usage limits. Re-check the <a href="https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-plan">Anthropic Help Center article</a> before each release.</p>
+<p>Speed targets, not yet measured: popup visible within 150 ms of the hotkey, and the first draft within about 4 seconds.</p>
+
+<h2 id="what-past-chats-show">What past chats show</h2>
+<p>This comes from about 25 of the user's rephrasing chats between February and October 2026. It is a sample, not every chat.</p>
+<ul>
+  <li><strong>"Rephrase, simple" is the most common request.</strong> It often carries "human" or "respectful" with it.</li>
+  <li><strong>Tone words the user actually types:</strong> simple, human, respectful, warmer, casual and friendly, professional and measured, shorter and to the point, less thankful, more polite, and softer (for example, "make it a suggestion, like 'you can adjust'").</li>
+  <li><strong>Drafts often contain typos and grammar slips, but the wording is sometimes already right.</strong> In one chat the user asked what was wrong with his version and then asked to keep it. "Fix errors only" must be a first-class mode.</li>
+  <li><strong>Edits happen at the word level:</strong> swap one phrase, remove one word, restore one sentence, usually 2 to 5 follow-ups per message. Multi-turn editing is required.</li>
+  <li><strong>Channels:</strong> text, email, WhatsApp, LinkedIn. <strong>Recipients:</strong> landlords and hosts, recruiters, professional contacts, friends, family, and community groups where Islamic greetings are normal. Keep greetings, religious phrases, and names exactly as the user wrote them.</li>
+  <li><strong>Clarifying questions slowed him down</strong> (for example, "who is this for?" and "which channel?"). The app must never ask a question before the first draft.</li>
+  <li><strong>Stated rules:</strong> no contractions, no em dashes, and never send anything for him.</li>
+</ul>
+
+<h2 id="user-flow">User flow</h2>
+<ol>
+  <li>On first launch, the setup wizard runs (see the setup wizard section). After that, the app starts at login and lives in the system tray. A warm Claude process is already waiting (see the engine section).</li>
+  <li>The user selects text in any app and presses the global hotkey. Defaults: Ctrl+Alt+R on Windows and Ctrl+Option+R on Mac, both configurable.</li>
+  <li>The app saves the current clipboard, waits until the user releases the hotkey's modifier keys (so the app never sends Ctrl+Alt+C by mistake), simulates the copy shortcut, waits for the clipboard change counter to move (the clipboard sequence number on Windows, the change count on Mac, with a timeout of about 400 ms), reads the selection, restores the clipboard, and records the active window (process name and window title).</li>
+  <li>The popup appears on the active window's monitor, shows the original text, preselects the default chips (Simple, Same length), and starts the first draft immediately. The user does not have to click anything first.</li>
+  <li>Two drafts stream into two cards. Each card has a <strong>Replace</strong> button and a <strong>Copy</strong> button.</li>
+  <li>The user can change chips (a chip change regenerates the drafts) or type a follow-up such as "remove the apology". Follow-ups continue the same conversation.</li>
+  <li>The user clicks <strong>Replace</strong> on a draft. The app puts the draft on the clipboard, hides the popup, returns focus to the original window, simulates the paste shortcut, waits about 500 ms so slow apps finish reading the clipboard, and restores the original clipboard. The pasted text never ends with a line break, because some apps treat a pasted line break like Enter. The text sits in the message box and the user presses Send himself.</li>
+  <li>Closing the popup (Esc or the close button) discards the conversation and starts a fresh warm process in the background.</li>
+</ol>
+<p>Edge cases the app must handle:</p>
+<ul>
+  <li><strong>Nothing selected:</strong> the popup opens with an empty editable box labelled "Paste or type text". Replace is disabled and Copy still works.</li>
+  <li><strong>Selection cannot be read</strong> (password field, locked app): show one plain line and keep the box editable.</li>
+  <li><strong>Original window closed or lost:</strong> Replace turns into Copy only and says so.</li>
+  <li><strong>Claude not installed, not signed in, or plan limit reached:</strong> show a plain message that names the fix. Never show a stack trace.</li>
+  <li><strong>Hotkey pressed while the popup is open:</strong> focus the existing popup. Never open a second one.</li>
+  <li><strong>Target app clicked while the popup is open:</strong> the original selection may be gone. The app watches for the target window taking focus. If it does, the Replace button changes to "Paste at cursor" and the header says the selection may have changed.</li>
+  <li><strong>Long selection (over 4,000 characters):</strong> say that Magic Mend is built for short messages and ask the user to confirm before the text goes to Claude.</li>
+</ul>
+
+<h2 id="popup-design">Popup design</h2>
+<p>The popup must feel like a native, calm, premium tool. Layout (480 px wide, height grows to a 640 px maximum, then the drafts area scrolls):</p>
+<pre><code>+--------------------------------------------------+
+|  [app icon] Replace will paste into: WhatsApp [x]|
+|  ORIGINAL                                        |
+|  hi chi, we had a great stay, can we check out   |
+|--------------------------------------------------|
+|  TONE    (Simple) Respectful Warm Casual         |
+|          Professional Firm                       |
+|  LENGTH  Shorter  (Same)  Fuller                 |
+|  [ ] Fix errors only  [ ] Softer  [ ] Less thankful |
+|  CHANNEL  Text v        (auto-detected)          |
+|--------------------------------------------------|
+|  +--------------------------------------------+  |
+|  | Draft A text streams in here               |  |
+|  |                       [ Copy ]  [ Replace ]|  |
+|  +--------------------------------------------+  |
+|  +--------------------------------------------+  |
+|  | Draft B text streams in here               |  |
+|  |                       [ Copy ]  [ Replace ]|  |
+|  +--------------------------------------------+  |
+|  Ask for a change...                          (&gt;)|
++--------------------------------------------------+</code></pre>
+<p><strong>Visual style</strong></p>
+<ul>
+  <li>Frameless window with 16 px rounded corners, always on top, no taskbar entry, soft shadow.</li>
+  <li>Translucent blurred background: acrylic on Windows 11 and native vibrancy on Mac. Use a solid color when the effect is unavailable.</li>
+  <li>Follows the OS light or dark theme. All colors are CSS variables defined once as design tokens: neutral surfaces, one accent color (suggested: soft indigo near #5B6CFF), and a muted text color.</li>
+  <li>System UI font (Segoe UI Variable on Windows, SF Pro on Mac). Body 14 px. Section labels 11 px, uppercase, slightly spaced.</li>
+  <li>Chips are 28 px tall pills. A selected chip has the accent fill. An unselected chip has a thin border. Toggles are small switches.</li>
+  <li>Draft cards have a 12 px radius, a subtle shadow, and selectable text.</li>
+  <li><strong>Replace</strong> is the primary button (accent fill). <strong>Copy</strong> is the secondary button (outline). Keep an 8 px gap between them and a 36 px minimum height so neither is easy to hit by mistake. After a click, the button shows "Replaced" or "Copied" for about one second.</li>
+  <li>The header always shows the target app name and icon so the user can see where Replace will paste.</li>
+</ul>
+<p><strong>Motion</strong> (all of it disabled when the OS asks for reduced motion)</p>
+<ul>
+  <li>Open: 120 ms fade and slight scale up.</li>
+  <li>Waiting for the first words: a soft shimmer skeleton in each card.</li>
+  <li>Drafts stream in word by word. A chip change cross-fades the cards.</li>
+</ul>
+<p><strong>Focus and keyboard</strong></p>
+<ul>
+  <li>The popup takes keyboard focus when it opens. Tab order is chips, toggles, draft buttons, then the follow-up box.</li>
+  <li>Esc closes the popup.</li>
+  <li>In the follow-up box, Enter submits the follow-up inside the popup only, and Shift+Enter adds a new line. A visible send arrow does the same. The popup must confirm it has focus before accepting any key, so no keypress can reach the app underneath.</li>
+  <li>Replace and Copy have no keyboard shortcut at all.</li>
+</ul>
+<p><strong>Accessibility:</strong> contrast of at least AA, visible focus rings, and screen reader labels on every control.</p>
+
+<h2 id="chips-and-prompt">Chips and prompt</h2>
+<p>Every draft sounds human. "Human" is the baseline for all tones, not a chip.</p>
+<table>
+  <thead><tr><th>Group</th><th>Option</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td>Tone (pick one, Simple is the default)</td><td>Simple</td><td>Plain, short, natural words. Direct, no filler.</td></tr>
+    <tr><td>Tone</td><td>Respectful</td><td>Polite and courteous, for example "could you please". Not stiff.</td></tr>
+    <tr><td>Tone</td><td>Warm</td><td>Friendly and appreciative with one warm touch, never heavy gratitude.</td></tr>
+    <tr><td>Tone</td><td>Casual</td><td>Relaxed everyday talk, like a text to a friend.</td></tr>
+    <tr><td>Tone</td><td>Professional</td><td>Clear, measured, businesslike. Suits recruiters and work contacts.</td></tr>
+    <tr><td>Tone</td><td>Firm</td><td>A clear position with no hedging. Polite but direct.</td></tr>
+    <tr><td>Length (pick one, Same is the default)</td><td>Shorter</td><td>Cut to the core, roughly 30 to 50 percent shorter.</td></tr>
+    <tr><td>Length</td><td>Same</td><td>About the same length as the original.</td></tr>
+    <tr><td>Length</td><td>Fuller</td><td>Add natural connecting words for clarity. Never add new facts.</td></tr>
+    <tr><td>Toggle</td><td>Fix errors only</td><td>Correct spelling, grammar, punctuation, and word slips. Keep the user's own words. Ignore the tone and length chips. Return one draft.</td></tr>
+    <tr><td>Toggle</td><td>Softer</td><td>Turn demands into suggestions, for example "you can adjust" instead of "adjust".</td></tr>
+    <tr><td>Toggle</td><td>Less thankful or apologetic</td><td>Keep at most one thank-you and one apology, and cut extra courtesy.</td></tr>
+  </tbody>
+</table>
+<p><strong>Channel</strong> (auto-detected from the active app, with a manual override):</p>
+<ul>
+  <li><strong>Text and WhatsApp:</strong> no subject and no sign-off. Add a greeting only if the original has one. Keep emojis only if the original has them.</li>
+  <li><strong>Email:</strong> a short greeting and a sign-off word such as "Best,". Use a name only if it appears in the original. Also return a subject line, shown above the drafts. Replace pastes the body only, and the subject line has its own Copy button.</li>
+  <li><strong>LinkedIn:</strong> slightly more professional, no emojis, short paragraphs.</li>
+</ul>
+<p><strong>Request sent to Claude on each turn</strong></p>
+<pre><code>{"text": "&lt;selected text&gt;", "tone": "Simple", "length": "Same", "toggles": ["Softer"], "channel": "Text", "followup": null}</code></pre>
+<p><strong>System prompt for the engine</strong></p>
+<pre><code>You rewrite short messages for one person. You do not chat and you never ask questions.
+
+Always:
+- Sound like a real person wrote it. Plain words. No corporate filler.
+- Never use contractions. Write "do not", "I am", "it is".
+- Never use em dashes. Use a comma, a period, or "and".
+- Keep every fact exactly as written: names, numbers, dates, times, prices, links, addresses.
+- Never invent facts, promises, or details. Never add a name that is not in the original.
+- Keep the input language. Keep greetings and religious phrases (for example "Assalamu Alaikum") as written.
+- Keep the sender's first person voice.
+- Do not add emojis unless the original has them.
+
+Each request gives tone, length, toggles, and channel. Apply them.
+When a follow-up is given, apply it to the latest drafts and return the full updated set.
+
+Return only JSON: {"variants": [{"text": "..."}, {"text": "..."}], "subject": "..."}
+Return two variants that differ in wording, not in meaning. Return one when Fix errors only is on.
+Include "subject" only for the email channel.</code></pre>
+<p><strong>Output check in the app:</strong> after each response, scan every draft for contractions (n't, 're, 've, 'll, 'm, and it's, that's, there's, let's, he's, she's, what's) and for em dashes. Match both straight and curly apostrophes, and also flag 'd. If any are found, ask the engine once to fix them. If an em dash remains, replace it locally with a comma followed by one space, then remove any double spaces. Drafts stream in before the check can run, so Replace and Copy stay disabled on a draft until it passes. They must never act on a draft that fails the check.</p>
+
+<h2 id="architecture">Architecture</h2>
+<p><strong>Recommended stack: Tauri 2</strong> (Rust core, web UI in HTML, CSS, and TypeScript). Reasons: small memory footprint for an always-running tray app, one codebase for Windows and Mac, and full control over the popup's look with web styling. Electron is the fallback if native key simulation proves hard in Rust. Claude Code should confirm the choice in the first milestone and say so if it changes it.</p>
+<table>
+  <thead><tr><th>Component</th><th>Job</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Tray and autostart</td><td>Keep the app running at login, show a tray menu (Settings, Run setup again, Pause, Quit)</td><td>Tauri tray and autostart plugins</td></tr>
+    <tr><td>Hotkey manager</td><td>Register the global hotkey</td><td>Tauri global-shortcut plugin. Handle conflicts with a clear message.</td></tr>
+    <tr><td>Selection capture</td><td>Save clipboard, simulate copy, read text, restore clipboard</td><td>Needs key simulation. Wait for the clipboard to change, with a timeout of about 400 ms.</td></tr>
+    <tr><td>Active window tracker</td><td>Record the window that was active at hotkey time (process name, title, handle)</td><td>Used for channel detection and for returning focus on Replace</td></tr>
+    <tr><td>Channel detector</td><td>Map the active window to Text, Email, WhatsApp, or LinkedIn</td><td>Rules table below</td></tr>
+    <tr><td>Engine manager</td><td>Own the warm Claude process, send requests, parse streamed replies, respawn after each session</td><td>See the engine section</td></tr>
+    <tr><td>Popup window</td><td>The UI described in the popup design section</td><td>Separate hidden window, shown on hotkey, reused each time</td></tr>
+    <tr><td>Replace and Copy actions</td><td>Write clipboard, refocus the original window, simulate paste, restore clipboard</td><td>Replace must never press Enter</td></tr>
+    <tr><td>Output checker</td><td>Scan drafts for contractions and em dashes</td><td>See the chips and prompt section</td></tr>
+    <tr><td>Settings store</td><td>Save settings in a local JSON file</td><td>No cloud sync</td></tr>
+  </tbody>
+</table>
+<p><strong>Channel detection rules</strong> (check process name first, then window title, case-insensitive; the user can override per message and change the rules in settings):</p>
+<ul>
+  <li>Process or title contains Outlook, Thunderbird, Mail, or "Gmail" in a browser title: <strong>Email</strong></li>
+  <li>Process or title contains WhatsApp: <strong>WhatsApp</strong></li>
+  <li>Browser title contains "LinkedIn": <strong>LinkedIn</strong></li>
+  <li>Browser title contains "Messenger" or "Facebook", or the app is Messages, Telegram, or Signal: <strong>Text</strong></li>
+  <li>Anything else: <strong>Text</strong></li>
+</ul>
+<p><strong>Suggested code layout</strong> (Claude Code may adjust it):</p>
+<pre><code>magic-mend/
+  src-tauri/src/
+    main.rs            app setup, tray, autostart
+    hotkey.rs          global hotkey
+    selection.rs       capture, clipboard save and restore
+    window_tracker.rs  active window per platform
+    actions.rs         replace and copy
+    engine.rs          warm claude process, protocol, respawn
+    checker.rs         contraction and em dash check
+    settings.rs        load and save settings
+  src/                 popup UI (TypeScript, CSS tokens)
+  prompts/system.txt   the system prompt from this spec
+  docs/SPEC.md         this spec</code></pre>
+
+<h2 id="claude-engine">Claude engine</h2>
+<p>The app keeps one warm <code>claude</code> process waiting in the background so the hotkey does not pay the startup delay. This is the official command on the user's own login, in line with hard rule 3.</p>
+<p><strong>Lifecycle (warm spare)</strong></p>
+<ol>
+  <li>When the app starts, it launches one spare process and waits until it is ready.</li>
+  <li>When the user presses the hotkey, the popup takes the spare and sends the first request.</li>
+  <li>Follow-ups go to the same process, so the conversation keeps its context.</li>
+  <li>When the user clicks Replace or Copy, or closes the popup, the app kills that process and launches a new spare in the background. Every message therefore starts with a clean context, and details never leak between messages.</li>
+  <li>If the hotkey is pressed before a spare is ready, start one on demand and show the skeleton loader.</li>
+  <li>If a spare dies, respawn it. A setting turns warm mode off, which falls back to starting a process per hotkey press.</li>
+  <li>Recycle the spare after it sits idle for more than 6 hours and after the computer wakes from sleep, so a stale process never answers the hotkey.</li>
+</ol>
+<p><strong>Process settings.</strong> The flag names below come from the Claude Code headless documentation and recent releases. Claude Code must verify each one against <code>claude --help</code> and the current docs, and adjust if a name has changed.</p>
+<table>
+  <thead><tr><th>Purpose</th><th>Flag or approach</th></tr></thead>
+  <tbody>
+    <tr><td>Stay alive and accept several messages</td><td>Print mode with <code>--input-format stream-json</code> and <code>--output-format stream-json</code> (plus <code>--verbose</code> if the output format requires it)</td></tr>
+    <tr><td>Stream words as they arrive</td><td><code>--include-partial-messages</code></td></tr>
+    <tr><td>Fast model</td><td><code>--model</code> set to the fastest model that passes the quality tests. Start with the Haiku-class alias and compare with Sonnet. Expose it in settings.</td></tr>
+    <tr><td>Use the rephrase prompt only</td><td>Replace the default system prompt with <code>prompts/system.txt</code> (<code>--system-prompt</code> or <code>--system-prompt-file</code>)</td></tr>
+    <tr><td>No tools</td><td>Disable all built-in tools (<code>--tools</code> with an empty value)</td></tr>
+    <tr><td>No extra connectors</td><td><code>--strict-mcp-config</code> with no servers</td></tr>
+    <tr><td>No skills or slash commands</td><td><code>--disable-slash-commands</code></td></tr>
+    <tr><td>No outside project settings</td><td>Run from a dedicated empty folder in the app data directory</td></tr>
+    <tr><td>No saved transcripts</td><td><code>--no-session-persistence</code>. If the installed version lacks it, delete only the transcript files of the app's own working directory after each session.</td></tr>
+    <tr><td>No personal Claude Code setup</td><td>The user-level CLAUDE.md, hooks, plugins, output styles, and MCP servers must not load. Check <code>--setting-sources</code> and related flags. Prove it with a test: put a marker line in the user-level CLAUDE.md and a logging hook in user settings, then confirm neither affects the engine.</td></tr>
+    <tr><td>No auto-update or extra traffic</td><td>Set <code>DISABLE_AUTOUPDATER=1</code> and <code>CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1</code> in the child process environment (verify the names).</td></tr>
+    <tr><td>No console window on Windows</td><td>Spawn with the <code>CREATE_NO_WINDOW</code> flag. If <code>claude</code> is installed as a .cmd shim, find a way to start it without a visible window.</td></tr>
+  </tbody>
+</table>
+<p><strong>Message format.</strong> Send one JSON line per user message on standard input, using the stream-json shape from the docs:</p>
+<pre><code>{"type":"user","message":{"role":"user","content":[{"type":"text","text":"&lt;the request JSON from the chips and prompt section&gt;"}]}}</code></pre>
+<p>Read JSON lines from standard output. Use an incremental JSON parser to pull each variant's text out of the partial reply and show it as it streams. When the reply completes, parse it fully as the JSON object defined in the prompt, then run the output check. If the final reply is not valid JSON, ask the engine once to resend it as valid JSON.</p>
+<p><strong>Overlapping requests.</strong> The user may change chips while drafts are still streaming. Wait 300 ms after the last chip change before sending. The process answers messages in order, so the app counts completed replies and shows only the reply to the newest request. Older replies are discarded when they finish. If the CLI supports an interrupt message in stream-json mode, Claude Code may use it to stop a stale reply sooner.</p>
+<p><strong>Warm-up test (milestone 1).</strong> It is not yet known whether the process does its heavy startup before the first message or when the first message arrives. Measure both: time from spawn to ready, and time from first message to first words. If startup happens lazily, send a tiny priming message such as "Reply with ok" when the spare launches. It costs a few tokens, and the priming exchange sits harmlessly in a context that is thrown away after the session.</p>
+<p><strong>Failures.</strong> Detect and explain each in plain words: <code>claude</code> not found, not signed in, plan limit reached, process exit, and a 30 second timeout (with a Retry button). If a process dies mid-session, respawn it and replay the current request once. Never log message text. Log only the error category.</p>
+<p><strong>Engine interface.</strong> Put the engine behind a small interface (<code>start</code>, <code>send</code>, <code>stop</code>) so a second backend can be added later. Do not build any other backend in version 1.</p>
+
+<h2 id="platform-notes">Platform notes</h2>
+<p>Build Windows first, but keep platform code behind one interface per feature (hotkey, selection capture, window tracker, paste) so the Mac port only adds implementations.</p>
+<p><strong>Windows</strong></p>
+<ul>
+  <li>Copy and paste are simulated with Ctrl+C and Ctrl+V.</li>
+  <li>At hotkey time, record the foreground window handle. On Replace, hide the popup, bring that window back to the front, wait about 80 ms, then paste. Windows restricts which process may take focus, so Claude Code must test this carefully.</li>
+  <li>An app running as administrator ignores keys from a normal app. Detect this case and show a plain message with Copy still working.</li>
+  <li>Use acrylic or Mica on Windows 11 and a solid background on Windows 10.</li>
+  <li>Install with an installer that registers autostart. A signed build is optional for personal use.</li>
+</ul>
+<p><strong>Mac</strong></p>
+<ul>
+  <li>Copy and paste use Cmd+C and Cmd+V. Default hotkey: Ctrl+Option+R.</li>
+  <li>Key simulation and window tracking need the Accessibility permission. The setup wizard's permission step explains it, opens the right System Settings pane, and detects when access is granted.</li>
+  <li>Show a menu bar item and no Dock icon.</li>
+  <li>Prefer a non-activating panel for the popup so the original app stays in front while the popup still accepts typing. If that is not possible, activate the popup and re-activate the original app on Replace.</li>
+  <li>Use native window vibrancy for the blurred background.</li>
+  <li>A local build is enough for personal use. Sharing the app later needs an Apple Developer ID and notarization.</li>
+</ul>
+<p><strong>Both platforms: finding <code>claude</code>.</strong> Apps started from the desktop do not inherit the terminal's PATH. Search the common install locations (for example the user's <code>.local/bin</code>, npm global folder, Homebrew folders on Mac) and ask a login shell as a last step. Let the user set the path by hand in settings. On first run, run <code>claude --version</code> and show a clear message if it fails.</p>
+
+<h2 id="privacy-and-safety">Privacy and safety</h2>
+<ul>
+  <li>Message text and drafts live only in memory during a session. The app never writes them to disk or to logs.</li>
+  <li>Logs hold error categories, timings, and the app version only.</li>
+  <li>Selected text goes only to the local <code>claude</code> process, which sends it to Anthropic under the user's own plan. The app opens no network connections of its own. Add a test that proves it.</li>
+  <li><strong>Excluded apps:</strong> the hotkey does nothing in password managers, remote desktop clients, terminals (Windows Terminal, Command Prompt, PowerShell, Terminal, iTerm2), and any app the user adds. Terminals are excluded because a simulated Ctrl+C can stop a running program and a pasted line break can run a command. Ship a sensible default list.</li>
+  <li><strong>Clipboard:</strong> save and restore every clipboard format the platform allows, not only text. If the original clipboard holds something that cannot be restored, tell the user before Replace runs.</li>
+  <li><strong>Clipboard history:</strong> mark the temporary clipboard values as private so history managers skip them. Claude Code should verify the platform flags: on Windows the <code>ExcludeClipboardContentFromMonitorProcessing</code> and <code>CanIncludeInClipboardHistory</code> formats, and on Mac the <code>org.nspasteboard.ConcealedType</code> type.</li>
+  <li>No analytics and no automatic updates without the user's consent.</li>
+  <li>No screenshots, no reading of window contents beyond the selected text and the active window's process name and title.</li>
+</ul>
+
+<h2 id="first-run-setup-wizard">First-run setup wizard</h2>
+<p>On first launch, a short wizard runs before the hotkey turns on. It uses the popup's look (same design tokens, blurred background, light and dark themes), shows one step per screen with Back and Next buttons and a step indicator, and aims for under two minutes from install to first rewrite.</p>
+<ol>
+  <li><strong>Welcome.</strong> One sentence on what Magic Mend does, the promise that it never sends a message, and a note that rewrites use the user's own Claude plan limits.</li>
+  <li><strong>Connect Claude.</strong> Find the <code>claude</code> command, run <code>claude --version</code>, then send one tiny test request through the engine. Show a green check when it works. If <code>claude</code> is missing, show the official install link, a Browse button to set the path by hand, and a Retry button. If it is not signed in, tell the user to open a terminal, run <code>claude</code>, sign in, and click Retry. The wizard never handles the login itself and never reads credentials.</li>
+  <li><strong>Allow access (Mac only).</strong> Explain why the Accessibility permission is needed (to copy the selection and paste the draft), open the right System Settings pane, and move on by itself once access is granted. If the platform needs an app restart for the permission to apply, say so and offer a Restart button.</li>
+  <li><strong>Choose your hotkey.</strong> Show the default. The user can press a new combination to change it. Check for conflicts, including the AltGr issue on Windows, and warn in plain words.</li>
+  <li><strong>Pick your defaults.</strong> Default tone and length, with Simple and Same preselected, and the "Start at login" switch, on by default.</li>
+  <li><strong>Try it.</strong> A practice box holds a sample message with a few typos. The user selects it, presses the hotkey, picks a draft, and clicks Replace. The wizard confirms the box changed. This tests selection capture, the engine, and paste end to end. A Skip link is available.</li>
+  <li><strong>Done.</strong> Show where the tray icon (menu bar item on Mac) lives and how to open settings.</li>
+</ol>
+<p><strong>Wizard rules</strong></p>
+<ul>
+  <li>Steps 2 and 3 must pass before the hotkey turns on. Other steps can be skipped, and skipped steps use the defaults.</li>
+  <li>If the user closes the wizard early, the app stays in the tray with a "Finish setup" item, and pressing the hotkey reopens the wizard at the first unfinished step.</li>
+  <li>Save progress in the settings file (setup version and completed steps). The tray menu has "Run setup again".</li>
+  <li>If a later version needs a new step (for example a new permission), show only that step.</li>
+  <li>The practice box lives in Magic Mend's own window, so the hotkey must work there during the wizard only.</li>
+  <li>All wizard text follows the no-contractions and no-em-dash rule.</li>
+</ul>
+
+<h2 id="settings">Settings</h2>
+<p>Store settings in a local JSON file with a simple settings window opened from the tray.</p>
+<table>
+  <thead><tr><th>Setting</th><th>Default</th></tr></thead>
+  <tbody>
+    <tr><td>Hotkey</td><td>Ctrl+Alt+R on Windows, Ctrl+Option+R on Mac</td></tr>
+    <tr><td>Default tone</td><td>Simple</td></tr>
+    <tr><td>Default length</td><td>Same</td></tr>
+    <tr><td>Default toggles</td><td>All off</td></tr>
+    <tr><td>Number of drafts</td><td>2</td></tr>
+    <tr><td>Model</td><td>Fastest model that passes the quality tests</td></tr>
+    <tr><td>Warm mode</td><td>On</td></tr>
+    <tr><td>Theme</td><td>Follow the system</td></tr>
+    <tr><td>Start at login</td><td>On</td></tr>
+    <tr><td>Popup position</td><td>Centered on the active window's monitor, with an option to open near the cursor</td></tr>
+    <tr><td>Excluded apps</td><td>Password managers, remote desktop clients, and terminals, editable</td></tr>
+    <tr><td>Channel rules</td><td>The rules from the architecture section, editable</td></tr>
+    <tr><td>Path to <code>claude</code></td><td>Auto-detected, editable</td></tr>
+    <tr><td>No contractions and no em dashes</td><td>On, and each can be turned off</td></tr>
+  </tbody>
+</table>
+
+<h2 id="milestones-and-acceptance-tests">Milestones and acceptance tests</h2>
+<p>Build in this order. After each milestone, run its tests and report the results in a short table before starting the next one.</p>
+<table>
+  <thead><tr><th>Milestone</th><th>Scope</th><th>Done when</th></tr></thead>
+  <tbody>
+    <tr><td>M1 Engine harness</td><td>Command-line program only, no UI. Start the warm process with the settings above, send requests, parse streamed replies, run the output check.</td><td>A timing report covers 20 sample messages: spawn to ready, first message to first words, and total time, for the Haiku-class and Sonnet-class models, with and without a priming message. It ends with a go or no-go on warm mode and a model recommendation.</td></tr>
+    <tr><td>M2 Popup UI</td><td>The full popup with fake drafts: chips, toggles, cards, buttons, streaming animation, light and dark themes.</td><td>It matches the design section and works with reduced motion on.</td></tr>
+    <tr><td>M3 Windows end to end</td><td>Hotkey, selection capture, popup, engine, Replace, Copy, clipboard restore, focus return.</td><td>Acceptance tests 1 to 8 pass on Windows.</td></tr>
+    <tr><td>M4 Product shell</td><td>First-run setup wizard, channel detection, settings window, tray, autostart, excluded apps, failure messages, installer.</td><td>Tests 9 to 15 and the wizard tests pass.</td></tr>
+    <tr><td>M5 Mac port</td><td>Accessibility step in the setup wizard, panel behavior, menu bar item.</td><td>All tests pass on Mac.</td></tr>
+    <tr><td>M6 Polish</td><td>Accessibility pass, performance pass, README.</td><td>No open defects.</td></tr>
+  </tbody>
+</table>
+<p><strong>Acceptance tests</strong></p>
+<ol>
+  <li><strong>Notepad:</strong> select text, press the hotkey, click Replace. The text is replaced, Ctrl+Z restores the original, and the original clipboard is back.</li>
+  <li><strong>WhatsApp desktop:</strong> Replace puts the text in the message box and nothing is sent.</li>
+  <li><strong>Browser:</strong> the same check in Gmail compose, Facebook Messenger, and a LinkedIn message. The channel is detected correctly and nothing is sent.</li>
+  <li><strong>Outlook:</strong> the email channel adds a greeting and sign-off according to the rules.</li>
+  <li><strong>Enter safety:</strong> with the popup open, pressing Enter in the follow-up box or on any control never reaches the app underneath.</li>
+  <li><strong>No selection:</strong> the empty-box mode works and Replace is disabled.</li>
+  <li><strong>Fix errors only:</strong> one draft, with the user's own words kept and only errors corrected.</li>
+  <li><strong>Output rules:</strong> across 20 outputs there are zero contractions and zero em dashes.</li>
+  <li><strong>Facts:</strong> names, numbers, dates, and links are unchanged in all test outputs.</li>
+  <li><strong>Follow-ups:</strong> "remove the apology" changes only that, and the rest stays.</li>
+  <li><strong>Warm spare:</strong> after Replace, a new spare is ready, and the next hotkey press meets the measured speed target.</li>
+  <li><strong>Failures:</strong> <code>claude</code> missing, signed out, offline, and timeout each show a plain message.</li>
+  <li><strong>Privacy:</strong> after a session, no message text exists in the app's files or logs, and the app process opens no network connections.</li>
+  <li><strong>Resources:</strong> report idle memory use with the warm spare running.</li>
+  <li><strong>Windows elevated apps:</strong> Replace falls back to Copy with a clear message.</li>
+  <li><strong>Terminals:</strong> the hotkey does nothing in Windows Terminal, PowerShell, and Terminal on Mac.</li>
+  <li><strong>Held modifiers:</strong> holding the hotkey longer than usual still captures the selection and sends no stray shortcut to the app.</li>
+  <li><strong>Setup isolation:</strong> a marker in the user-level CLAUDE.md and a test hook in user settings have no effect on the engine.</li>
+  <li><strong>Rapid chip changes:</strong> clicking five chips quickly ends with drafts for the last selection only.</li>
+  <li><strong>Line breaks:</strong> Replace never adds a trailing line break, and a multi-line draft pastes without sending in WhatsApp, Messenger, and LinkedIn.</li>
+  <li><strong>Wizard, fresh install:</strong> the wizard runs, and a first rewrite in the practice box works in under two minutes.</li>
+  <li><strong>Wizard, Claude problems:</strong> with <code>claude</code> missing or signed out, the wizard shows the fix, and Retry passes once it is fixed.</li>
+  <li><strong>Wizard, closed early:</strong> the hotkey reopens the wizard at the first unfinished step, and nothing is captured or sent to Claude before steps 2 and 3 pass.</li>
+</ol>
+<p><strong>Sample test messages</strong> (write more in the same style for the 20-message set):</p>
+<ul>
+  <li>hi, i want to ask when you can send me the document, i need it by friday</li>
+  <li>Thank you for the update, I was worried because I could not track the slip</li>
+  <li>sorry for late reply, I was out of town for a while</li>
+  <li>Assalamu Alaikum, how much is one share this year and when is the last date to pay</li>
+  <li>I interviewed at the senior level, not principal, and I would love the list of open roles</li>
+</ul>
+
+<h2 id="open-decisions-and-kickoff-prompt">Open decisions and kickoff prompt</h2>
+<p><strong>Decisions for Claude Code to confirm or flag in milestone 1</strong></p>
+<ol>
+  <li><strong>Tauri or Electron.</strong> Tauri is recommended. Confirm that key simulation works reliably on both Windows and Mac, or say why Electron is better.</li>
+  <li><strong>Enter in the follow-up box.</strong> Default: Enter submits the follow-up inside the popup. If testing shows any leak to the app underneath, switch to a send button only.</li>
+  <li><strong>Default model.</strong> Decide between the Haiku-class and Sonnet-class models using the quality tests and timing numbers.</li>
+  <li><strong>Priming message.</strong> Keep it only if the timing test shows it helps.</li>
+  <li><strong>Hotkey default.</strong> Check it against common shortcuts in Outlook, Chrome, and WhatsApp, and propose another if it conflicts. Ctrl+Alt acts as AltGr on many non-US Windows keyboard layouts, so Ctrl+Alt+R can type a character there.</li>
+</ol>
+<p><strong>Kickoff prompt to paste into the Claude Code session</strong> (save this spec as <code>docs/SPEC.md</code> first):</p>
+<pre><code>Read docs/SPEC.md fully before writing any code. It is the build spec for Magic Mend, a cross-platform tray app that rewrites selected text in a popup using my own Claude login through the official claude command.
+
+Rules for this session:
+- Build in milestone order and start with M1 only. Do not start M2 until I approve the M1 timing report.
+- Obey the hard rules in the spec. If any requirement conflicts with them, stop and ask me.
+- Verify every claude command flag against claude --help and the current official docs before using it. Tell me about any flag that differs from the spec.
+- Do not read, copy, or store my Claude login credentials, and do not imitate Claude Code requests.
+- Never add anything that presses Enter or Send in another app.
+- All user-facing text, comments, and the README must use no contractions and no em dashes.
+- After each milestone, run its acceptance tests and give me a short table of results.
+- Do not add features that are not in the spec. Put ideas in a notes file instead.</code></pre>
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+[package]
+name = "magic-mend"
+version = "1.0.0"
+description = "Magic Mend: rewrite selected text with your own Claude login"
+authors = ["M2 Labs"]
+edition = "2021"
+default-run = "magic-mend"
+
+[lib]
+name = "magic_mend_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "magic-mend"
+path = "src/main.rs"
+
+[[bin]]
+name = "mm-harness"
+path = "src/bin/harness.rs"
+
+[[bin]]
+name = "mm-testpad"
+path = "src/bin/testpad.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png", "macos-private-api"] }
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-autostart = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-single-instance = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+regex = "1"
+dirs = "6"
+base64 = "0.22"
+png = "0.17"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.61", features = [
+  "Win32_Foundation",
+  "Win32_Security",
+  "Win32_System_DataExchange",
+  "Win32_System_Memory",
+  "Win32_System_Threading",
+  "Win32_System_JobObjects",
+  "Win32_System_Ole",
+  "Win32_System_SystemInformation",
+  "Win32_System_WindowsProgramming",
+  "Win32_System_LibraryLoader",
+  "Win32_Storage_FileSystem",
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_UI_Input_KeyboardAndMouse",
+  "Win32_UI_Shell",
+  "Win32_UI_Controls",
+  "Win32_Graphics_Gdi",
+  "Win32_Graphics_Dwm",
+  "Win32_System_Registry",
+] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-graphics = "0.24"
+core-foundation = "0.10"
+objc2 = "0.6"
+objc2-app-kit = { version = "0.3", features = ["NSPasteboard", "NSRunningApplication", "NSWorkspace", "NSImage", "NSBitmapImageRep", "NSImageRep", "NSGraphics"] }
+objc2-foundation = { version = "0.3", features = ["NSString", "NSArray", "NSData", "NSDictionary", "NSURL"] }
+window-vibrancy = "0.6"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

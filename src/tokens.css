@@ -1,0 +1,253 @@
+/* Design tokens, defined once. Light and dark follow the OS unless the user picks one. */
+:root {
+  --font: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --font-size: 14px;
+  --label-size: 11px;
+
+  --accent: #5b6cff;
+  --accent-hover: #4c5df0;
+  --accent-press: #4352de;
+  --on-accent: #ffffff;
+  --accent-soft: rgba(91, 108, 255, 0.12);
+  --focus: #3d4fe6;
+
+  --surface: #f7f7fa;
+  --surface-translucent: rgba(247, 247, 250, 0.78);
+  --card: #ffffff;
+  --card-border: rgba(20, 24, 40, 0.08);
+  --field: rgba(20, 24, 40, 0.04);
+  --line: rgba(20, 24, 40, 0.09);
+  --text: #1b1d24;
+  --muted: #5d6372;
+  --chip-border: rgba(20, 24, 40, 0.18);
+  --chip-hover: rgba(20, 24, 40, 0.05);
+  --danger: #b42318;
+  --danger-soft: rgba(180, 35, 24, 0.08);
+  --success: #12805c;
+  --shimmer-a: rgba(20, 24, 40, 0.06);
+  --shimmer-b: rgba(20, 24, 40, 0.12);
+  --shadow-card: 0 1px 2px rgba(16, 20, 40, 0.06), 0 2px 8px rgba(16, 20, 40, 0.05);
+  --shadow-window: 0 12px 40px rgba(16, 20, 40, 0.22);
+
+  --radius-window: 16px;
+  --radius-card: 12px;
+  --radius-chip: 14px;
+  --chip-height: 28px;
+  --button-height: 36px;
+
+  --motion-open: 120ms;
+  --motion-fade: 180ms;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --accent: #7b88ff;
+    --accent-hover: #8c97ff;
+    --accent-press: #6b79f5;
+    --on-accent: #0e1020;
+    --accent-soft: rgba(123, 136, 255, 0.18);
+    --focus: #a3acff;
+    --surface: #1d1f26;
+    --surface-translucent: rgba(29, 31, 38, 0.74);
+    --card: #262932;
+    --card-border: rgba(255, 255, 255, 0.07);
+    --field: rgba(255, 255, 255, 0.05);
+    --line: rgba(255, 255, 255, 0.08);
+    --text: #eceef3;
+    --muted: #a5abb9;
+    --chip-border: rgba(255, 255, 255, 0.2);
+    --chip-hover: rgba(255, 255, 255, 0.06);
+    --danger: #ff8a80;
+    --danger-soft: rgba(255, 138, 128, 0.1);
+    --success: #5fd3a6;
+    --shimmer-a: rgba(255, 255, 255, 0.05);
+    --shimmer-b: rgba(255, 255, 255, 0.11);
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.2);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --accent: #7b88ff;
+  --accent-hover: #8c97ff;
+  --accent-press: #6b79f5;
+  --on-accent: #0e1020;
+  --accent-soft: rgba(123, 136, 255, 0.18);
+  --focus: #a3acff;
+  --surface: #1d1f26;
+  --surface-translucent: rgba(29, 31, 38, 0.74);
+  --card: #262932;
+  --card-border: rgba(255, 255, 255, 0.07);
+  --field: rgba(255, 255, 255, 0.05);
+  --line: rgba(255, 255, 255, 0.08);
+  --text: #eceef3;
+  --muted: #a5abb9;
+  --chip-border: rgba(255, 255, 255, 0.2);
+  --chip-hover: rgba(255, 255, 255, 0.06);
+  --danger: #ff8a80;
+  --danger-soft: rgba(255, 138, 128, 0.1);
+  --success: #5fd3a6;
+  --shimmer-a: rgba(255, 255, 255, 0.05);
+  --shimmer-b: rgba(255, 255, 255, 0.11);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.2);
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-open: 0ms;
+    --motion-fade: 0ms;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font);
+  font-size: var(--font-size);
+  line-height: 1.45;
+  color: var(--text);
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.solid {
+  background: var(--surface);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.label {
+  font-size: var(--label-size);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Chips: 28 px pills. Selected chips use the accent fill. */
+.chip {
+  height: var(--chip-height);
+  padding: 0 12px;
+  border-radius: var(--radius-chip);
+  border: 1px solid var(--chip-border);
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: background var(--motion-fade), border-color var(--motion-fade), color var(--motion-fade);
+}
+.chip:hover {
+  background: var(--chip-hover);
+}
+.chip[aria-checked="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+/* Small switches for toggles. */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: none;
+  padding: 2px 0;
+  cursor: pointer;
+  font-size: 13px;
+}
+.switch .track {
+  width: 28px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--chip-border);
+  position: relative;
+  transition: background var(--motion-fade);
+  flex: none;
+}
+.switch .track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform var(--motion-fade);
+}
+.switch[aria-checked="true"] .track {
+  background: var(--accent);
+}
+.switch[aria-checked="true"] .track::after {
+  transform: translateX(12px);
+}
+
+/* Buttons: 36 px minimum height. Primary uses the accent fill, secondary is outlined. */
+.btn {
+  min-height: var(--button-height);
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: background var(--motion-fade), border-color var(--motion-fade), opacity var(--motion-fade);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.btn-primary:not(:disabled):hover {
+  background: var(--accent-hover);
+}
+.btn-primary:not(:disabled):active {
+  background: var(--accent-press);
+}
+.btn-secondary {
+  background: transparent;
+  border-color: var(--chip-border);
+}
+.btn-secondary:not(:disabled):hover {
+  background: var(--chip-hover);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--accent);
+  padding: 0 8px;
+}
