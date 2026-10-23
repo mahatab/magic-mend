@@ -20,13 +20,15 @@ pub enum Capture {
     Unreadable { reason: String },
 }
 
-/// Waits until no modifier key (and not the hotkey letter) is held, so a simulated Ctrl+C is
-/// never combined with Alt or Shift into a different shortcut.
-pub fn wait_for_release(extra_vk: Option<u16>, timeout: Duration) -> bool {
+/// Waits until no modifier key is held, so a simulated Ctrl+C is never combined with Alt or
+/// Shift into a different shortcut. The hotkey letter itself is not waited on: a held letter
+/// cannot change what Ctrl+C means, and Windows sometimes reports a letter as held long after
+/// it was let go (for example after a lock screen), which would block every capture.
+pub fn wait_for_release(_extra_vk: Option<u16>, timeout: Duration) -> bool {
     let deadline = Instant::now() + timeout;
     // A short settle time lets the key-up events arrive.
     std::thread::sleep(Duration::from_millis(15));
-    while imp::modifiers_held(extra_vk) {
+    while imp::modifiers_held(None) {
         if Instant::now() > deadline {
             return false;
         }

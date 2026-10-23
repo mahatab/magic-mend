@@ -40,6 +40,34 @@ const FAKE: Record<string, string[]> = {
   ],
 };
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+export const fakeSettings = {
+  hotkey: "Ctrl+Alt+R",
+  default_tone: "Simple",
+  default_length: "Same",
+  default_toggles: [] as string[],
+  drafts: 2,
+  model: "haiku",
+  warm_mode: true,
+  priming: false,
+  theme: "system",
+  start_at_login: true,
+  popup_position: "center",
+  excluded_apps: ["WindowsTerminal", "powershell", "cmd", "1Password", "mstsc"],
+  channel_rules: [
+    { process: ["outlook", "thunderbird"], title: ["Outlook", "Mail"], browser_only: false, channel: "Email" },
+    { process: [], title: ["Gmail"], browser_only: true, channel: "Email" },
+    { process: ["whatsapp"], title: ["WhatsApp"], browser_only: false, channel: "WhatsApp" },
+    { process: [], title: ["LinkedIn"], browser_only: true, channel: "LinkedIn" },
+  ],
+  claude_path: null as string | null,
+  no_contractions: true,
+  no_em_dashes: true,
+  paused: false,
+  setup: { version: 0, completed: [] as string[], pending_new: [] as string[] },
+};
+
 const listeners = new Map<string, Handler<unknown>[]>();
 
 export const mock = {
@@ -74,7 +102,7 @@ export const mock = {
     switch (cmd) {
       case "request_drafts":
       case "retry_drafts":
-        this.stream(args.req_id as number, args.request as Request);
+        this.stream(args.reqId as number, args.request as Request);
         return null;
       case "replace_draft":
         return { result: "pasted" };
@@ -82,6 +110,31 @@ export const mock = {
         return true;
       case "target_status":
         return { alive: true, focused: false };
+      case "app_info":
+        return {
+          settings: { ...fakeSettings },
+          platform: "windows",
+          version: "1.0.0",
+          hotkey_display: "Ctrl+Alt+R",
+          detected_claude: "C:/Users/me/.local/bin/claude.exe",
+          log_path: null,
+          steps: ["welcome", "connect", "hotkey", "defaults", "try", "done"],
+          required: ["connect"],
+          first_unfinished: "welcome",
+          translucent: false,
+        };
+      case "wizard_check_claude":
+        await sleep(400);
+        return { found: true, path: "C:/Users/me/.local/bin/claude.exe", version: "2.1.296 (Claude Code)", signed_in: true, message: null };
+      case "wizard_test_engine":
+        await sleep(1200);
+        return { ok: true, message: "Claude is connected.", ms: 2400, sample: "Thanks for helping me move last weekend." };
+      case "check_hotkey":
+        return { ok: true, display: String(args.hotkeyStr), warnings: [], error: null };
+      case "set_hotkey":
+        return String(args.hotkeyStr);
+      case "access_status":
+        return true;
       default:
         return null;
     }

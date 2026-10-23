@@ -13,7 +13,6 @@ body {
   background: var(--surface);
   border-radius: 0;
   overflow: hidden;
-  opacity: 0;
 }
 body.translucent #app {
   background: var(--surface-translucent);
@@ -28,7 +27,7 @@ body.solid {
 }
 
 #app.open {
-  animation: pop-in var(--motion-open) ease-out forwards;
+  animation: pop-in var(--motion-open) ease-out backwards;
 }
 @keyframes pop-in {
   from {
@@ -43,7 +42,6 @@ body.solid {
 @media (prefers-reduced-motion: reduce) {
   #app.open {
     animation: none;
-    opacity: 1;
   }
 }
 

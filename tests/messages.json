@@ -1,0 +1,22 @@
+[
+  { "text": "hi, i want to ask when you can send me the document, i need it by friday", "tone": "Simple", "length": "Same", "toggles": [], "channel": "Text", "keep": ["friday"] },
+  { "text": "Thank you for the update, I was worried because I could not track the slip", "tone": "Simple", "length": "Same", "toggles": [], "channel": "Text", "keep": [] },
+  { "text": "sorry for late reply, I was out of town for a while", "tone": "Respectful", "length": "Same", "toggles": [], "channel": "Text", "keep": [] },
+  { "text": "Assalamu Alaikum, how much is one share this year and when is the last date to pay", "tone": "Respectful", "length": "Same", "toggles": [], "channel": "WhatsApp", "keep": ["Assalamu Alaikum"] },
+  { "text": "I interviewed at the senior level, not principal, and I would love the list of open roles", "tone": "Professional", "length": "Same", "toggles": [], "channel": "LinkedIn", "keep": ["senior", "principal"] },
+  { "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late", "tone": "Warm", "length": "Same", "toggles": [], "channel": "WhatsApp", "keep": ["Chi", "1pm", "11"] },
+  { "text": "the heater in unit 4B is still not working since monday, please send someone tomorrow morning", "tone": "Firm", "length": "Same", "toggles": [], "channel": "Text", "keep": ["4B", "monday", "tomorrow morning"] },
+  { "text": "hey sarah thanks so much for the dinner last night, thank you again it was really really amazing thanks", "tone": "Warm", "length": "Shorter", "toggles": ["Less thankful"], "channel": "Text", "keep": ["Sarah"] },
+  { "text": "Hi David, I am following up on my application for the Data Engineer role (job ID 48213) that I submitted on October 3", "tone": "Professional", "length": "Same", "toggles": [], "channel": "Email", "keep": ["David", "Data Engineer", "48213", "October 3"] },
+  { "text": "can you adjust the price to $1,250 per month, the listing said that and i can sign the lease on nov 1", "tone": "Respectful", "length": "Same", "toggles": ["Softer"], "channel": "Text", "keep": ["$1,250", "nov 1"] },
+  { "text": "i has send the payment yesterday but i didnt got any confirmation email, can you check it", "tone": "Simple", "length": "Same", "toggles": ["Fix errors only"], "channel": "Text", "keep": ["yesterday"] },
+  { "text": "Here is the link to the form: https://forms.example.org/r/7Hq2x please fill it before 5:30 pm", "tone": "Casual", "length": "Same", "toggles": [], "channel": "WhatsApp", "keep": ["https://forms.example.org/r/7Hq2x", "5:30 pm"] },
+  { "text": "We will be 3 adults and 2 kids, arriving on Dec 22 and leaving on Dec 29, is parking included", "tone": "Simple", "length": "Fuller", "toggles": [], "channel": "Email", "keep": ["3 adults", "2 kids", "Dec 22", "Dec 29"] },
+  { "text": "Jazakallah khair brother Imran for organizing the iftar, everyone loved it", "tone": "Warm", "length": "Same", "toggles": [], "channel": "WhatsApp", "keep": ["Jazakallah khair", "Imran"] },
+  { "text": "i cannot make the meeting at 10 tomorrow, can we move it to thursday 2pm or friday 9am", "tone": "Professional", "length": "Shorter", "toggles": [], "channel": "Email", "keep": ["10", "thursday 2pm", "friday 9am"] },
+  { "text": "mom i reached safely, the flight was ok, will call you after i sleep a little", "tone": "Casual", "length": "Same", "toggles": [], "channel": "Text", "keep": [] },
+  { "text": "I already sent the documents twice, I need you to confirm today that you received them", "tone": "Firm", "length": "Same", "toggles": [], "channel": "Email", "keep": ["twice", "today"] },
+  { "text": "thanks for reaching out, i am not looking for new roles right now but happy to stay in touch for next year", "tone": "Professional", "length": "Same", "toggles": [], "channel": "LinkedIn", "keep": ["next year"] },
+  { "text": "the community dinner is on saturday at 7pm at the hall on 52 Elm Street, bring one dish if you can", "tone": "Simple", "length": "Same", "toggles": [], "channel": "WhatsApp", "keep": ["saturday", "7pm", "52 Elm Street"] },
+  { "text": "Sorry to bother you again, could you please tell me when the repair for order #A-90311 will be done", "tone": "Simple", "length": "Shorter", "toggles": [], "channel": "Text", "keep": ["#A-90311"] }
+]

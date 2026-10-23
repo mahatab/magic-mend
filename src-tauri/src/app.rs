@@ -53,6 +53,8 @@ pub struct AppState {
     busy: AtomicBool,
     session_ids: AtomicU64,
     registered: Mutex<Option<String>>,
+    /// The wizard step on screen. The practice box takes the hotkey only on the Try it step.
+    wizard_step: Mutex<String>,
 }
 
 impl AppState {
@@ -103,6 +105,7 @@ fn register_hotkey(app: &AppHandle, hk: &str) -> Result<(), String> {
     match gs.register(plugin_str.as_str()) {
         Ok(()) => {
             *reg = Some(plugin_str);
+            logging::event("hotkey_registered", &[]);
             Ok(())
         }
         Err(_) => Err(format!("Another app is already using {}. Pick a different hotkey in Settings.", parsed.display())),
@@ -147,7 +150,8 @@ fn hotkey_pressed(app: &AppHandle) {
                 .get_webview_window("wizard")
                 .map(|wz| wz.is_focused().unwrap_or(false) && wz.is_visible().unwrap_or(false))
                 .unwrap_or(false);
-            if !wizard_focused {
+            let on_try_step = st.wizard_step.lock().unwrap().as_str() == "try";
+            if !wizard_focused || !on_try_step {
                 return;
             }
             own_window = true;
@@ -462,6 +466,7 @@ struct AppInfo {
     steps: Vec<&'static str>,
     required: Vec<&'static str>,
     first_unfinished: &'static str,
+    translucent: bool,
 }
 
 fn platform_name() -> &'static str {
@@ -488,6 +493,7 @@ fn app_info(app: AppHandle) -> AppInfo {
         log_path: logging::path().map(|p| p.to_string_lossy().into_owned()),
         steps: Settings::steps_for_platform(),
         required: Settings::required_steps(),
+        translucent: translucent_supported(),
     }
 }
 
@@ -819,6 +825,11 @@ fn wizard_finish(app: AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn wizard_at(app: AppHandle, step: String) {
+    *app.state::<AppState>().wizard_step.lock().unwrap() = step;
+}
+
+#[tauri::command]
 fn close_window(window: WebviewWindow) {
     let _ = window.close();
 }
@@ -913,12 +924,19 @@ fn on_menu(app: &AppHandle, id: &str) {
 // ---------------------------------------------------------------------------------------------
 // Startup
 
+fn test_data_dir() -> Option<PathBuf> {
+    std::env::var_os("MAGIC_MEND_DATA_DIR").map(PathBuf::from)
+}
+
 pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+    let mut builder = tauri::Builder::default();
+    if test_data_dir().is_none() {
+        builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             // A second launch opens settings in the running app instead.
             open_settings_window(app);
-        }))
+        }));
+    }
+    builder
         .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, Some(vec!["--autostart"])))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
@@ -951,6 +969,7 @@ pub fn run() {
             wizard_complete,
             wizard_save_defaults,
             wizard_finish,
+            wizard_at,
             close_window,
             access_status,
             open_access_settings,
@@ -975,9 +994,16 @@ pub fn run() {
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
             let handle = app.handle().clone();
-            let config_dir = app.path().app_config_dir()?;
-            let data_dir = app.path().app_local_data_dir()?;
-            logging::init(app.path().app_log_dir().unwrap_or_else(|_| data_dir.join("logs")));
+            // Automated tests point the app at a throwaway folder so real settings stay untouched.
+            let (config_dir, data_dir, log_dir) = match test_data_dir() {
+                Some(d) => (d.join("config"), d.join("data"), d.join("logs")),
+                None => {
+                    let data = app.path().app_local_data_dir()?;
+                    let logs = app.path().app_log_dir().unwrap_or_else(|_| data.join("logs"));
+                    (app.path().app_config_dir()?, data, logs)
+                }
+            };
+            logging::init(log_dir);
             let prompt_dir = data_dir.join("prompt");
             std::fs::create_dir_all(&prompt_dir)?;
             let prompt_file = prompt_dir.join("system.txt");
@@ -994,6 +1020,7 @@ pub fn run() {
                 busy: AtomicBool::new(false),
                 session_ids: AtomicU64::new(0),
                 registered: Mutex::new(None),
+                wizard_step: Mutex::new(String::new()),
             });
 
             // Engine events.

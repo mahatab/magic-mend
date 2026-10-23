@@ -22,6 +22,10 @@ path = "src/bin/harness.rs"
 name = "mm-testpad"
 path = "src/bin/testpad.rs"
 
+[[bin]]
+name = "mm-fakeclaude"
+path = "src/bin/fakeclaude.rs"
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
