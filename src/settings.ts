@@ -110,7 +110,7 @@ function select(id: string, options: [string, string][], get: () => string, set:
 
 function hotkeyControl() {
   const wrap = el("div");
-  const box = el("div", { class: "keybox", tabindex: "0", role: "button", "aria-label": "Hotkey. Focus and press a new combination." , text: info.hotkey_display });
+  const box = el("div", { class: "keybox", tabindex: "0", role: "button", "aria-label": `${info.hotkey_display}, hotkey. Focus and press a new combination.`, text: info.hotkey_display });
   const msg = el("div", { class: "msg" });
   box.addEventListener("keydown", async (e) => {
     if (e.key === "Tab" || e.key === "Escape") return;
@@ -119,6 +119,7 @@ function hotkeyControl() {
     if (!combo) return;
     const r = await invoke<{ ok: boolean; display: string; warnings: string[]; error: string | null }>("check_hotkey", { hotkeyStr: combo });
     box.textContent = r.display;
+    box.setAttribute("aria-label", `${r.display}, hotkey. Focus and press a new combination.`);
     if (r.error) {
       msg.className = "msg bad";
       msg.textContent = r.error;
@@ -152,7 +153,7 @@ function rulesTable() {
   const table = el("table", { class: "rules" });
   const paint = () => {
     table.replaceChildren(
-      el("thead", {}, el("tr", {}, el("th", { text: "Process names" }), el("th", { text: "Window title words" }), el("th", { text: "Browser only" }), el("th", { text: "Channel" }), el("th"))),
+      el("thead", {}, el("tr", {}, el("th", { text: "Process names" }), el("th", { text: "Window title words" }), el("th", { text: "Browser only" }), el("th", { text: "Channel" }), el("th", {}, el("span", { class: "sr-only", text: "Delete" })))),
     );
     const body = el("tbody");
     s.channel_rules.forEach((r, i) => {

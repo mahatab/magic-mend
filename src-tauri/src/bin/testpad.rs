@@ -161,7 +161,7 @@ mod win {
             EDIT = edit.0 as isize;
             let t = wide(&text.replace('\n', "\r\n"));
             let _ = SetWindowTextW(edit, PCWSTR(t.as_ptr()));
-            OLD_PROC = SetWindowLongPtrW(edit, GWLP_WNDPROC, edit_proc as usize as isize);
+            OLD_PROC = SetWindowLongPtrW(edit, GWLP_WNDPROC, edit_proc as *const () as usize as isize);
             SendMessageW(edit, 0x00B1 /* EM_SETSEL */, Some(WPARAM(0)), Some(LPARAM(-1)));
             let _ = SetForegroundWindow(hwnd);
             let _ = windows::Win32::UI::Input::KeyboardAndMouse::SetFocus(Some(edit));

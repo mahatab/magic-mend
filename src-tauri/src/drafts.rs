@@ -40,7 +40,6 @@ pub enum Output {
 struct Pending {
     req_id: u64,
     turn: u64,
-    kind: TurnKind,
     sent_at: Instant,
 }
 
@@ -98,7 +97,8 @@ impl DraftFlow {
     /// The caller sent a message and got this turn number back.
     pub fn sent(&mut self, req_id: u64, turn: u64, kind: TurnKind) {
         if req_id == self.latest_req {
-            self.pending = Some(Pending { req_id, turn, kind, sent_at: Instant::now() });
+            let _ = kind;
+            self.pending = Some(Pending { req_id, turn, sent_at: Instant::now() });
         }
     }
 

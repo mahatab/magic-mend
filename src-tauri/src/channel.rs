@@ -143,7 +143,7 @@ mod tests {
         assert_eq!(d("ApplicationFrameHost.exe", "WhatsApp"), "WhatsApp");
         assert_eq!(d("chrome.exe", "WhatsApp - Google Chrome"), "WhatsApp");
         assert_eq!(d("chrome.exe", "(2) Messaging | LinkedIn - Google Chrome"), "LinkedIn");
-        assert_eq!(d("firefox.exe", "Messenger | Facebook — Mozilla Firefox"), "Text");
+        assert_eq!(d("firefox.exe", "Messenger | Facebook \u{2014} Mozilla Firefox"), "Text");
         assert_eq!(d("Telegram.exe", "Telegram"), "Text");
         assert_eq!(d("Signal.exe", "Signal"), "Text");
         assert_eq!(d("notepad.exe", "Untitled - Notepad"), "Text");

@@ -340,7 +340,9 @@ async function main() {
     await sleep(1500);
     const own = Number(execFileSync("powershell", ["-NoProfile", "-Command", `(Get-Process -Id ${app.proc.pid}).WorkingSet64`], { encoding: "utf8" }).trim());
     const kids = childProcesses(app.proc.pid);
-    const webview = Number(execFileSync("powershell", ["-NoProfile", "-Command", `$ids = @(Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'msedgewebview2.exe' -and $_.CommandLine -like '*mm-e2e*' } | Select-Object -ExpandProperty ProcessId); if ($ids.Count) { (Get-Process -Id $ids | Measure-Object WorkingSet64 -Sum).Sum } else { 0 }`], { encoding: "utf8" }).trim());
+    // WebView2 processes are children (and grandchildren) of the app.
+    const ps = `$all = Get-CimInstance Win32_Process; $ids = @(${app.proc.pid}); $i = 0; while ($i -lt $ids.Count) { $ids += @($all | Where-Object { $_.ParentProcessId -eq $ids[$i] -and $_.Name -eq 'msedgewebview2.exe' } | Select-Object -ExpandProperty ProcessId); $i++ }; $w = $ids | Select-Object -Skip 1; if ($w) { (Get-Process -Id $w | Measure-Object WorkingSet64 -Sum).Sum } else { 0 }`;
+    const webview = Number(execFileSync("powershell", ["-NoProfile", "-Command", ps], { encoding: "utf8" }).trim());
     const spare = kids.filter((k) => /claude/i.test(k.Name)).reduce((a, k) => a + Number(k.WorkingSetSize), 0);
     const mb = (b) => (b / 1048576).toFixed(0) + " MB";
     return `app ${mb(own)}, WebView2 ${mb(webview)}, spare (fake) ${mb(spare)}`;

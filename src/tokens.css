@@ -4,11 +4,12 @@
   --font-size: 14px;
   --label-size: 11px;
 
-  --accent: #5b6cff;
-  --accent-hover: #4c5df0;
-  --accent-press: #4352de;
+  /* Soft indigo near #5B6CFF, darkened slightly so white text passes WCAG AA (5.2:1). */
+  --accent: #4c5ce8;
+  --accent-hover: #4352de;
+  --accent-press: #3a48cc;
   --on-accent: #ffffff;
-  --accent-soft: rgba(91, 108, 255, 0.12);
+  --accent-soft: rgba(76, 92, 232, 0.12);
   --focus: #3d4fe6;
 
   --surface: #f7f7fa;

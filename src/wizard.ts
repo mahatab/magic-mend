@@ -269,7 +269,7 @@ function access(body: HTMLElement) {
 
 function hotkeyStep(body: HTMLElement) {
   body.append(el("h1", { text: "Choose your hotkey" }), el("p", { text: "Press this after you select text. Click the box and press a new combination to change it." }));
-  const box = el("div", { class: "keybox", tabindex: "0", role: "button", "aria-label": "Hotkey. Focus and press a new combination.", "data-autofocus": "", text: hotkeyLabel() });
+  const box = el("div", { class: "keybox", tabindex: "0", role: "button", "aria-label": `${hotkeyLabel()}, hotkey. Focus and press a new combination.`, "data-autofocus": "", text: hotkeyLabel() });
   const msg = el("div");
   const actions = el("div", { class: "row" });
   body.append(box, msg, actions);
@@ -281,6 +281,7 @@ function hotkeyStep(body: HTMLElement) {
     if (!combo) return;
     const r = await invoke<{ ok: boolean; display: string; warnings: string[]; error: string | null }>("check_hotkey", { hotkeyStr: combo });
     box.textContent = r.display;
+    box.setAttribute("aria-label", `${r.display}, hotkey. Focus and press a new combination.`);
     msg.replaceChildren();
     actions.replaceChildren();
     if (r.error) msg.append(el("div", { class: "warn", text: r.error }));

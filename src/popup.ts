@@ -102,7 +102,8 @@ function render() {
     el("div", { class: "brand" }, el("img", { src: logoUrl, alt: "" }), "Magic Mend"),
     target,
   );
-  const close = el("button", { class: "close", "aria-label": "Close Magic Mend", title: "Close (Esc)" });
+  // Esc closes too, so the close button stays out of the Tab order (chips come first).
+  const close = el("button", { class: "close", "aria-label": "Close Magic Mend", title: "Close (Esc)", tabindex: "-1" });
   close.innerHTML = icons.close;
   close.addEventListener("click", closePopup);
   header.append(close);
@@ -138,7 +139,8 @@ function render() {
   controls.append(el("div", { class: "channel-row" }, select, channelHint));
 
   // Drafts.
-  const drafts = el("section", { class: "drafts", "aria-label": "Drafts", "aria-live": "polite" });
+  const drafts = el("section", { class: "drafts", "aria-label": "Drafts" });
+  const live = el("div", { class: "sr-only", role: "status", "aria-live": "polite", id: "live" });
 
   // Follow-up.
   const followup = el("textarea", { rows: "1", placeholder: "Ask for a change...", "aria-label": "Ask for a change" }) as HTMLTextAreaElement;
@@ -164,7 +166,7 @@ function render() {
   send.addEventListener("click", submitFollowup);
   const footer = el("section", { class: "followup" }, followup, send);
 
-  app.append(header, original, controls, drafts, footer);
+  app.append(el("h1", { class: "sr-only", text: "Magic Mend" }), header, original, controls, drafts, footer, live);
   refs = { target, original, controls, channelHint, drafts, followup, send };
   renderTarget();
   renderOriginal();
@@ -307,13 +309,14 @@ function renderDrafts() {
     }
     foot.append(status);
     const actOk = canActOn(d);
-    const copy = el("button", { class: "btn btn-secondary", text: "Copy", "aria-label": `Copy draft ${String.fromCharCode(65 + i)}` }) as HTMLButtonElement;
+    const copy = el("button", { class: "btn btn-secondary", text: "Copy", "aria-label": `Copy draft ${String.fromCharCode(65 + i)}`, "aria-description": "Mouse only" }) as HTMLButtonElement;
     copy.disabled = !actOk;
     mouseOnly(copy, () => doCopy(d.text, copy));
     const replace = el("button", {
       class: "btn btn-primary",
       text: mode.label,
       "aria-label": `${mode.label} with draft ${String.fromCharCode(65 + i)}`,
+      "aria-description": "Mouse only. Pastes into the original app. You press Send yourself.",
     }) as HTMLButtonElement;
     replace.disabled = !actOk || !mode.enabled;
     mouseOnly(replace, () => doReplace(d.text, replace));
@@ -457,7 +460,11 @@ document.addEventListener("keydown", (e) => {
 
 void listen<OpenPayload>("popup:open", open);
 void listen<Output>("popup:output", (o) => {
-  if (applyOutput(state, o)) renderDrafts();
+  if (!applyOutput(state, o)) return;
+  renderDrafts();
+  const live = document.getElementById("live");
+  if (live && o.type === "final") live.textContent = o.drafts.length === 1 ? "One draft is ready." : `${o.drafts.length} drafts are ready.`;
+  if (live && o.type === "error") live.textContent = o.message;
 });
 void listen("popup:target-focused", () => {
   state.targetFocused = true;

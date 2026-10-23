@@ -275,7 +275,21 @@ fn show_popup(app: &AppHandle, target: Option<isize>, position: &str, payload: &
 
 /// Centers the popup on the target window's monitor, or opens it near the cursor.
 fn place_popup(popup: &WebviewWindow, target: Option<isize>, position: &str, height: f64) {
-    let (l, t, r, b) = imp::work_area(target);
+    let (mut l, mut t, mut r, mut b) = imp::work_area(target);
+    if r <= l || b <= t {
+        // Mac: use the monitor under the pointer, from Tauri.
+        let cursor = popup.cursor_position().ok();
+        let mon = cursor
+            .and_then(|c| popup.monitor_from_point(c.x, c.y).ok().flatten())
+            .or_else(|| popup.primary_monitor().ok().flatten());
+        if let Some(m) = mon {
+            let wa = m.work_area();
+            (l, t) = (wa.position.x, wa.position.y);
+            (r, b) = (l + wa.size.width as i32, t + wa.size.height as i32);
+        } else {
+            (l, t, r, b) = (0, 0, 1440, 900);
+        }
+    }
     let scale = popup
         .monitor_from_point(((l + r) / 2) as f64, ((t + b) / 2) as f64)
         .ok()
