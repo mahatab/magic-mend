@@ -175,7 +175,11 @@ async function main() {
     const firstDraftMs = Date.now() - t0;
     await closePopup(app);
     p2.close();
-    return `one spare after Replace; next popup visible in ${visibleMs} ms (includes key and helper overhead), drafts in ${firstDraftMs} ms`;
+    // The app logs its own time from hotkey to visible popup, without the test helper's overhead.
+    const times = [...app.log().matchAll(/popup_visible ms=(\d+)/g)].map((m) => Number(m[1]));
+    const appMs = times[times.length - 1];
+    assert(appMs <= 150, `popup took ${appMs} ms in the app (target 150 ms)`);
+    return `one spare after Replace; popup visible ${appMs} ms after the hotkey (app timing; ${visibleMs} ms seen by the test), drafts ${firstDraftMs} ms`;
   });
 
   await test("edge", "Original window closed: Replace turns into Copy only", async () => {

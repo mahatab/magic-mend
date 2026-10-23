@@ -272,7 +272,7 @@ mod win {
             };
             let text = read(13)
                 .map(|b| {
-                    let w: Vec<u16> = b.chunks_exact(2).map(|c| u16::from_le_bytes([c[0], c[1]])).collect();
+                    let w: Vec<u16> = b.as_chunks::<2>().0.iter().map(|c| u16::from_le_bytes(*c)).collect();
                     let end = w.iter().position(|x| *x == 0).unwrap_or(w.len());
                     String::from_utf16_lossy(&w[..end])
                 })

@@ -253,7 +253,7 @@ pub fn read_clipboard_text() -> Option<String> {
     unsafe {
         let h = GetClipboardData(CF_UNICODETEXT).ok()?;
         let bytes = global_bytes(h)?;
-        let words: Vec<u16> = bytes.chunks_exact(2).map(|c| u16::from_le_bytes([c[0], c[1]])).collect();
+        let words: Vec<u16> = bytes.as_chunks::<2>().0.iter().map(|c| u16::from_le_bytes(*c)).collect();
         let end = words.iter().position(|w| *w == 0).unwrap_or(words.len());
         Some(String::from_utf16_lossy(&words[..end]))
     }
@@ -631,8 +631,8 @@ unsafe fn icon_to_png(icon: HICON) -> Option<Vec<u8>> {
     if lines == 0 {
         return None;
     }
-    let has_alpha = px.chunks_exact(4).any(|p| p[3] != 0);
-    for p in px.chunks_exact_mut(4) {
+    let has_alpha = px.as_chunks::<4>().0.iter().any(|p| p[3] != 0);
+    for p in px.as_chunks_mut::<4>().0 {
         p.swap(0, 2); // BGRA to RGBA
         if !has_alpha {
             p[3] = 255;
