@@ -1,6 +1,6 @@
 # Windows end-to-end results
 
-Run on 2026-10-23 with `node tests/e2e/run.mjs` against the debug build and the fake claude.
+Run on 2026-10-24 with `node tests/e2e/run.mjs` against the debug build and the fake claude.
 
 | Test | What | Result | Notes |
 | --- | --- | --- | --- |
@@ -9,7 +9,8 @@ Run on 2026-10-23 with `node tests/e2e/run.mjs` against the debug build and the 
 | 5 | Enter in the popup never reaches the app underneath | Pass | Enter submitted the follow-up in the popup only; focused Replace ignored Enter; Esc closed |
 | 6 | No selection: editable box, Replace disabled, Copy works | Pass | Copy left the draft on the clipboard as intended |
 | 7 | Fix errors only gives one draft | Pass |  |
-| 11 | Warm spare: a new process is ready after Replace | Pass | one spare after Replace; next popup visible in 159 ms (includes key and helper overhead), drafts in 417 ms |
+| 11 | Warm spare: a new process is ready after Replace | Pass | one spare after Replace; popup visible 109 ms after the hotkey (app timing; 199 ms seen by the test), drafts 464 ms |
+| edge | Original window closed: Replace turns into Copy only | Pass | "Copy only" with "The original window was closed, so Replace is off. Use Copy." |
 | 17 | Held hotkey still captures and sends no stray shortcut | Pass | selection captured after a 1.5 s hold |
 | 19 | Rapid chip changes end with drafts for the last chip only | Pass | five clicks, one request, Firm drafts shown |
 | 20 | Multi-line draft pastes with no trailing line break and no Enter | Pass |  |
@@ -19,5 +20,5 @@ Run on 2026-10-23 with `node tests/e2e/run.mjs` against the debug build and the 
 | 12d | Failure: timeout after 30 seconds with Retry | Pass | "Claude took longer than 30 seconds. Click Retry." after about 31 s |
 | 16 | Terminals: the hotkey does nothing | Pass | no popup and no copy in WindowsTerminal.exe, WindowsTerminal.exe |
 | 13 | Privacy: no message text on disk, no network connections from the app | Pass | 3 app files scanned, 0 hits; app process sockets: 0 TCP, 0 UDP |
-| 14 | Resources: idle memory with the warm spare | Pass | app 43 MB, WebView2 0 MB, spare (fake) 4 MB |
-| 21-23 | Wizard: fresh install, Claude problems, closed early, practice box | **Fail** | timed out waiting for devtools target (last: undefined) |
+| 14 | Resources: idle memory with the warm spare | Pass | app 43 MB, WebView2 355 MB, spare (fake) 4 MB |
+| 21-23 | Wizard: fresh install, Claude problems, closed early, practice box | **Fail** | timed out waiting for popup over the wizard (last: false) |

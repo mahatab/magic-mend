@@ -148,10 +148,14 @@ fn hotkey_pressed(app: &AppHandle) {
             // Our own windows: only the practice box in the setup wizard takes the hotkey.
             let wizard_focused = app
                 .get_webview_window("wizard")
-                .map(|wz| wz.is_focused().unwrap_or(false) && wz.is_visible().unwrap_or(false))
+                .map(|wz| wz.is_visible().unwrap_or(false) && is_front(&wz, w.handle))
                 .unwrap_or(false);
             let on_try_step = st.wizard_step.lock().unwrap().as_str() == "try";
             if !wizard_focused || !on_try_step {
+                logging::event(
+                    "hotkey_own_window",
+                    &[("wizard_focused", if wizard_focused { "1" } else { "0" }), ("try_step", if on_try_step { "1" } else { "0" })],
+                );
                 return;
             }
             own_window = true;
@@ -185,6 +189,20 @@ fn hotkey_pressed(app: &AppHandle) {
     payload.clipboard_warning = clipboard_warning;
     show_popup(app, fg.as_ref().map(|w| w.handle), &s.popup_position, &payload);
     logging::timing("popup_visible", pressed_at.elapsed().as_millis());
+}
+
+/// Whether this window is the one in front. Tauri's focus flag can lag behind on Windows, so
+/// there the real foreground window is compared.
+fn is_front(w: &WebviewWindow, foreground: isize) -> bool {
+    #[cfg(windows)]
+    {
+        w.hwnd().map(|h| imp::root_handle(h.0 as isize) == imp::root_handle(foreground)).unwrap_or(false)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = foreground;
+        w.is_focused().unwrap_or(false)
+    }
 }
 
 #[derive(Serialize, Clone)]

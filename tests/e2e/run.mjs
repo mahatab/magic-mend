@@ -406,7 +406,10 @@ async function main() {
     await wiz2.click("#next"); // try it
     await waitFor(() => wiz2.eval(`document.querySelector('h1')?.textContent === 'Try it'`), { what: "try step" });
     await wiz2.click(".practice");
-    await wiz2.eval(`document.querySelector('.practice').select(), 1`);
+    // DevTools clicks do not bring a window to the front, so do it the way a user would.
+    pad("focus", "Magic Mend setup");
+    await waitFor(() => fg()?.title === "Magic Mend setup", { what: "wizard in front", timeout: 4000 });
+    await wiz2.eval(`document.querySelector('.practice').focus(), document.querySelector('.practice').select(), 1`);
     await sleep(200);
     hotkey();
     await waitFor(popupVisible, { what: "popup over the wizard" });

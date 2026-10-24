@@ -25,7 +25,7 @@ Updated 2026-10-23. Details for each suite are in the files next to this one.
 
 ## M3 and M4 Windows end to end
 
-See [e2e-windows.md](e2e-windows.md). 16 of 17 passed in the first full run; the wizard test failed because the computer locked itself during the run (the lock screen blocks hotkeys and key simulation). It needs a rerun on an unlocked desktop.
+See [e2e-windows.md](e2e-windows.md). All 18 pass on an unlocked desktop (the wizard test found and fixed a real bug: Tauri reported the wizard as unfocused while Windows had it in front, so the practice box ignored the hotkey).
 
 | Acceptance test | Status |
 | --- | --- |
@@ -37,17 +37,18 @@ See [e2e-windows.md](e2e-windows.md). 16 of 17 passed in the first full run; the
 | 8 Output rules across 20 outputs | Checker logic: pass (unit tests). Live outputs: waiting for sign-in. |
 | 9 Facts kept | Waiting for sign-in (`mm-harness timing` checks every sample) |
 | 10 Follow-ups | Flow: pass. Live wording: waiting for sign-in (`mm-harness quality`). |
-| 11 Warm spare | Pass |
+| 11 Warm spare | Pass. Popup visible 109 ms after the hotkey (target 150 ms). |
 | 12 Failures: missing, signed out, offline, plan limit, timeout | Pass |
 | 13 Privacy: no text on disk, no app sockets | Pass |
-| 14 Resources | Measured: app 43 MB plus WebView2; real claude spare to be measured after sign-in |
+| 14 Resources | App 43 MB, WebView2 processes 355 MB (shared browser, GPU, and renderer processes); real claude spare to be measured after sign-in |
 | 15 Elevated apps | Detection and fallback are built; not automated, because it needs an administrator window and a UAC prompt |
 | 16 Terminals | Pass |
 | 17 Held modifiers | Pass |
 | 18 Setup isolation | Waiting for sign-in |
 | 19 Rapid chip changes | Pass |
 | 20 Line breaks | Pass |
-| 21, 22, 23 Wizard | Needs a rerun on an unlocked desktop |
+| 21, 22, 23 Wizard | Pass |
+| Edge: original window closed | Pass (Replace turns into Copy only) |
 
 ## M5 Mac port
 
