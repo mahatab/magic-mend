@@ -33,7 +33,7 @@ jobs:
       - run: npx vite build
       - run: cargo test --lib
         working-directory: src-tauri
-      - run: cargo clippy --lib --bins -- -D warnings
+      - run: cargo clippy --lib --bins --features test-tools -- -D warnings
         working-directory: src-tauri
 
   macos:

@@ -98,8 +98,8 @@ cd src-tauri && cargo test --lib
 | --- | --- | --- |
 | Rust unit tests | `cargo test --lib` | Output checker, request and reply parsing, streaming extraction, draft flow (stale replies, the one fix round, JSON repair, timeouts), channel detection, excluded apps, settings, hotkeys, error messages |
 | Frontend unit tests | `npm test` | Popup logic, Replace button states, hotkey capture, and a scan of the whole source tree for contractions and em dashes |
-| Windows end to end | `node tests/e2e/run.mjs` | The real app, real clipboard, and real keys against a test window, with a fake `claude`. Covers acceptance tests 1, 5, 6, 7, 11 to 14, 16, 17, 19, 20, and 21 to 23. It takes over the keyboard for a few minutes, so leave the computer alone while it runs. |
-| Engine harness | `mm-harness timing`, `quality`, `isolation` | Live Claude timings for the M1 report, follow-up and fix-errors quality, and proof that your personal Claude Code setup does not reach the engine |
+| Windows end to end | `npx tauri build --debug --no-bundle`, then `cargo build --features test-tools --bin mm-testpad --bin mm-fakeclaude` (in src-tauri), then `node tests/e2e/run.mjs` | The real app, real clipboard, and real keys against a test window, with a fake `claude`. Covers acceptance tests 1, 5, 6, 7, 11 to 14, 16, 17, 19, 20, and 21 to 23. It takes over the keyboard for a few minutes, so leave the computer alone while it runs. |
+| Engine harness | `cargo run --features test-tools --bin mm-harness -- timing` (also `quality`, `isolation`) | Live Claude timings for the M1 report, follow-up and fix-errors quality, and proof that your personal Claude Code setup does not reach the engine |
 
 Results are in [docs/test-results](docs/test-results).
 

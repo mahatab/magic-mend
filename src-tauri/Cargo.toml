@@ -17,14 +17,22 @@ path = "src/main.rs"
 [[bin]]
 name = "mm-harness"
 path = "src/bin/harness.rs"
+required-features = ["test-tools"]
 
 [[bin]]
 name = "mm-testpad"
 path = "src/bin/testpad.rs"
+required-features = ["test-tools"]
 
 [[bin]]
 name = "mm-fakeclaude"
 path = "src/bin/fakeclaude.rs"
+required-features = ["test-tools"]
+
+# Test helpers (harness, test window, fake claude) only build with --features test-tools,
+# so the installer never includes them.
+[features]
+test-tools = []
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
