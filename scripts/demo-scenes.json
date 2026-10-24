@@ -1,0 +1,105 @@
+[
+ {
+  "name": "Simple",
+  "request": {
+   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "length": "Same",
+   "toggles": [],
+   "channel": "WhatsApp",
+   "followup": null,
+   "tone": "Simple"
+  }
+ },
+ {
+  "name": "Respectful",
+  "request": {
+   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "length": "Same",
+   "toggles": [],
+   "channel": "WhatsApp",
+   "followup": null,
+   "tone": "Respectful"
+  }
+ },
+ {
+  "name": "Warm",
+  "request": {
+   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "length": "Same",
+   "toggles": [],
+   "channel": "WhatsApp",
+   "followup": null,
+   "tone": "Warm"
+  }
+ },
+ {
+  "name": "Casual",
+  "request": {
+   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "length": "Same",
+   "toggles": [],
+   "channel": "WhatsApp",
+   "followup": null,
+   "tone": "Casual"
+  }
+ },
+ {
+  "name": "Professional",
+  "request": {
+   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "length": "Same",
+   "toggles": [],
+   "channel": "WhatsApp",
+   "followup": null,
+   "tone": "Professional"
+  }
+ },
+ {
+  "name": "Firm",
+  "request": {
+   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "length": "Same",
+   "toggles": [],
+   "channel": "WhatsApp",
+   "followup": null,
+   "tone": "Firm"
+  }
+ },
+ {
+  "name": "Shorter",
+  "request": {
+   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "length": "Shorter",
+   "toggles": [],
+   "channel": "WhatsApp",
+   "followup": null,
+   "tone": "Simple"
+  }
+ },
+ {
+  "name": "Fix errors only",
+  "request": {
+   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "length": "Same",
+   "toggles": [
+    "Fix errors only"
+   ],
+   "channel": "WhatsApp",
+   "followup": null,
+   "tone": "Simple"
+  }
+ },
+ {
+  "name": "Softer",
+  "request": {
+   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "length": "Same",
+   "toggles": [
+    "Softer"
+   ],
+   "channel": "WhatsApp",
+   "followup": null,
+   "tone": "Simple"
+  }
+ }
+]

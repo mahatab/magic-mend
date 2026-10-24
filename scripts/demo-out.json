@@ -1,0 +1,64 @@
+{
+  "Casual": {
+    "drafts": [
+      "hi chi, we had a great stay. Can we check out at 1pm instead of 11? Sorry for asking so late.",
+      "hi chi, we really enjoyed our stay. Is it okay if we check out at 1pm instead of 11? Sorry to ask this late."
+    ],
+    "subject": null
+  },
+  "Firm": {
+    "drafts": [
+      "Hi Chi, we had a great stay. I would like to check out at 1pm instead of 11. I am sorry for asking so late.",
+      "Hi Chi, we really enjoyed our stay. I need to check out at 1pm instead of 11. Sorry for the late request."
+    ],
+    "subject": null
+  },
+  "Fix errors only": {
+    "drafts": [
+      "Hi Chi, we had a great stay. Can we check out at 1pm instead of 11? Sorry for asking so late."
+    ],
+    "subject": null
+  },
+  "Professional": {
+    "drafts": [
+      "Hi Chi, we had a great stay. Would it be possible to check out at 1pm instead of 11? I am sorry for asking so late.",
+      "Hi Chi, we enjoyed our stay very much. Could we please check out at 1pm instead of 11? I apologize for the late request."
+    ],
+    "subject": null
+  },
+  "Respectful": {
+    "drafts": [
+      "Hi Chi, we had a great stay. Could we please check out at 1pm instead of 11? I am sorry for asking so late.",
+      "Hi Chi, we really enjoyed our stay. Would it be possible for us to check out at 1pm instead of 11? I am sorry to ask so late."
+    ],
+    "subject": null
+  },
+  "Shorter": {
+    "drafts": [
+      "Hi Chi, we had a great stay. Can we check out at 1pm instead of 11? I am sorry for asking so late.",
+      "Hi Chi, we loved our stay. Could we check out at 1pm instead of 11? Sorry for the late ask."
+    ],
+    "subject": null
+  },
+  "Simple": {
+    "drafts": [
+      "Hi Chi, we had a great stay. Can we check out at 1pm instead of 11? I am sorry for asking so late.",
+      "Hi Chi, we really enjoyed our stay. Could we check out at 1pm instead of 11? Sorry to ask so late."
+    ],
+    "subject": null
+  },
+  "Softer": {
+    "drafts": [
+      "Hi Chi, we had a great stay. Would it be possible to check out at 1pm instead of 11? I am sorry for asking so late.",
+      "Hi Chi, we really enjoyed our stay. Could we check out at 1pm instead of 11 if that works? I am sorry to ask so late."
+    ],
+    "subject": null
+  },
+  "Warm": {
+    "drafts": [
+      "Hi Chi, we had a great stay. Could we check out at 1pm instead of 11? I am sorry for asking so late.",
+      "Hi Chi, we really enjoyed our stay. Would it be possible to check out at 1pm instead of 11? Sorry for asking so late."
+    ],
+    "subject": null
+  }
+}
