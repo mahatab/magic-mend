@@ -23,3 +23,14 @@ pub use app::run;
 
 /// The system prompt from the spec, built into the app.
 pub const SYSTEM_PROMPT: &str = include_str!("../../prompts/system.txt");
+
+#[cfg(test)]
+mod prompt_tests {
+    #[test]
+    fn prompt_has_the_rules() {
+        let p = super::SYSTEM_PROMPT;
+        for rule in ["Never use contractions", "Never use em dashes", "never ask questions", "Never put the same word twice"] {
+            assert!(p.contains(rule), "missing: {rule}");
+        }
+    }
+}

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/mahatab/magic-mend/releases/latest"><img src="https://img.shields.io/badge/release-v1.0.0-4C5CE8" alt="Release v1.0.0" /></a>
+  <a href="https://github.com/mahatab/magic-mend/releases/latest"><img src="https://img.shields.io/badge/release-v1.0.1-4C5CE8" alt="Release v1.0.1" /></a>
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS-1B1D24?logo=windows&logoColor=white" alt="Windows | macOS" />
   <img src="https://img.shields.io/badge/tauri-v2-24C8D8?logo=tauri&logoColor=white" alt="Tauri v2" />
   <img src="https://img.shields.io/badge/rust-1.93-DEA584?logo=rust&logoColor=white" alt="Rust" />
@@ -38,7 +38,7 @@ You select text and press the hotkey. Magic Mend copies the selection (and puts 
 ## Download
 
 <p>
-  <a href="https://github.com/mahatab/magic-mend/releases/download/v1.0.0/Magic.Mend_1.0.0_x64-setup.exe"><img src="https://img.shields.io/badge/Download%20for%20Windows-1.7%20MB-4C5CE8?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" /></a>
+  <a href="https://github.com/mahatab/magic-mend/releases/download/v1.0.1/Magic.Mend_1.0.1_x64-setup.exe"><img src="https://img.shields.io/badge/Download%20for%20Windows-1.7%20MB-4C5CE8?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" /></a>
 </p>
 
 | | |
@@ -229,7 +229,7 @@ git clone https://github.com/mahatab/magic-mend.git
 cd magic-mend && npm install && npx tauri build
 ```
 
-**Windows** produces `src-tauri/target/release/bundle/nsis/Magic Mend_1.0.0_x64-setup.exe`.
+**Windows** produces `src-tauri/target/release/bundle/nsis/Magic Mend_1.0.1_x64-setup.exe`.
 **macOS** run `npx tauri build --bundles app` to produce `Magic Mend.app`. On first run the wizard asks for the Accessibility permission, which macOS requires for copying the selection and pasting the draft.
 
 For development: `npm run dev` serves the popup with a built-in fake backend at `http://localhost:1420/?mock` (add `&email`, `&empty`, `&long`, `&error`, `&fix`, or `&dark`).
