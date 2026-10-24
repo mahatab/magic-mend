@@ -81,23 +81,23 @@ async function main() {
   await sleep(3000);
 
   await popupShot(app, {
-    text: "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+    text: "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
     appName: "WhatsApp", letterColor: "#25D366", channel: "WhatsApp", file: "popup-light.png",
   });
   await popupShot(app, {
-    text: "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+    text: "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
     appName: "WhatsApp", letterColor: "#25D366", theme: "dark", channel: "WhatsApp", tone: "Warm", file: "popup-dark.png",
   });
   await popupShot(app, {
-    text: "Hi David, I am following up on my application for the Data Engineer role (job ID 48213) that I submitted on October 3",
+    text: "Hi Priya, just checking if you had a chance to look at the proposal I sent on March 12, happy to walk through it on a call this week",
     appName: "Outlook", letterColor: "#0F6CBD", channel: "Email", tone: "Professional", file: "popup-email.png",
   });
   await popupShot(app, {
-    text: "i has send the payment yesterday but i didnt got any confirmation email, can you check it",
+    text: "me and my wife was thinking we could come for dinner on friday if your free, we will bring desert",
     appName: "Messenger", letterColor: "#0866FF", toggles: ["Fix errors only"], file: "popup-fix.png",
   });
   await popupShot(app, {
-    text: "Hi Omar, sorry for the delay, I will send the signed contract by Tuesday 3pm and the invoice for $480",
+    text: "Hi Daniel, sorry for the late reply, I would be glad to join the panel on May 8 and can share my slides by May 1",
     appName: "LinkedIn", letterColor: "#0A66C2", theme: "dark", channel: "LinkedIn", followup: "remove the apology", file: "popup-followup.png",
   });
 
