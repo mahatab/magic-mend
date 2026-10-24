@@ -13,7 +13,7 @@ const OUT = join(ROOT, "docs", "images", "screenshots");
 const PORT = 1421;
 const CDP = 9444;
 const EDGE = ["C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe", "C:/Program Files/Microsoft/Edge/Application/msedge.exe"].find(existsSync);
-const scenes = JSON.parse(readFileSync(join(ROOT, "scripts", "scenes-out.json"), "utf8"));
+const scenes = { ...JSON.parse(readFileSync(join(ROOT, "scripts", "scenes-out.json"), "utf8")), ...JSON.parse(readFileSync(join(ROOT, "scripts", "scenes-chatgpt-out.json"), "utf8")) };
 mkdirSync(OUT, { recursive: true });
 
 // Serve the production build: the exact files the app ships.
@@ -45,7 +45,7 @@ async function shoot(c, selector, file) {
 }
 
 /** Opens the popup with a target app and a scene's real drafts. */
-async function popup(c, { scene, text, app, color, channel, tone = "Simple", toggles = [], dark = false, file, midStream = false, followupNote }) {
+async function popup(c, { scene, text, app, color, channel, tone = "Simple", toggles = [], dark = false, file, midStream = false, followupNote, provider = "Claude" }) {
   await setup(c, { width: 480, height: 900, dark });
   await go(c, `http://localhost:${PORT}/?mock&empty`);
   const s = scenes[scene];
@@ -54,7 +54,7 @@ async function popup(c, { scene, text, app, color, channel, tone = "Simple", tog
     window.__mm.open(window.__mm.mock.payload({
       capture: { kind: "text", text: ${JSON.stringify(text)} },
       target: { app_name: ${JSON.stringify(app)}, process: "", icon: null, elevated: false, own_window: false, present: true },
-      channel: ${JSON.stringify(channel)}, tone: ${JSON.stringify(tone)}, toggles: ${JSON.stringify(toggles)}, theme: ${JSON.stringify(dark ? "dark" : "light")},
+      provider: ${JSON.stringify(provider)}, channel: ${JSON.stringify(channel)}, tone: ${JSON.stringify(tone)}, toggles: ${JSON.stringify(toggles)}, theme: ${JSON.stringify(dark ? "dark" : "light")},
     }));
     const l = document.querySelector('.target .letter'); l.style.background = ${JSON.stringify(color)}; l.style.color = '#fff';
     return 1; })()`);
@@ -78,6 +78,7 @@ async function main() {
 
   const main = "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble";
   await popup(c, { scene: "whatsapp", text: main, app: "WhatsApp", color: "#25D366", channel: "WhatsApp", file: "popup-light.png" });
+  await popup(c, { scene: "chatgpt", text: main, app: "WhatsApp", color: "#25D366", channel: "WhatsApp", provider: "ChatGPT", file: "popup-chatgpt.png" });
   await popup(c, { scene: "warm", text: main, app: "WhatsApp", color: "#25D366", channel: "WhatsApp", tone: "Warm", dark: true, file: "popup-dark.png" });
   await popup(c, { scene: "whatsapp", text: main, app: "WhatsApp", color: "#25D366", channel: "WhatsApp", file: "popup-streaming.png", midStream: true });
   await popup(c, {

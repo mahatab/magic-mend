@@ -17,7 +17,9 @@ interface Settings {
   default_length: string;
   default_toggles: string[];
   drafts: number;
+  provider: string;
   model: string;
+  chatgpt_model: string;
   warm_mode: boolean;
   priming: boolean;
   theme: string;
@@ -26,6 +28,7 @@ interface Settings {
   excluded_apps: string[];
   channel_rules: Rule[];
   claude_path: string | null;
+  codex_path: string | null;
   no_contractions: boolean;
   no_em_dashes: boolean;
   paused: boolean;
@@ -37,6 +40,7 @@ interface Info {
   version: string;
   hotkey_display: string;
   detected_claude: string | null;
+  detected_codex: string | null;
   log_path: string | null;
 }
 
@@ -196,30 +200,70 @@ function rulesTable() {
   return wrap;
 }
 
-function claudeControl() {
+function pathControl(kind: "claude" | "codex") {
+  const key = kind === "claude" ? "claude_path" : "codex_path";
+  const detected = kind === "claude" ? info.detected_claude : info.detected_codex;
   const wrap = el("div");
-  const input = el("input", { type: "text", id: "claude-path", placeholder: info.detected_claude ?? "Not found", value: s.claude_path ?? "" }) as HTMLInputElement;
+  const input = el("input", { type: "text", id: `${kind}-path`, placeholder: detected ?? "Not found", value: s[key] ?? "" }) as HTMLInputElement;
   input.classList.add("grow");
   input.addEventListener("input", () => {
-    s.claude_path = input.value.trim() || null;
+    s[key] = input.value.trim() || null;
     changed();
   });
   const browse = el("button", { class: "btn btn-secondary", text: "Browse..." });
   browse.addEventListener("click", async () => {
     if (!inTauri) return;
     const { open } = await import("@tauri-apps/plugin-dialog");
-    const p = await open({ multiple: false, directory: false, title: "Find the claude command" });
+    const p = await open({ multiple: false, directory: false, title: `Find the ${kind} command` });
     if (typeof p === "string") {
       input.value = p;
-      s.claude_path = p;
+      s[key] = p;
       changed();
     }
   });
   const msg = el("div", { class: "msg" });
-  msg.textContent = info.detected_claude ? `Found: ${info.detected_claude}` : "Magic Mend cannot find the claude command.";
-  msg.className = info.detected_claude ? "msg good" : "msg bad";
+  msg.textContent = detected ? `Found: ${detected}` : `Magic Mend cannot find the ${kind} command.`;
+  msg.className = detected ? "msg good" : "msg bad";
   wrap.append(el("div", { class: "row" }, input, browse), msg, el("small", { text: "Leave empty to find it on its own." }));
   return wrap;
+}
+
+function modelControl(kind: "claude" | "chatgpt") {
+  const id = `${kind}-model`;
+  const input = el("input", { type: "text", id, value: kind === "claude" ? s.model : s.chatgpt_model, list: `${id}s` }) as HTMLInputElement;
+  input.addEventListener("input", () => {
+    if (kind === "claude") s.model = input.value.trim() || "sonnet";
+    else s.chatgpt_model = input.value.trim() || "gpt-6-luna";
+    changed();
+  });
+  const list = el("datalist", { id: `${id}s` });
+  if (kind === "claude") ["sonnet", "haiku", "opus"].forEach((m) => list.append(el("option", { value: m })));
+  else
+    void invoke<{ slug: string; name: string }[]>("chatgpt_models").then((ms) =>
+      (ms ?? []).forEach((m) => list.append(el("option", { value: m.slug, text: m.name }))),
+    );
+  return el("div", {}, input, list);
+}
+
+function providerSection() {
+  const fs = el("fieldset", {}, el("legend", { text: "AI service" }));
+  const pick = select(
+    "provider",
+    [
+      ["claude", "Claude (claude command, your Claude plan)"],
+      ["chatgpt", "ChatGPT (codex command, your ChatGPT plan)"],
+    ],
+    () => s.provider,
+    (v) => (s.provider = v),
+  );
+  fs.append(
+    item("Write drafts with", "Switch any time. The tray menu has the same choice.", pick, "provider"),
+    item("Claude model", "An alias or full name, such as sonnet or haiku.", modelControl("claude"), "claude-model"),
+    item("Path to claude", "", pathControl("claude"), "claude-path"),
+    item("ChatGPT model", "From the models your ChatGPT plan offers.", modelControl("chatgpt"), "chatgpt-model"),
+    item("Path to codex", "From the Codex app, the ChatGPT extension, or npm.", pathControl("codex"), "codex-path"),
+  );
+  return fs;
 }
 
 function render() {
@@ -242,19 +286,12 @@ function render() {
     s.drafts = Math.min(4, Math.max(1, Number(drafts.value) || 2));
     changed();
   });
-  const model = el("input", { type: "text", id: "model", value: s.model, list: "models" }) as HTMLInputElement;
-  model.addEventListener("input", () => {
-    s.model = model.value.trim() || "sonnet";
-    changed();
-  });
-  const models = el("datalist", { id: "models" }, el("option", { value: "sonnet" }), el("option", { value: "haiku" }), el("option", { value: "opus" }));
   rewrites.append(
     item("Default tone", "", chips(TONES, () => s.default_tone, (v) => (s.default_tone = v), "Default tone")),
     item("Default length", "", chips(LENGTHS, () => s.default_length, (v) => (s.default_length = v), "Default length")),
     item("Default toggles", "", toggleChips()),
     item("Number of drafts", "Fix errors only always returns one.", drafts, "drafts"),
-    item("Model", "A Claude model name or alias, such as haiku or sonnet.", el("div", {}, model, models), "model"),
-    item("Warm mode", "Keeps one claude process ready so drafts start faster.", sw(() => s.warm_mode, (v) => (s.warm_mode = v), "Warm mode")),
+    item("Warm mode", "Keeps one Claude or ChatGPT process ready so drafts start faster.", sw(() => s.warm_mode, (v) => (s.warm_mode = v), "Warm mode")),
   );
 
   const rules = el("fieldset", {}, el("legend", { text: "Output rules" }));
@@ -275,17 +312,15 @@ function render() {
   const channels = el("fieldset", {}, el("legend", { text: "Channel rules" }));
   channels.append(rulesTable());
 
-  const claude = el("fieldset", {}, el("legend", { text: "Claude" }));
-  claude.append(item("Path to claude", "", claudeControl(), "claude-path"));
 
   const about = el("fieldset", { class: "about" }, el("legend", { text: "Privacy" }));
   about.append(
-    el("p", { text: "Magic Mend sends your selected text only to the claude command on this computer, which sends it to Anthropic under your own plan. The app opens no network connections of its own." }),
+    el("p", { text: "Magic Mend sends your selected text only to the command you chose on this computer (claude or codex), which sends it to Anthropic or OpenAI under your own plan. The app opens no network connections of its own." }),
     el("p", { text: "Messages and drafts stay in memory and are never written to disk. The log holds error types and timings only." }),
   );
   if (info.log_path) about.append(el("p", {}, "Log file: ", el("code", { text: info.log_path })));
 
-  scroll.append(general, rewrites, rules, excluded, channels, claude, about);
+  scroll.append(providerSection(), general, rewrites, rules, excluded, channels, about);
 
   const bar = el("div", { class: "bar" });
   const status = el("span", { class: "status", id: "status", text: "" });

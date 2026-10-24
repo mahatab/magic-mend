@@ -48,7 +48,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.93.1
-          components: clippy
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
@@ -57,4 +57,12 @@ jobs:
       - run: npx vite build
       - run: cargo test --lib
         working-directory: src-tauri
-      - run: npx tauri build --bundles app
+      # One app for Apple silicon and Intel. Not signed or notarized (personal use).
+      - run: npx tauri build --target universal-apple-darwin --bundles app,dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: magic-mend-macos
+          path: |
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+            src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app
+          if-no-files-found: error

@@ -22,6 +22,24 @@ Decisions, deviations from the spec, and ideas that are not in the spec.
 
 - **Default model: sonnet, priming off.** From the M1 report: sonnet is faster once warm and handles Fix errors only correctly. Haiku stays available in Settings.
 
+## ChatGPT support (v1.1.0)
+
+- **Engine: OpenAI's official `codex app-server`.** It is the counterpart of `claude -p` with stream-json: one warm process, one ephemeral conversation (thread) per popup, words streamed as `item/agentMessage/delta`, follow-ups in the same thread, and `turn/interrupt` for replies that are no longer needed. The user signs in with `codex login` (ChatGPT); Magic Mend never touches the login and checks it with `codex login status`.
+- **Why not `codex exec`.** It works (about 3 s per draft) but runs once per request, sends no words until the end, and needs saved sessions for follow-ups, which conflicts with the no-transcripts rule.
+- **Isolation.** The rewrite prompt replaces Codex's own instructions (`baseInstructions`), the thread is ephemeral, the sandbox is read-only, and these are switched off: plugins, apps, skills (`skills.include_instructions=false`), memories, hooks, multi-agent, the shell and exec tools, image generation, browser and computer use, web search, AGENTS.md files (`project_doc_max_bytes=0`), and the permissions, environment, apps, and collaboration instruction blocks. The prompt the model sees went from about 15,000 tokens to about 3,100. `codex debug prompt-input` was used to verify each step.
+- **The user's MCP servers.** `mcp_servers={}` does not clear servers that are already configured, so Magic Mend reads the server names from `codex mcp list --json` and switches each off with `mcp_servers.<name>.enabled=false`. A server that comes from a desktop app feature cannot be overridden by name (Codex reports "invalid transport"), so every override is checked with a harmless `codex mcp list` first and kept only when Codex accepts it. Those feature servers are already off through their feature flags.
+- **Feature names change between versions.** Only flags that the installed Codex lists in `codex features list` are passed, so a renamed feature never stops the engine. Two `include_*_usage_instructions` keys that are not valid top-level settings were dropped after testing.
+- **Finding `codex`.** It ships in several places: npm, the Codex desktop app (in a versioned folder), and the ChatGPT extension for VS Code and similar editors. Copies differ in age; the copy in the VS Code extension here (0.122) could not use current ChatGPT models. Magic Mend asks every copy for its version and uses the newest. The user can set a path in Settings.
+- **Model: GPT-6-Luna** at low reasoning effort, from the ChatGPT timing report: as fast as Claude Sonnet once warm and it kept every fact. GPT-5.6-Luna is slightly faster but changed "7pm" to "7 pm". The model list in Settings comes live from `codex debug models`.
+- **Tool and approval requests** from the server are always declined, as a second line of defense behind the switched-off tools.
+- **Both installed.** The setup wizard checks Claude and ChatGPT side by side, with a live test rewrite for each, and the user picks one. The tray menu and Settings switch at any time; the warm process restarts with the new service, and the next popup uses it.
+- **Hard rule 3, extended.** "Use only the official, unmodified command, already signed in by the user" now covers `codex` for ChatGPT in the same way as `claude`.
+
+### Known limits
+
+- OpenAI labels `app-server` experimental. Magic Mend was built and tested against `codex-cli 0.163.0-alpha`; a future protocol change may need an update. The fake codex used by the tests documents the subset Magic Mend relies on.
+- GPT-6-Luna follows the repeated-word rule less reliably than Claude: on the "move-in date" example, about one draft in four still said "move the move-in date".
+
 ## Deviations
 
 - **Window corners on Windows 11.** With acrylic turned on, Windows draws the frame, and its rounded corner radius is 8 px, not 16 px. When acrylic is not available (Windows 10) the popup draws its own 16 px corners on a solid background.

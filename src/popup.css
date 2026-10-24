@@ -61,6 +61,16 @@ header {
   font-size: 13px;
   flex: none;
 }
+.brand .via {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding: 1px 6px;
+  margin-left: 2px;
+}
 .brand img {
   width: 18px;
   height: 18px;

@@ -4,7 +4,7 @@
 
 use crate::checker::Rules;
 use crate::drafts::{DraftFlow, Output, TurnKind};
-use crate::engine::{ClaudeEngine, Engine, EngineConfig, EngineEvent, ErrorKind, Tagged};
+use crate::engine::{self, Engine, EngineConfig, EngineEvent, ErrorKind, Provider, Tagged};
 use crate::logging;
 use crate::platform::imp;
 use crate::protocol::Request;
@@ -20,12 +20,12 @@ pub struct EngineManager {
     warm: bool,
     rules: Rules,
     tx: Sender<Tagged>,
-    spare: Option<ClaudeEngine>,
+    spare: Option<Box<dyn Engine>>,
     spare_primed: bool,
     spare_since: Instant,
     spare_failures: u32,
     next_spare_at: Instant,
-    active: Option<ClaudeEngine>,
+    active: Option<Box<dyn Engine>>,
     flow: DraftFlow,
     in_session: bool,
     replayed: bool,
@@ -62,7 +62,7 @@ impl EngineManager {
 
     pub fn configure(&mut self, cfg: Option<EngineConfig>, warm: bool, rules: Rules) {
         let changed = match (&self.cfg, &cfg) {
-            (Some(a), Some(b)) => a.claude_path != b.claude_path || a.model != b.model || a.priming != b.priming,
+            (Some(a), Some(b)) => a.provider != b.provider || a.program != b.program || a.model != b.model || a.priming != b.priming,
             (None, None) => false,
             _ => true,
         };
@@ -97,11 +97,15 @@ impl EngineManager {
         self.active.as_ref().and_then(|s| s.pid())
     }
 
-    fn spawn(&self) -> Result<ClaudeEngine, ErrorKind> {
+    fn spawn(&self) -> Result<Box<dyn Engine>, ErrorKind> {
         let cfg = self.cfg.clone().ok_or(ErrorKind::NotFound)?;
-        let mut e = ClaudeEngine::new(cfg, self.tx.clone());
+        let mut e = engine::create(cfg, self.tx.clone());
         e.start().map_err(|err| err.0)?;
         Ok(e)
+    }
+
+    pub fn provider(&self) -> Provider {
+        self.cfg.as_ref().map(|c| c.provider).unwrap_or_default()
     }
 
     fn drop_spare(&mut self) {
@@ -144,7 +148,7 @@ impl EngineManager {
         self.replayed = false;
         self.first_words_logged = false;
         self.session_started = Some(Instant::now());
-        self.flow = DraftFlow::new(self.rules);
+        self.flow = DraftFlow::for_provider(self.rules, self.provider());
         let warm_hit = self.spare.is_some();
         let engine = match self.spare.take() {
             Some(mut s) => {
@@ -170,13 +174,13 @@ impl EngineManager {
     pub fn request(&mut self, req_id: u64, request: Request) -> Vec<Output> {
         if !self.in_session {
             if let Err(k) = self.begin_session() {
-                return vec![error_out(req_id, k)];
+                return vec![error_out(req_id, k, self.provider())];
             }
         }
         if self.active.is_none() {
             match self.spawn() {
                 Ok(e) => self.active = Some(e),
-                Err(k) => return vec![error_out(req_id, k)],
+                Err(k) => return vec![error_out(req_id, k, self.provider())],
             }
         }
         let text = self.flow.begin(req_id, request);
@@ -184,7 +188,8 @@ impl EngineManager {
     }
 
     fn send_turn(&mut self, req_id: u64, text: &str, kind: TurnKind) -> Vec<Output> {
-        let Some(active) = self.active.as_mut() else { return vec![error_out(req_id, ErrorKind::ProcessExit)] };
+        let provider = self.provider();
+        let Some(active) = self.active.as_mut() else { return vec![error_out(req_id, ErrorKind::ProcessExit, provider)] };
         match active.send(text) {
             Ok(turn) => {
                 self.flow.sent(req_id, turn, kind);
@@ -203,7 +208,7 @@ impl EngineManager {
                         }
                     }
                 }
-                vec![error_out(req_id, e.0)]
+                vec![error_out(req_id, e.0, provider)]
             }
         }
     }
@@ -218,7 +223,7 @@ impl EngineManager {
                 self.in_session = true;
                 self.request(req_id, request)
             }
-            Err(k) => vec![error_out(req_id, k)],
+            Err(k) => vec![error_out(req_id, k, self.provider())],
         }
     }
 
@@ -232,15 +237,15 @@ impl EngineManager {
     pub fn end_session(&mut self) {
         self.end_active();
         self.in_session = false;
-        self.flow = DraftFlow::new(self.rules);
+        self.flow = DraftFlow::for_provider(self.rules, self.provider());
         self.session_started = None;
         self.next_spare_at = Instant::now();
         self.ensure_spare();
     }
 
     pub fn handle(&mut self, t: Tagged) -> Vec<Output> {
-        let is_active = self.active.as_ref().map(|a| a.id) == Some(t.engine);
-        let is_spare = self.spare.as_ref().map(|s| s.id) == Some(t.engine);
+        let is_active = self.active.as_ref().map(|a| a.id()) == Some(t.engine);
+        let is_spare = self.spare.as_ref().map(|s| s.id()) == Some(t.engine);
         if is_spare {
             match t.event {
                 EngineEvent::Primed { ms } => {
@@ -334,6 +339,6 @@ impl EngineManager {
     }
 }
 
-fn error_out(req_id: u64, kind: ErrorKind) -> Output {
-    Output::Error { req_id, kind, message: kind.message().to_string() }
+fn error_out(req_id: u64, kind: ErrorKind, provider: Provider) -> Output {
+    Output::Error { req_id, kind, message: kind.message_for(provider) }
 }

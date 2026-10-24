@@ -1,6 +1,6 @@
 [package]
 name = "magic-mend"
-version = "1.0.1"
+version = "1.1.0"
 description = "Magic Mend: rewrite selected text with your own Claude login"
 authors = ["M2 Labs"]
 edition = "2021"
@@ -22,6 +22,11 @@ required-features = ["test-tools"]
 [[bin]]
 name = "mm-testpad"
 path = "src/bin/testpad.rs"
+required-features = ["test-tools"]
+
+[[bin]]
+name = "mm-fakecodex"
+path = "src/bin/fakecodex.rs"
 required-features = ["test-tools"]
 
 [[bin]]

@@ -6,6 +6,8 @@ pub mod actions;
 pub mod channel;
 pub mod checker;
 pub mod claude_path;
+pub mod codex_engine;
+pub mod codex_path;
 pub mod drafts;
 pub mod engine;
 pub mod engine_manager;

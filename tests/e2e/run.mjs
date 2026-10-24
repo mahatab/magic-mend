@@ -7,7 +7,7 @@ import { writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { execFileSync, spawn } from "node:child_process";
 import {
-  ROOT, FAKE, sleep, waitFor, keys, clipSet, clipGet, clipSeq, fg, hotkey,
+  ROOT, FAKE, FAKE_CODEX, sleep, waitFor, keys, clipSet, clipGet, clipSeq, fg, hotkey,
   startPad, startApp, defaultSettings, popupVisible, waitDrafts, findFiles, childProcesses,
   tcpConnections, cleanTmp, Cdp, pad,
 } from "./lib.mjs";
@@ -38,7 +38,14 @@ async function openOn(app, text, name) {
   const p = await startPad(text, name);
   await sleep(150);
   hotkey();
-  await waitFor(popupVisible, { what: "popup in front" });
+  // A window left by an earlier test (a terminal, for example) can keep the foreground for a
+  // moment. Bring the test window forward and press the hotkey once more.
+  await waitFor(popupVisible, { what: "popup in front", timeout: 4000 }).catch(async () => {
+    p.focus();
+    await sleep(300);
+    hotkey();
+    await waitFor(popupVisible, { what: "popup in front" });
+  });
   return p;
 }
 
@@ -54,7 +61,7 @@ const enterKeys = (lines) => lines.filter((l) => /keydown .*0x0D$/.test(l) || l 
 async function main() {
   cleanTmp();
   pad("release"); // clear any key Windows still reports as held
-  console.log("Windows end-to-end tests (fake claude)\n");
+  console.log("Windows end-to-end tests (fake claude and fake codex)\n");
   let app = await startApp({ name: "main" });
   await sleep(1500);
 
@@ -96,7 +103,7 @@ async function main() {
     assert(argv[argv.indexOf("--tools") + 1] === "", "--tools is not empty");
     assert(!argv.some((a) => /dangerously|bypass/i.test(a)), "a permission bypass flag is set");
     const cwd = app.fakeLog().find((l) => l.argv)?.cwd ?? "";
-    assert(/engine$/i.test(cwd), `cwd is ${cwd}`);
+    assert(/engine[\\/](claude|chatgpt)$/i.test(cwd), `cwd is ${cwd}`);
     return `cwd ${cwd.split(/[\\/]/).slice(-2).join("/")}`;
   });
 
@@ -368,13 +375,118 @@ async function main() {
     return `app ${mb(own)}, WebView2 ${mb(webview)}, spare (fake) ${mb(spare)}`;
   });
 
+  // ---- ChatGPT (fake codex app-server) ----
+  await app.stop();
+  app = await startApp({ name: "chatgpt", settings: defaultSettings({ provider: "chatgpt" }) });
+  await sleep(1500);
+
+  await test("gpt-1", "ChatGPT: Replace end to end, isolated and ephemeral", async () => {
+    clipSet("CLIP-BEFORE-GPT");
+    const p = await openOn(app, "chatgpt replace check", "g1");
+    const drafts = await waitDrafts(app, 2);
+    assert(drafts[0].startsWith("[ChatGPT Simple] Draft A:"), `draft from ${drafts[0]}`);
+    const badge = await app.popup.eval(`document.querySelector('.brand .via')?.textContent`);
+    assert(badge === "ChatGPT", `badge ${badge}`);
+    await app.popup.click(".card .btn-primary");
+    await waitFor(() => p.text() === drafts[0], { what: "text replaced" });
+    await sleep(700);
+    const c = clipGet();
+    assert(c.text === "CLIP-BEFORE-GPT" && c.custom, `clipboard after Replace: ${JSON.stringify(c)}`);
+    assert(enterKeys(p.keys()).length === 0, "Enter reached the app");
+    const log = app.fakeLog();
+    const argv = log.find((l) => l.argv && l.argv[0] === "app-server")?.argv ?? [];
+    for (const [flag, value] of [["--disable", "shell_tool"], ["--disable", "plugins"], ["--disable", "hooks"], ["--disable", "memories"], ["-c", "project_doc_max_bytes=0"], ["-c", "skills.include_instructions=false"]]) {
+      assert(argv.some((a, i) => a === flag && argv[i + 1] === value), `missing ${flag} ${value}`);
+    }
+    const ts = log.find((l) => l.thread_start)?.thread_start;
+    assert(ts && ts.ephemeral === true && ts.sandbox === "read-only" && ts.instructions_len > 500, `thread start ${JSON.stringify(ts)}`);
+    assert(ts.model === "gpt-6-luna", `model ${ts.model}`);
+    const msg = log.find((l) => l.message);
+    assert(msg.effort === "low" && msg.schema === true, `turn ${JSON.stringify(msg)}`);
+    p.close();
+    return "replaced via ChatGPT; ephemeral read-only thread with our prompt; tools, plugins, hooks, memories, project docs, skills off";
+  });
+
+  await test("gpt-2", "ChatGPT: follow-up, Fix errors only, rapid chip changes", async () => {
+    const p = await openOn(app, "chatgpt flow check", "g2");
+    await waitDrafts(app, 2);
+    await app.popup.click(".followup textarea");
+    keys("x");
+    keys("enter");
+    await waitFor(() => app.popup.eval(`[...document.querySelectorAll('.card .body')].every(b => b.textContent.includes('(after: x)')) && document.querySelectorAll('.card .btn-secondary:not([disabled])').length === 2`), { what: "follow-up drafts" });
+    await app.popup.click('.switch[data-toggle="Fix errors only"]');
+    await waitFor(() => app.popup.eval(`document.querySelectorAll('.card').length === 1 && !!document.querySelector('.card .btn-secondary:not([disabled])')`), { what: "one draft" });
+    await app.popup.click('.switch[data-toggle="Fix errors only"]');
+    for (const n of [2, 3, 4, 5, 6]) await app.popup.click(`.tone-row .chip:nth-child(${n})`);
+    await waitFor(() => app.popup.eval(`[...document.querySelectorAll('.card .body')].every(b => b.textContent.startsWith('[ChatGPT Firm]')) && document.querySelectorAll('.card .btn-secondary:not([disabled])').length === 2`), { what: "Firm drafts" });
+    await closePopup(app);
+    p.close();
+    return "follow-up kept context, Fix errors only gave one draft, five quick clicks ended on Firm";
+  });
+
+  await test("gpt-3", "Switching between Claude and ChatGPT applies to the next popup", async () => {
+    const order = [];
+    for (const [provider, prefix, badge] of [["claude", "[Simple] Draft A:", "Claude"], ["chatgpt", "[ChatGPT Simple] Draft A:", "ChatGPT"], ["claude", "[Simple] Draft A:", "Claude"]]) {
+      await app.popup.eval(`window.__TAURI_INTERNALS__.invoke('set_provider', { provider: '${provider}' })`);
+      await sleep(800);
+      const p = await openOn(app, `switch to ${provider}`, "g3");
+      const drafts = await waitDrafts(app, 2);
+      const b = await app.popup.eval(`document.querySelector('.brand .via')?.textContent`);
+      assert(drafts[0].startsWith(prefix) && b === badge, `${provider}: "${drafts[0].slice(0, 30)}" badge ${b}`);
+      order.push(badge);
+      await closePopup(app);
+      p.close();
+    }
+    const saved = JSON.parse(readFileSync(join(app.dir, "config", "settings.json"), "utf8"));
+    assert(saved.provider === "claude", `saved ${saved.provider}`);
+    await app.popup.eval(`window.__TAURI_INTERNALS__.invoke('set_provider', { provider: 'chatgpt' })`);
+    await sleep(800);
+    return `drafts came from ${order.join(", then ")}; the choice is saved`;
+  });
+
+  await test("gpt-4", "ChatGPT failures show plain messages that name ChatGPT", async () => {
+    const out = [];
+    for (const [mode, re] of [["signed_out", /ChatGPT is not signed in.*codex login/], ["limit", /ChatGPT plan limit/], ["offline", /ChatGPT cannot reach the internet/], ["badmodel", /ChatGPT model is not available/]]) {
+      app.setMode(mode);
+      // The spare that is already running started in the old mode, so use it once and close it.
+      const warm = await openOn(app, `${mode} warm-up`, "g4");
+      await sleep(400);
+      await closePopup(app);
+      warm.close();
+      await sleep(600);
+      const p = await openOn(app, `${mode} check`, "g4b");
+      const msg = await waitFor(() => app.popup.eval(`document.querySelector('.banner.error p')?.textContent`), { what: `${mode} banner` });
+      assert(re.test(msg), `${mode}: ${msg}`);
+      out.push(`${mode}: "${msg}"`);
+      await closePopup(app);
+      p.close();
+    }
+    app.setMode("normal");
+    return out.join("; ");
+  });
+
+  await app.stop();
+  app = await startApp({ name: "oneprovider", settings: { claude_path: FAKE, codex_path: "C:\\nope\\codex.exe" } });
+  await test("gpt-5", "Wizard with only Claude installed picks it and offers Codex", async () => {
+    const wz = await Cdp.connect((u) => u.includes("wizard.html"));
+    await waitFor(() => wz.eval(`document.querySelector('h1')?.textContent === 'Welcome to Magic Mend'`), { what: "welcome" });
+    await wz.click("#next");
+    await waitFor(() => wz.eval(`document.querySelector('.provider[data-key="claude"]').classList.contains('chosen')`), { what: "Claude chosen", timeout: 15000 });
+    const gpt = await wz.eval(`(() => { const c = document.querySelector('.provider[data-key="chatgpt"]'); return { state: c.querySelector('.pstate').textContent, buttons: [...c.querySelectorAll('button')].map(b => b.textContent), help: c.querySelector('.help')?.textContent }; })()`);
+    assert(gpt.state === "Not installed" && gpt.buttons.includes("Get Codex") && gpt.buttons.includes("Browse..."), JSON.stringify(gpt));
+    assert(!(await wz.eval(`document.getElementById('next').disabled`)), "Next disabled");
+    wz.close();
+    return `ChatGPT card: "${gpt.help}"`;
+  });
+
   await app.stop();
 
   // Wizard tests run on a fresh data folder.
   await test("21-23", "Wizard: fresh install, Claude problems, closed early, practice box", async () => {
     // A first-run settings file with only the fake claude path, so the user's real claude
     // (which may be signed in) is never used here.
-    let w = await startApp({ name: "wizard", mode: "signed_out", settings: { claude_path: FAKE } });
+    // Both fakes start signed out, so both cards show the fix. The user's real commands are never used.
+    let w = await startApp({ name: "wizard", mode: "signed_out", settings: { claude_path: FAKE, codex_path: FAKE_CODEX } });
     const wiz = await Cdp.connect((u) => u.includes("wizard.html"));
     await waitFor(() => wiz.eval(`document.querySelector('h1')?.textContent === 'Welcome to Magic Mend'`), { what: "welcome step" });
     // Closed early: the hotkey must reopen the wizard and capture nothing.
@@ -391,18 +503,33 @@ async function main() {
     assert(step === "Welcome to Magic Mend", `reopened at ${step}`);
     p.close();
     await wiz2.click("#next");
-    await waitFor(() => wiz2.eval(`document.querySelector('h1')?.textContent === 'Connect Claude'`), { what: "connect step" });
+    await waitFor(() => wiz2.eval(`document.querySelector('h1')?.textContent === 'Connect your AI'`), { what: "connect step" });
     // Signed out: the fix is shown.
-    await waitFor(() => wiz2.eval(`document.querySelector('.help')?.textContent.includes('not signed in')`), { what: "sign-in help", timeout: 15000 });
+    const card = (k) => `document.querySelector('.provider[data-key="${k}"]')`;
+    const retry = (k) => wiz2.eval(`[...${card(k)}.querySelectorAll('button')].find(b => b.textContent === 'Retry').click()`);
+    for (const k of ["claude", "chatgpt"]) {
+      await waitFor(() => wiz2.eval(`${card(k)}.querySelector('.help')?.textContent.includes('not signed in')`), { what: `${k} sign-in help`, timeout: 15000 });
+    }
+    const chatgptHelp = await wiz2.eval(`${card("chatgpt")}.querySelector('.help').textContent`);
+    assert(/codex login/.test(chatgptHelp), `ChatGPT help: ${chatgptHelp}`);
+    assert(await wiz2.eval(`document.getElementById('next').disabled`), "Next enabled with nothing ready");
     // Claude missing: point at a bad path, retry, see the fix; then a good path passes.
     await wiz2.eval(`window.__TAURI_INTERNALS__.invoke('set_claude_path', { path: 'C:\\\\nope\\\\claude.exe' })`);
-    await wiz2.eval(`[...document.querySelectorAll('button')].find(b => b.textContent === 'Retry').click()`);
-    await waitFor(() => wiz2.eval(`document.querySelector('.help')?.textContent.includes('cannot find')`), { what: "missing help" });
-    const hasBrowse = await wiz2.eval(`[...document.querySelectorAll('button')].some(b => b.textContent === 'Browse...')`);
+    await retry("claude");
+    await waitFor(() => wiz2.eval(`${card("claude")}.querySelector('.help')?.textContent.includes('cannot find')`), { what: "missing help" });
+    const hasBrowse = await wiz2.eval(`[...${card("claude")}.querySelectorAll('button')].some(b => b.textContent === 'Browse...')`);
     assert(hasBrowse, "no Browse button");
     w.setMode("normal");
     await wiz2.eval(`window.__TAURI_INTERNALS__.invoke('set_claude_path', { path: ${JSON.stringify(FAKE)} })`);
-    await wiz2.eval(`[...document.querySelectorAll('button')].find(b => b.textContent === 'Retry').click()`);
+    await retry("claude");
+    await retry("chatgpt");
+    // Both detected and ready: Claude is picked first, the user switches to ChatGPT.
+    for (const k of ["claude", "chatgpt"]) {
+      await waitFor(() => wiz2.eval(`${card(k)}.classList.contains('ready')`), { what: `${k} ready`, timeout: 15000 });
+    }
+    assert(await wiz2.eval(`${card("claude")}.classList.contains('chosen')`), "Claude not preselected");
+    await wiz2.click('.provider[data-key="chatgpt"]');
+    assert(await wiz2.eval(`${card("chatgpt")}.getAttribute('aria-checked') === 'true'`), "ChatGPT not chosen");
     await waitFor(() => wiz2.eval(`!document.getElementById('next').disabled`), { what: "connect passed", timeout: 15000 });
     const t0 = Date.now();
     await wiz2.click("#next"); // hotkey
@@ -420,7 +547,7 @@ async function main() {
     await waitFor(popupVisible, { what: "popup over the wizard" });
     await waitDrafts(w, 2);
     await w.popup.click(".card .btn-primary");
-    await waitFor(() => wiz2.eval(`document.querySelector('.practice').value.startsWith('[Simple] Draft A:')`), { what: "practice box replaced" });
+    await waitFor(() => wiz2.eval(`document.querySelector('.practice').value.startsWith('[ChatGPT Simple] Draft A:')`), { what: "practice box replaced by ChatGPT" });
     const ok = await wiz2.eval(`!!document.querySelector('.check.ok')`);
     assert(ok, "wizard did not confirm the change");
     const practiceMs = Date.now() - t0;
@@ -430,10 +557,11 @@ async function main() {
     await sleep(800);
     const saved = JSON.parse(readFileSync(join(w.dir, "config", "settings.json"), "utf8"));
     assert(saved.setup.version === 1 && saved.setup.completed.includes("connect"), "setup progress not saved");
+    assert(saved.provider === "chatgpt", `provider saved as ${saved.provider}`);
     wiz.close();
     wiz2.close();
     await w.stop();
-    return `closed early: nothing captured or started; missing and signed-out fixes shown; practice Replace worked ${practiceMs} ms after Connect passed`;
+    return `closed early: nothing captured or started; both providers detected, signed-out and missing fixes shown, ChatGPT chosen and saved; practice Replace by ChatGPT worked ${practiceMs} ms after Connect passed`;
   });
 
   // Report.
@@ -442,7 +570,7 @@ async function main() {
   const lines = [
     "# Windows end-to-end results",
     "",
-    `Run on ${new Date().toISOString().slice(0, 10)} with \`node tests/e2e/run.mjs\` against the debug build and the fake claude.`,
+    `Run on ${new Date().toISOString().slice(0, 10)} with \`node tests/e2e/run.mjs\` against the debug build with the fake claude and the fake codex.`,
     "",
     "| Test | What | Result | Notes |",
     "| --- | --- | --- | --- |",

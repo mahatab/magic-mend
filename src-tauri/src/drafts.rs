@@ -2,7 +2,7 @@
 //! rule fix, and the local em dash repair. Pure logic, so it is tested without a process.
 
 use crate::checker::{self, Rules};
-use crate::engine::{EngineEvent, ErrorKind};
+use crate::engine::{EngineEvent, ErrorKind, Provider};
 use crate::protocol::{parse_reply, partial_variants, Request};
 use serde::Serialize;
 use std::time::{Duration, Instant};
@@ -46,6 +46,7 @@ struct Pending {
 #[derive(Debug, Default)]
 pub struct DraftFlow {
     rules: Option<Rules>,
+    provider: Provider,
     latest_req: u64,
     request: Option<Request>,
     pending: Option<Pending>,
@@ -65,6 +66,10 @@ pub const JSON_REPAIR_MESSAGE: &str = "Your last reply was not valid JSON. Resen
 impl DraftFlow {
     pub fn new(rules: Rules) -> Self {
         DraftFlow { rules: Some(rules), ..Default::default() }
+    }
+
+    pub fn for_provider(rules: Rules, provider: Provider) -> Self {
+        DraftFlow { rules: Some(rules), provider, ..Default::default() }
     }
 
     fn rules(&self) -> Rules {
@@ -112,7 +117,7 @@ impl DraftFlow {
         if now.duration_since(p.sent_at) >= TURN_TIMEOUT {
             let req_id = p.req_id;
             self.pending = None;
-            return Some(error(req_id, ErrorKind::Timeout));
+            return Some(error(req_id, ErrorKind::Timeout, self.provider));
         }
         None
     }
@@ -141,13 +146,13 @@ impl DraftFlow {
             EngineEvent::TurnDone { turn, text, error: err } if *turn == p.turn => {
                 self.pending = None;
                 if let Some(kind) = err {
-                    return vec![error(p.req_id, *kind)];
+                    return vec![error(p.req_id, *kind, self.provider)];
                 }
                 self.finish(p.req_id, text)
             }
             EngineEvent::Exited { error: kind } => {
                 self.pending = None;
-                vec![error(p.req_id, *kind)]
+                vec![error(p.req_id, *kind, self.provider)]
             }
             _ => Vec::new(),
         }
@@ -166,7 +171,7 @@ impl DraftFlow {
                 self.json_retry = true;
                 return vec![Output::Send { req_id, text: JSON_REPAIR_MESSAGE.into(), kind: TurnKind::JsonRepair }];
             }
-            return vec![error(req_id, ErrorKind::BadReply)];
+            return vec![error(req_id, ErrorKind::BadReply, self.provider)];
         };
         if let Some(r) = &self.request {
             reply.variants.truncate(r.expected_drafts().max(1));
@@ -204,8 +209,8 @@ impl DraftFlow {
     }
 }
 
-fn error(req_id: u64, kind: ErrorKind) -> Output {
-    Output::Error { req_id, kind, message: kind.message().to_string() }
+fn error(req_id: u64, kind: ErrorKind, provider: Provider) -> Output {
+    Output::Error { req_id, kind, message: kind.message_for(provider) }
 }
 
 #[cfg(test)]

@@ -17,7 +17,12 @@ pub struct Settings {
     pub default_length: String,
     pub default_toggles: Vec<String>,
     pub drafts: u8,
+    /// Which service writes the drafts: "claude" or "chatgpt".
+    pub provider: String,
+    /// The Claude model (alias or full name).
     pub model: String,
+    /// The ChatGPT model, as listed by `codex debug models`.
+    pub chatgpt_model: String,
     pub warm_mode: bool,
     pub priming: bool,
     pub theme: String,
@@ -26,6 +31,7 @@ pub struct Settings {
     pub excluded_apps: Vec<String>,
     pub channel_rules: Vec<ChannelRule>,
     pub claude_path: Option<String>,
+    pub codex_path: Option<String>,
     pub no_contractions: bool,
     pub no_em_dashes: bool,
     pub paused: bool,
@@ -41,6 +47,9 @@ pub struct SetupProgress {
     pub pending_new: Vec<String>,
 }
 
+/// The default ChatGPT model, from the ChatGPT timing report.
+pub const DEFAULT_CHATGPT_MODEL: &str = "gpt-6-luna";
+
 pub fn default_hotkey() -> String {
     // Ctrl+Option+R on Mac is the same chord, since Option is Alt.
     "Ctrl+Alt+R".to_string()
@@ -54,7 +63,9 @@ impl Default for Settings {
             default_length: "Same".into(),
             default_toggles: vec![],
             drafts: 2,
+            provider: "claude".into(),
             model: "sonnet".into(),
+            chatgpt_model: DEFAULT_CHATGPT_MODEL.into(),
             warm_mode: true,
             priming: false,
             theme: "system".into(),
@@ -63,6 +74,7 @@ impl Default for Settings {
             excluded_apps: default_excluded_apps(),
             channel_rules: default_rules(),
             claude_path: None,
+            codex_path: None,
             no_contractions: true,
             no_em_dashes: true,
             paused: false,
@@ -106,6 +118,10 @@ impl Settings {
         if self.model.trim().is_empty() {
             self.model = "sonnet".into();
         }
+        if self.chatgpt_model.trim().is_empty() {
+            self.chatgpt_model = DEFAULT_CHATGPT_MODEL.into();
+        }
+        self.provider = crate::engine::Provider::parse(&self.provider).key().to_string();
         if !["center", "cursor"].contains(&self.popup_position.as_str()) {
             self.popup_position = "center".into();
         }
@@ -161,6 +177,18 @@ impl Settings {
             .unwrap_or("done")
     }
 
+    pub fn provider(&self) -> crate::engine::Provider {
+        crate::engine::Provider::parse(&self.provider)
+    }
+
+    /// The model for the provider in use.
+    pub fn active_model(&self) -> &str {
+        match self.provider() {
+            crate::engine::Provider::Claude => &self.model,
+            crate::engine::Provider::ChatGpt => &self.chatgpt_model,
+        }
+    }
+
     pub fn checker_rules(&self) -> crate::checker::Rules {
         crate::checker::Rules { no_contractions: self.no_contractions, no_em_dashes: self.no_em_dashes }
     }
@@ -198,6 +226,8 @@ mod tests {
         assert!(s.warm_mode && s.start_at_login && s.no_contractions && s.no_em_dashes);
         assert_eq!(s.theme, "system");
         assert!(s.excluded_apps.iter().any(|a| a == "WindowsTerminal"));
+        assert_eq!(s.provider, "claude");
+        assert_eq!(s.active_model(), "sonnet");
     }
 
     #[test]

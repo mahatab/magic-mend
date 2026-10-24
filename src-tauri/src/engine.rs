@@ -1,7 +1,8 @@
-//! The Claude engine: one official `claude` process in print mode with stream-json input and
-//! output, kept warm so the hotkey does not pay the startup delay (spec, "Claude engine").
+//! The engine interface, shared types, and the Claude engine: one official `claude` process in
+//! print mode with stream-json input and output, kept warm so the hotkey does not pay the
+//! startup delay (spec, "Claude engine"). The ChatGPT engine lives in codex_engine.rs.
 //!
-//! The engine never reads credentials. It only starts the user's own signed-in command.
+//! No engine reads credentials. Each only starts the user's own signed-in official command.
 
 use serde::Serialize;
 use std::io::{BufRead, BufReader, Read, Write};
@@ -17,10 +18,68 @@ use crate::protocol::user_message_line;
 
 pub const PRIMING_TEXT: &str = "Reply with ok";
 
+/// Which service writes the drafts. Each runs through its official command on the user's own
+/// login: Claude through `claude`, ChatGPT through OpenAI's `codex`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, serde::Deserialize, Default)]
+pub enum Provider {
+    #[default]
+    #[serde(rename = "claude")]
+    Claude,
+    #[serde(rename = "chatgpt")]
+    ChatGpt,
+}
+
+impl Provider {
+    pub fn parse(s: &str) -> Provider {
+        if s.eq_ignore_ascii_case("chatgpt") || s.eq_ignore_ascii_case("codex") {
+            Provider::ChatGpt
+        } else {
+            Provider::Claude
+        }
+    }
+
+    pub fn key(self) -> &'static str {
+        match self {
+            Provider::Claude => "claude",
+            Provider::ChatGpt => "chatgpt",
+        }
+    }
+
+    pub fn name(self) -> &'static str {
+        match self {
+            Provider::Claude => "Claude",
+            Provider::ChatGpt => "ChatGPT",
+        }
+    }
+
+    /// The official command for this service.
+    pub fn command(self) -> &'static str {
+        match self {
+            Provider::Claude => "claude",
+            Provider::ChatGpt => "codex",
+        }
+    }
+
+    fn install_hint(self) -> &'static str {
+        match self {
+            Provider::Claude => "Install Claude Code",
+            Provider::ChatGpt => "Install the Codex app or the codex command from OpenAI",
+        }
+    }
+
+    fn sign_in_hint(self) -> &'static str {
+        match self {
+            Provider::Claude => "run claude",
+            Provider::ChatGpt => "run codex login",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ErrorKind {
     NotFound,
+    ModelUnavailable,
     NotSignedIn,
     LimitReached,
     Offline,
@@ -32,22 +91,30 @@ pub enum ErrorKind {
 
 impl ErrorKind {
     /// A plain message that names the fix. Never a stack trace.
-    pub fn message(self) -> &'static str {
+    pub fn message(self) -> String {
+        self.message_for(Provider::Claude)
+    }
+
+    /// The same message for the service in use.
+    pub fn message_for(self, p: Provider) -> String {
+        let (name, cmd) = (p.name(), p.command());
         match self {
-            ErrorKind::NotFound => "Magic Mend cannot find the claude command. Install Claude Code, or set the path in Settings.",
-            ErrorKind::NotSignedIn => "Claude is not signed in. Open a terminal, run claude, sign in, and then click Retry.",
-            ErrorKind::LimitReached => "Your Claude plan limit has been reached. Try again when your limit resets.",
-            ErrorKind::Offline => "Claude cannot reach the internet. Check your connection and click Retry.",
-            ErrorKind::ProcessExit => "The claude process stopped unexpectedly. Click Retry.",
-            ErrorKind::Timeout => "Claude took longer than 30 seconds. Click Retry.",
-            ErrorKind::BadReply => "Claude sent a reply Magic Mend could not read. Click Retry.",
-            ErrorKind::Other => "Something went wrong with Claude. Click Retry.",
+            ErrorKind::NotFound => format!("Magic Mend cannot find the {cmd} command. {}, or set the path in Settings.", p.install_hint()),
+            ErrorKind::ModelUnavailable => format!("This {name} model is not available on your plan. Pick another model in Settings."),
+            ErrorKind::NotSignedIn => format!("{name} is not signed in. Open a terminal, {}, sign in, and then click Retry.", p.sign_in_hint()),
+            ErrorKind::LimitReached => format!("Your {name} plan limit has been reached. Try again when your limit resets."),
+            ErrorKind::Offline => format!("{name} cannot reach the internet. Check your connection and click Retry."),
+            ErrorKind::ProcessExit => format!("The {cmd} process stopped unexpectedly. Click Retry."),
+            ErrorKind::Timeout => format!("{name} took longer than 30 seconds. Click Retry."),
+            ErrorKind::BadReply => format!("{name} sent a reply Magic Mend could not read. Click Retry."),
+            ErrorKind::Other => format!("Something went wrong with {name}. Click Retry."),
         }
     }
 
     pub fn category(self) -> &'static str {
         match self {
             ErrorKind::NotFound => "not_found",
+            ErrorKind::ModelUnavailable => "model_unavailable",
             ErrorKind::NotSignedIn => "not_signed_in",
             ErrorKind::LimitReached => "limit_reached",
             ErrorKind::Offline => "offline",
@@ -106,7 +173,9 @@ pub struct Tagged {
 
 #[derive(Debug, Clone)]
 pub struct EngineConfig {
-    pub claude_path: PathBuf,
+    pub provider: Provider,
+    /// The official command for the provider.
+    pub program: PathBuf,
     pub model: String,
     pub system_prompt_file: PathBuf,
     /// A dedicated empty folder, so no project settings load.
@@ -117,15 +186,32 @@ pub struct EngineConfig {
 #[derive(Debug, Clone, PartialEq)]
 pub struct EngineError(pub ErrorKind);
 
-/// The small engine interface, so a second backend can be added later.
+/// The small engine interface (spec, "Engine interface"). Claude and ChatGPT each implement it.
 pub trait Engine: Send {
     fn start(&mut self) -> Result<(), EngineError>;
-    /// Sends one user turn and returns its turn number (1, 2, 3...).
+    /// Sends one user turn and returns its turn number (1, 2, 3...). Replies to older turns may
+    /// still arrive; the draft flow ignores them.
     fn send(&mut self, text: &str) -> Result<u64, EngineError>;
     fn stop(&mut self);
+    /// Tags every event this engine sends.
+    fn id(&self) -> u64;
+    fn pid(&self) -> Option<u32>;
+    fn is_running(&mut self) -> bool;
 }
 
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
+
+pub fn next_engine_id() -> u64 {
+    NEXT_ID.fetch_add(1, Ordering::SeqCst)
+}
+
+/// Starts the right engine for the configured provider.
+pub fn create(cfg: EngineConfig, tx: Sender<Tagged>) -> Box<dyn Engine> {
+    match cfg.provider {
+        Provider::Claude => Box::new(ClaudeEngine::new(cfg, tx)),
+        Provider::ChatGpt => Box::new(crate::codex_engine::CodexEngine::new(cfg, tx)),
+    }
+}
 
 pub struct ClaudeEngine {
     pub id: u64,
@@ -192,7 +278,7 @@ pub fn scrub_env(cmd: &mut std::process::Command) {
 impl ClaudeEngine {
     pub fn new(cfg: EngineConfig, tx: Sender<Tagged>) -> Self {
         ClaudeEngine {
-            id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
+            id: next_engine_id(),
             cfg,
             child: None,
             stdin: None,
@@ -204,29 +290,18 @@ impl ClaudeEngine {
         }
     }
 
-    pub fn is_running(&mut self) -> bool {
-        match self.child.as_mut() {
-            Some(c) => matches!(c.try_wait(), Ok(None)),
-            None => false,
-        }
-    }
-
     pub fn turns_sent(&self) -> u64 {
         self.sent
-    }
-
-    pub fn pid(&self) -> Option<u32> {
-        self.child.as_ref().map(|c| c.id())
     }
 }
 
 impl Engine for ClaudeEngine {
     fn start(&mut self) -> Result<(), EngineError> {
-        if !self.cfg.claude_path.is_file() {
+        if !self.cfg.program.is_file() {
             return Err(EngineError(ErrorKind::NotFound));
         }
         std::fs::create_dir_all(&self.cfg.workdir).map_err(|_| EngineError(ErrorKind::Other))?;
-        let mut cmd = claude_path::command(&self.cfg.claude_path);
+        let mut cmd = claude_path::command(&self.cfg.program);
         cmd.args(args(&self.cfg))
             .current_dir(&self.cfg.workdir)
             .stdin(Stdio::piped())
@@ -308,6 +383,21 @@ impl Engine for ClaudeEngine {
         #[cfg(windows)]
         {
             self.job = None;
+        }
+    }
+
+    fn id(&self) -> u64 {
+        self.id
+    }
+
+    fn pid(&self) -> Option<u32> {
+        self.child.as_ref().map(|c| c.id())
+    }
+
+    fn is_running(&mut self) -> bool {
+        match self.child.as_mut() {
+            Some(c) => matches!(c.try_wait(), Ok(None)),
+            None => false,
         }
     }
 }
@@ -463,7 +553,8 @@ mod tests {
     #[test]
     fn args_disable_tools_and_personal_setup() {
         let cfg = EngineConfig {
-            claude_path: "claude".into(),
+            provider: Provider::Claude,
+            program: "claude".into(),
             model: "haiku".into(),
             system_prompt_file: "sys.txt".into(),
             workdir: ".".into(),
@@ -481,8 +572,10 @@ mod tests {
     #[test]
     fn error_messages_follow_output_rules() {
         let rules = crate::checker::Rules::default();
-        for k in [ErrorKind::NotFound, ErrorKind::NotSignedIn, ErrorKind::LimitReached, ErrorKind::Offline, ErrorKind::ProcessExit, ErrorKind::Timeout, ErrorKind::BadReply, ErrorKind::Other] {
-            assert!(crate::checker::check(k.message(), rules).is_clean(), "{:?}", k);
+        for k in [ErrorKind::NotFound, ErrorKind::ModelUnavailable, ErrorKind::NotSignedIn, ErrorKind::LimitReached, ErrorKind::Offline, ErrorKind::ProcessExit, ErrorKind::Timeout, ErrorKind::BadReply, ErrorKind::Other] {
+            for p in [Provider::Claude, Provider::ChatGpt] {
+                assert!(crate::checker::check(&k.message_for(p), rules).is_clean(), "{:?}", k);
+            }
         }
     }
 }

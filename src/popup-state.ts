@@ -36,6 +36,8 @@ export interface OpenPayload {
   no_contractions: boolean;
   no_em_dashes: boolean;
   clipboard_warning?: boolean;
+  /** The service writing the drafts, such as "Claude" or "ChatGPT". */
+  provider?: string;
 }
 
 export interface Request {

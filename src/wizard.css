@@ -322,3 +322,87 @@ kbd {
   width: 28px;
   height: 28px;
 }
+
+/* Connect step: one card per AI service. */
+.providers {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 8px;
+}
+.provider {
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: var(--card);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-card);
+  cursor: default;
+  transition: border-color var(--motion-fade), box-shadow var(--motion-fade);
+}
+.provider.ready {
+  cursor: pointer;
+}
+.provider.ready:hover {
+  border-color: var(--chip-border);
+}
+.provider.chosen {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.phead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.phead b {
+  font-size: 15px;
+}
+.phead .radio {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--chip-border);
+  flex: none;
+}
+.provider.chosen .radio {
+  border-color: var(--accent);
+  background: radial-gradient(circle, var(--accent) 45%, transparent 50%);
+}
+.pstate {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+}
+.provider.ready .pstate {
+  color: var(--success);
+  font-weight: 600;
+}
+.pblurb {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin: 2px 0 8px 26px;
+}
+.psteps {
+  display: grid;
+  gap: 4px;
+  margin-left: 26px;
+}
+.psteps .check {
+  padding: 6px 10px;
+  border: 0;
+  background: var(--field);
+}
+.provider .help,
+.provider .row {
+  margin-left: 26px;
+}
+.provider .row {
+  margin-top: 8px;
+}
+.note {
+  font-size: 12.5px;
+}
+.psummary {
+  color: var(--success);
+  font-size: 12px;
+}

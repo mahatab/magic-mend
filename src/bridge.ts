@@ -48,7 +48,9 @@ export const fakeSettings = {
   default_length: "Same",
   default_toggles: [] as string[],
   drafts: 2,
+  provider: "claude",
   model: "sonnet",
+  chatgpt_model: "gpt-6-luna",
   warm_mode: true,
   priming: false,
   theme: "system",
@@ -62,6 +64,7 @@ export const fakeSettings = {
     { process: [], title: ["LinkedIn"], browser_only: true, channel: "LinkedIn" },
   ],
   claude_path: null as string | null,
+  codex_path: null as string | null,
   no_contractions: true,
   no_em_dashes: true,
   paused: false,
@@ -96,6 +99,7 @@ export const mock = {
       engine_error: null,
       no_contractions: true,
       no_em_dashes: true,
+      provider: new URLSearchParams(location.search).has("chatgpt") ? "ChatGPT" : "Claude",
       ...overrides,
     };
   },
@@ -119,18 +123,32 @@ export const mock = {
           version: "1.0.0",
           hotkey_display: "Ctrl+Alt+R",
           detected_claude: "C:/Users/me/.local/bin/claude.exe",
+          detected_codex: "C:/Users/me/AppData/Local/OpenAI/Codex/bin/codex.exe (codex-cli 0.163.0)",
           log_path: null,
           steps: ["welcome", "connect", "hotkey", "defaults", "try", "done"],
           required: ["connect"],
           first_unfinished: "welcome",
           translucent: false,
         };
-      case "wizard_check_claude":
+      case "check_provider": {
         await sleep(400);
-        return { found: true, path: "C:/Users/me/.local/bin/claude.exe", version: "2.1.296 (Claude Code)", signed_in: true, message: null };
-      case "wizard_test_engine":
-        await sleep(1200);
-        return { ok: true, message: "Claude is connected.", ms: 2400, sample: "Thanks for helping me move last weekend." };
+        const chatgpt = args.provider === "chatgpt";
+        return {
+          provider: args.provider,
+          name: chatgpt ? "ChatGPT" : "Claude",
+          found: true,
+          path: chatgpt ? "C:/Users/me/AppData/Local/OpenAI/Codex/bin/codex.exe" : "C:/Users/me/.local/bin/claude.exe",
+          version: chatgpt ? "codex-cli 0.163.0" : "2.1.296 (Claude Code)",
+          signed_in: true,
+          method: chatgpt ? "Logged in using ChatGPT" : null,
+          message: null,
+        };
+      }
+      case "test_provider":
+        await sleep(args.provider === "chatgpt" ? 1500 : 1100);
+        return { ok: true, message: "Connected.", ms: 2400, sample: "Thanks for helping me move last weekend." };
+      case "chatgpt_models":
+        return [{ slug: "gpt-5.6-luna", name: "GPT-5.6-Luna" }, { slug: "gpt-6.1-sol", name: "GPT-6.1-Sol" }];
       case "check_hotkey":
         return { ok: true, display: String(args.hotkeyStr), warnings: [], error: null };
       case "set_hotkey":

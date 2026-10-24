@@ -13,6 +13,7 @@ const ALLOWED = new Set([
   "src-tauri/src/drafts.rs",
   "src-tauri/src/engine.rs",
   "src-tauri/src/bin/fakeclaude.rs",
+  "src-tauri/src/bin/fakecodex.rs",
   "tests/popup-state.test.ts",
   "tests/copy-rules.test.ts",
   "tests/messages.json",

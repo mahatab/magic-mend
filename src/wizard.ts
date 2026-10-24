@@ -7,7 +7,7 @@ import { comboFrom } from "./keys";
 import logoUrl from "./assets/logo-64.png";
 
 interface Info {
-  settings: { hotkey: string; default_tone: string; default_length: string; start_at_login: boolean; theme: string; setup: { completed: string[] } };
+  settings: { provider: string; hotkey: string; default_tone: string; default_length: string; start_at_login: boolean; theme: string; setup: { completed: string[] } };
   platform: string;
   hotkey_display: string;
   steps: string[];
@@ -16,7 +16,8 @@ interface Info {
   translucent: boolean;
 }
 
-const INSTALL_URL = "https://claude.com/product/claude-code";
+const CLAUDE_URL = "https://claude.com/product/claude-code";
+const CODEX_URL = "https://openai.com/codex";
 const PRACTICE = "hi, i wanted to ask if you can send me the documnet by friday, i need it becuase my landlord is asking for it";
 
 const shell = document.getElementById("shell")!;
@@ -69,6 +70,10 @@ function go(i: number) {
 
 async function next() {
   const s = step();
+  if (s === "connect" && chosen) {
+    await invoke("set_provider", { provider: chosen });
+    info.settings.provider = chosen;
+  }
   if (s === "defaults") {
     await invoke("wizard_save_defaults", { tone, length, startAtLogin });
   }
@@ -143,90 +148,186 @@ function welcome(body: HTMLElement) {
       "div",
       { class: "promise" },
       el("div", {}, el("span", { class: "ic", text: "1" }), el("div", {}, el("b", { text: "It never sends a message" }), el("span", { text: "Replace only puts the text in the box. You press Send yourself." }))),
-      el("div", {}, el("span", { class: "ic", text: "2" }), el("div", {}, el("b", { text: "It uses your own Claude plan" }), el("span", { text: "Rewrites run through the claude command you already signed in to, and count toward your plan limits." }))),
+      el("div", {}, el("span", { class: "ic", text: "2" }), el("div", {}, el("b", { text: "It uses your own Claude or ChatGPT plan" }), el("span", { text: "Rewrites run through the official command you already signed in to, and count toward that plan." }))),
       el("div", {}, el("span", { class: "ic", text: "3" }), el("div", {}, el("b", { text: "Your text stays private" }), el("span", { text: "Messages live in memory only. Nothing is saved, logged, or tracked." }))),
     ),
   );
 }
 
+type ProviderKey = "claude" | "chatgpt";
+interface ProviderCheck {
+  provider: ProviderKey;
+  name: string;
+  found: boolean;
+  path: string | null;
+  version: string | null;
+  signed_in: boolean | null;
+  method: string | null;
+  message: string | null;
+}
+interface EngineTest {
+  ok: boolean;
+  message: string;
+  ms: number;
+  sample: string | null;
+}
+
+const PROVIDERS: { key: ProviderKey; name: string; command: string; install: string; installUrl: string; signIn: string; blurb: string }[] = [
+  {
+    key: "claude",
+    name: "Claude",
+    command: "claude",
+    install: "Get Claude Code",
+    installUrl: CLAUDE_URL,
+    signIn: "Open a terminal, run <code>claude</code>, sign in, and then click Retry.",
+    blurb: "Uses the claude command (Claude Code) and your Claude plan.",
+  },
+  {
+    key: "chatgpt",
+    name: "ChatGPT",
+    command: "codex",
+    install: "Get Codex",
+    installUrl: CODEX_URL,
+    signIn: "Open a terminal, run <code>codex login</code>, sign in with your ChatGPT account, and then click Retry.",
+    blurb: "Uses OpenAI's codex command (from the Codex app or the ChatGPT extension) and your ChatGPT plan.",
+  },
+];
+
+/** Ready providers, from the last checks on this screen. */
+const ready = new Set<ProviderKey>();
+let chosen: ProviderKey | null = null;
+
+function updateNext() {
+  connectOk = chosen !== null && ready.has(chosen);
+  const next = document.getElementById("next") as HTMLButtonElement | null;
+  if (next) next.disabled = !connectOk;
+}
+
 function connect(body: HTMLElement, _footer: HTMLElement) {
-  body.append(el("h1", { text: "Connect Claude" }), el("p", { text: "Magic Mend uses the official claude command on this computer. It never handles your login or reads your credentials." }));
-  const checks = el("div", { class: "checks" });
-  const row = (label: string) => {
-    const r = el("div", { class: "check busy" }, el("span", { class: "mark", "aria-hidden": "true" }), el("div", { class: "txt" }, el("span", { text: label }), el("small")));
-    checks.append(r);
-    return {
-      set(state: "ok" | "bad" | "busy" | "idle", detail = "") {
+  body.append(
+    el("h1", { text: "Connect your AI" }),
+    el("p", { text: "Magic Mend works with Claude and with ChatGPT, through their official commands on this computer. It never handles your login or reads your credentials." }),
+  );
+  const cards = el("div", { class: "providers", role: "radiogroup", "aria-label": "Which AI writes your drafts" });
+  const note = el("p", { class: "note", text: "Have both? Pick one now. You can switch any time from the tray menu or Settings." });
+  body.append(cards, note);
+  ready.clear();
+  chosen = null;
+  updateNext();
+
+  const choose = (key: ProviderKey) => {
+    if (!ready.has(key)) return;
+    chosen = key;
+    cards.querySelectorAll<HTMLElement>(".provider").forEach((c) => {
+      const on = c.dataset.key === key;
+      c.classList.toggle("chosen", on);
+      c.setAttribute("aria-checked", String(on));
+    });
+    updateNext();
+  };
+
+  for (const p of PROVIDERS) {
+    const card = el("div", { class: "provider", role: "radio", "aria-checked": "false", tabindex: "0", "data-key": p.key });
+    const head = el("div", { class: "phead" }, el("span", { class: "radio", "aria-hidden": "true" }), el("b", { text: p.name }), el("span", { class: "pstate", text: "Checking..." }));
+    const blurb = el("small", { class: "pblurb", text: p.blurb });
+    const steps = el("div", { class: "psteps" });
+    const help = el("div");
+    const actions = el("div", { class: "row" });
+    card.append(head, blurb, steps, help, actions);
+    cards.append(card);
+    card.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).closest("button")) return;
+      choose(p.key);
+    });
+    card.addEventListener("keydown", (e) => {
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        choose(p.key);
+      }
+    });
+
+    const stateLabel = head.querySelector(".pstate") as HTMLElement;
+    const line = (label: string) => {
+      const r = el("div", { class: "check busy" }, el("span", { class: "mark", "aria-hidden": "true" }), el("div", { class: "txt" }, el("span", { text: label }), el("small")));
+      steps.append(r);
+      return (state: "ok" | "bad" | "busy" | "idle", detail = "") => {
         r.className = `check ${state === "idle" ? "" : state}`;
         (r.querySelector(".mark") as HTMLElement).textContent = state === "ok" ? "✓" : state === "bad" ? "!" : "";
         (r.querySelector("small") as HTMLElement).textContent = detail;
-      },
+      };
     };
-  };
-  const found = row("Find the claude command");
-  const signed = row("Check that Claude is signed in");
-  const test = row("Send a tiny test rewrite");
-  const help = el("div");
-  const actions = el("div", { class: "row" });
-  body.append(checks, help, actions);
 
-  const run = async () => {
-    connectOk = false;
-    (document.getElementById("next") as HTMLButtonElement | null)?.setAttribute("disabled", "");
-    help.replaceChildren();
-    actions.replaceChildren();
-    found.set("busy");
-    signed.set("idle");
-    test.set("idle");
-    const c = await invoke<{ found: boolean; path: string | null; version: string | null; signed_in: boolean | null; message: string | null }>("wizard_check_claude");
-    if (!c.found || !c.version) {
-      found.set("bad", c.path ?? "Not found");
-      help.append(el("div", { class: "help", text: c.message ?? "Magic Mend cannot find the claude command." }));
-      actions.append(
-        button("Get Claude Code", "btn btn-secondary", () => void openUrl(INSTALL_URL)),
-        button("Browse...", "btn btn-secondary", () => void browse(run)),
-        button("Retry", "btn btn-primary", () => void run()),
-      );
-      return;
-    }
-    found.set("ok", `${c.version} at ${c.path}`);
-    signed.set("busy");
-    if (c.signed_in === false) {
-      signed.set("bad", "Not signed in");
-      help.append(signInHelp());
-      actions.append(button("Retry", "btn btn-primary", () => void run()));
-      return;
-    }
-    signed.set("ok", c.signed_in ? "Signed in" : "Checked by the test below");
-    test.set("busy", "This takes a few seconds");
-    const t = await invoke<{ ok: boolean; message: string; ms: number; sample: string | null }>("wizard_test_engine");
-    if (!t.ok) {
-      test.set("bad", t.message);
-      if (/signed in/i.test(t.message)) help.append(signInHelp());
-      else help.append(el("div", { class: "help", text: t.message }));
-      actions.append(button("Retry", "btn btn-primary", () => void run()));
-      return;
-    }
-    test.set("ok", t.sample ? `"${t.sample}"` : `Answered in ${(t.ms / 1000).toFixed(1)} s`);
-    connectOk = true;
-    await complete("connect");
-    (document.getElementById("next") as HTMLButtonElement | null)?.removeAttribute("disabled");
-  };
-  void run();
+    const run = async () => {
+      ready.delete(p.key);
+      if (chosen === p.key) chosen = null;
+      card.classList.remove("ready", "chosen");
+      card.setAttribute("aria-checked", "false");
+      updateNext();
+      steps.replaceChildren();
+      help.replaceChildren();
+      actions.replaceChildren();
+      stateLabel.textContent = "Checking...";
+      const found = line(`Find the ${p.command} command`);
+      const signed = line(`Check that ${p.name} is signed in`);
+      const test = line("Send a tiny test rewrite");
+      found("busy");
+      signed("idle");
+      test("idle");
+      const c = await invoke<ProviderCheck>("check_provider", { provider: p.key });
+      if (!c.found || !c.version) {
+        found("bad", c.path ?? "Not found");
+        signed("idle");
+        test("idle");
+        stateLabel.textContent = "Not installed";
+        help.append(el("div", { class: "help", text: c.message ?? `Magic Mend cannot find the ${p.command} command.` }));
+        actions.append(
+          button(p.install, "btn btn-secondary", () => void openUrl(p.installUrl)),
+          button("Browse...", "btn btn-secondary", () => void browse(p.key, run)),
+          button("Retry", "btn btn-secondary", () => void run()),
+        );
+        return;
+      }
+      found("ok", `${c.version} at ${c.path}`);
+      if (c.signed_in === false) {
+        signed("bad", "Not signed in");
+        stateLabel.textContent = "Not signed in";
+        const h = el("div", { class: "help" });
+        h.innerHTML = `${p.name} is not signed in. ${p.signIn}`;
+        help.append(h);
+        actions.append(button("Retry", "btn btn-secondary", () => void run()));
+        return;
+      }
+      signed("ok", c.method ?? (c.signed_in ? "Signed in" : "Checked by the test below"));
+      test("busy", "This takes a few seconds");
+      const t = await invoke<EngineTest>("test_provider", { provider: p.key });
+      if (!t.ok) {
+        test("bad", t.message);
+        stateLabel.textContent = "Needs attention";
+        help.append(el("div", { class: "help", text: t.message }));
+        actions.append(button("Retry", "btn btn-secondary", () => void run()));
+        return;
+      }
+      test("ok", t.sample ? `"${t.sample}"` : `Answered in ${(t.ms / 1000).toFixed(1)} s`);
+      stateLabel.textContent = "Ready";
+      // Collapse the three checks into one line once everything passed.
+      steps.replaceChildren(el("small", { class: "psummary", text: `${c.version} · ${c.method ?? "Signed in"} · test rewrite passed in ${(t.ms / 1000).toFixed(1)} s` }));
+      card.classList.add("ready");
+      ready.add(p.key);
+      // Keep the saved choice when it works, otherwise pick the first one that does.
+      if (!chosen && (info.settings.provider === p.key || ready.size === 1)) choose(p.key);
+      else if (chosen && chosen !== info.settings.provider && p.key === info.settings.provider) choose(p.key);
+    };
+    void run();
+  }
 }
 
-function signInHelp() {
-  const d = el("div", { class: "help" });
-  d.innerHTML = "Claude is not signed in. Open a terminal, run <code>claude</code>, sign in, and then click Retry.";
-  return d;
-}
-
-async function browse(after: () => Promise<void>) {
+async function browse(provider: ProviderKey, after: () => Promise<void>) {
   if (!inTauri) return;
   const { open } = await import("@tauri-apps/plugin-dialog");
-  const picked = await open({ multiple: false, directory: false, title: "Find the claude command" });
+  const command = provider === "claude" ? "claude" : "codex";
+  const picked = await open({ multiple: false, directory: false, title: `Find the ${command} command` });
   if (typeof picked === "string") {
-    await invoke("set_claude_path", { path: picked });
+    await invoke(provider === "claude" ? "set_claude_path" : "set_codex_path", { path: picked });
     await after();
   }
 }
@@ -376,7 +477,7 @@ async function start() {
   length = info.settings.default_length;
   startAtLogin = info.settings.start_at_login;
   steps = info.steps;
-  connectOk = info.settings.setup.completed.includes("connect");
+  connectOk = false;
   accessOk = info.settings.setup.completed.includes("access");
   const translucent = inTauri && info.translucent;
   document.body.classList.toggle("translucent", translucent);

@@ -14,6 +14,7 @@ export const BIN = join(ROOT, "src-tauri", "target", "debug");
 export const APP = join(BIN, "magic-mend.exe");
 export const PAD = join(BIN, "mm-testpad.exe");
 export const FAKE = join(BIN, "mm-fakeclaude.exe");
+export const FAKE_CODEX = join(BIN, "mm-fakecodex.exe");
 export const CDP_PORT = 9333;
 
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -37,7 +38,19 @@ export function pad(...args) {
   return execFileSync(PAD, args, { encoding: "utf8" }).trim();
 }
 
-export const keys = (combo, hold = 20) => pad("keys", combo, String(hold));
+/** Windows the tests own. Keys are only ever sent while one of them is in front, so a test can
+ *  never type into an app the person at the computer is using. */
+const OWN_TITLES = [/^MM Testpad$/, /^Magic Mend$/, /^Magic Mend setup$/, /^MM-TERM-/, /^Administrator: MM-TERM-/];
+export function assertOwnForeground(what) {
+  const f = JSON.parse(execFileSync(PAD, ["fg"], { encoding: "utf8" }).trim() || "null");
+  if (!f || !OWN_TITLES.some((re) => re.test(f.title ?? ""))) {
+    throw new Error(`refusing to send ${what}: "${f?.title ?? "nothing"}" (${f?.process ?? "?"}) is in front, not a test window`);
+  }
+}
+export const keys = (combo, hold = 20) => {
+  assertOwnForeground(combo);
+  return pad("keys", combo, String(hold));
+};
 export const clipSet = (text) => pad("clip-set", text);
 export const clipGet = () => JSON.parse(pad("clip-get"));
 export const clipSeq = () => Number(pad("clip-seq"));
@@ -152,6 +165,9 @@ export function defaultSettings(over = {}) {
     start_at_login: false,
     popup_position: "center",
     claude_path: FAKE,
+    codex_path: FAKE_CODEX,
+    provider: "claude",
+    chatgpt_model: "gpt-6-luna",
     no_contractions: true,
     no_em_dashes: true,
     paused: false,

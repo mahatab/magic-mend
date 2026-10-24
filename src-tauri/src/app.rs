@@ -5,7 +5,8 @@ use crate::channel;
 use crate::checker;
 use crate::claude_path;
 use crate::drafts::Output;
-use crate::engine::{ClaudeEngine, Engine, EngineConfig, EngineEvent, ErrorKind};
+use crate::codex_path;
+use crate::engine::{EngineConfig, EngineEvent, ErrorKind, Provider};
 use crate::engine_manager::EngineManager;
 use crate::hotkey;
 use crate::logging;
@@ -20,7 +21,7 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
-use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent};
 use tauri_plugin_autostart::ManagerExt as _;
@@ -64,12 +65,22 @@ impl AppState {
 }
 
 pub fn engine_config(s: &Settings, paths: &Paths) -> Option<EngineConfig> {
+    engine_config_for(s, paths, s.provider())
+}
+
+/// The engine settings for one provider. Each gets its own empty working folder.
+pub fn engine_config_for(s: &Settings, paths: &Paths, p: Provider) -> Option<EngineConfig> {
+    let (program, model) = match p {
+        Provider::Claude => (claude_path::resolve(s.claude_path.as_deref())?, s.model.clone()),
+        Provider::ChatGpt => (codex_path::resolve(s.codex_path.as_deref())?.path, s.chatgpt_model.clone()),
+    };
     Some(EngineConfig {
-        claude_path: claude_path::resolve(s.claude_path.as_deref())?,
-        model: s.model.clone(),
+        provider: p,
+        program,
+        model,
         system_prompt_file: paths.prompt_file.clone(),
-        workdir: paths.engine_dir.clone(),
-        priming: s.priming,
+        workdir: paths.engine_dir.join(p.key()),
+        priming: s.priming && p == Provider::Claude,
     })
 }
 
@@ -232,6 +243,8 @@ struct PopupPayload {
     no_contractions: bool,
     no_em_dashes: bool,
     clipboard_warning: bool,
+    /// The service writing the drafts, shown in the popup header.
+    provider: String,
 }
 
 fn popup_payload(
@@ -266,7 +279,8 @@ fn popup_payload(
         long_text_limit: LONG_TEXT,
         theme: s.theme.clone(),
         translucent: translucent_supported(),
-        engine_error: engine_error.map(|k| k.message().to_string()),
+        engine_error: engine_error.map(|k| k.message_for(s.provider())),
+        provider: s.provider().name().to_string(),
         no_contractions: s.no_contractions,
         no_em_dashes: s.no_em_dashes,
         clipboard_warning: false,
@@ -499,6 +513,7 @@ struct AppInfo {
     version: &'static str,
     hotkey_display: String,
     detected_claude: Option<String>,
+    detected_codex: Option<String>,
     log_path: Option<String>,
     steps: Vec<&'static str>,
     required: Vec<&'static str>,
@@ -523,6 +538,7 @@ fn app_info(app: AppHandle) -> AppInfo {
     AppInfo {
         hotkey_display: hotkey::parse(&s.hotkey).map(|h| h.display()).unwrap_or_else(|| s.hotkey.clone()),
         detected_claude: claude_path::resolve(s.claude_path.as_deref()).map(|p| p.to_string_lossy().into_owned()),
+        detected_codex: codex_path::resolve(s.codex_path.as_deref()).map(|f| format!("{} ({})", f.path.to_string_lossy(), f.version)),
         first_unfinished: s.first_unfinished_step(),
         settings: s,
         platform: platform_name(),
@@ -673,39 +689,65 @@ fn apply_effects(w: &WebviewWindow) {
 }
 
 #[derive(Serialize)]
-struct ClaudeCheck {
+pub struct ProviderCheck {
+    provider: &'static str,
+    name: &'static str,
     found: bool,
     path: Option<String>,
     version: Option<String>,
     signed_in: Option<bool>,
+    /// How the user is signed in, such as "Logged in using ChatGPT".
+    method: Option<String>,
     message: Option<String>,
 }
 
-#[tauri::command]
-async fn wizard_check_claude(app: AppHandle) -> ClaudeCheck {
-    tauri::async_runtime::spawn_blocking(move || {
-        let s = app.state::<AppState>().settings();
-        let Some(path) = claude_path::resolve(s.claude_path.as_deref()) else {
-            return ClaudeCheck { found: false, path: None, version: None, signed_in: None, message: Some(ErrorKind::NotFound.message().into()) };
-        };
-        let p = path.to_string_lossy().into_owned();
-        match claude_path::version(&path) {
-            Ok(v) => {
-                let signed_in = claude_path::signed_in(&path);
-                let message = (signed_in == Some(false)).then(|| ErrorKind::NotSignedIn.message().to_string());
-                ClaudeCheck { found: true, path: Some(p), version: Some(v), signed_in, message }
+/// Finds the official command for a provider and asks whether the user is signed in. Neither
+/// step reads credentials.
+pub fn check_provider_sync(s: &Settings, p: Provider) -> ProviderCheck {
+    let mut c = ProviderCheck { provider: p.key(), name: p.name(), found: false, path: None, version: None, signed_in: None, method: None, message: None };
+    match p {
+        Provider::Claude => {
+            let Some(path) = claude_path::resolve(s.claude_path.as_deref()) else {
+                c.message = Some(ErrorKind::NotFound.message_for(p));
+                return c;
+            };
+            c.found = true;
+            c.path = Some(path.to_string_lossy().into_owned());
+            match claude_path::version(&path) {
+                Ok(v) => {
+                    c.version = Some(v);
+                    c.signed_in = claude_path::signed_in(&path);
+                    if c.signed_in == Some(false) {
+                        c.message = Some(ErrorKind::NotSignedIn.message_for(p));
+                    }
+                }
+                Err(_) => c.message = Some("The claude command did not run. Check the path, or reinstall Claude Code.".into()),
             }
-            Err(_) => ClaudeCheck {
-                found: true,
-                path: Some(p),
-                version: None,
-                signed_in: None,
-                message: Some("The claude command did not run. Check the path, or reinstall Claude Code.".into()),
-            },
         }
-    })
-    .await
-    .unwrap_or(ClaudeCheck { found: false, path: None, version: None, signed_in: None, message: Some(ErrorKind::Other.message().into()) })
+        Provider::ChatGpt => {
+            let Some(found) = codex_path::resolve(s.codex_path.as_deref()) else {
+                c.message = Some(ErrorKind::NotFound.message_for(p));
+                return c;
+            };
+            c.found = true;
+            c.path = Some(found.path.to_string_lossy().into_owned());
+            c.version = Some(found.version.clone());
+            c.method = codex_path::sign_in(&found.path);
+            c.signed_in = Some(c.method.is_some());
+            if c.method.is_none() {
+                c.message = Some(ErrorKind::NotSignedIn.message_for(p));
+            }
+        }
+    }
+    c
+}
+
+#[tauri::command]
+async fn check_provider(app: AppHandle, provider: String) -> ProviderCheck {
+    let p = Provider::parse(&provider);
+    tauri::async_runtime::spawn_blocking(move || check_provider_sync(&app.state::<AppState>().settings(), p))
+        .await
+        .unwrap_or(ProviderCheck { provider: p.key(), name: p.name(), found: false, path: None, version: None, signed_in: None, method: None, message: Some(ErrorKind::Other.message_for(p)) })
 }
 
 #[derive(Serialize)]
@@ -718,11 +760,12 @@ pub struct EngineTest {
 
 /// Sends one tiny test request through the engine, exactly as the popup would.
 pub fn run_engine_test(cfg: EngineConfig) -> EngineTest {
+    let p = cfg.provider;
     let started = Instant::now();
     let (tx, rx) = std::sync::mpsc::channel();
-    let mut eng = ClaudeEngine::new(EngineConfig { priming: false, ..cfg }, tx);
+    let mut eng = crate::engine::create(EngineConfig { priming: false, ..cfg }, tx);
     if let Err(e) = eng.start() {
-        return EngineTest { ok: false, message: e.0.message().into(), ms: 0, sample: None };
+        return EngineTest { ok: false, message: e.0.message_for(p), ms: 0, sample: None };
     }
     let req = Request {
         text: "thanks for helping me move last weekend".into(),
@@ -734,27 +777,27 @@ pub fn run_engine_test(cfg: EngineConfig) -> EngineTest {
         drafts: None,
     };
     if let Err(e) = eng.send(&req.to_json()) {
-        return EngineTest { ok: false, message: e.0.message().into(), ms: 0, sample: None };
+        return EngineTest { ok: false, message: e.0.message_for(p), ms: 0, sample: None };
     }
     let deadline = Instant::now() + Duration::from_secs(60);
     loop {
         let left = deadline.saturating_duration_since(Instant::now());
         if left.is_zero() {
             eng.stop();
-            return EngineTest { ok: false, message: ErrorKind::Timeout.message().into(), ms: started.elapsed().as_millis(), sample: None };
+            return EngineTest { ok: false, message: ErrorKind::Timeout.message_for(p), ms: started.elapsed().as_millis(), sample: None };
         }
         match rx.recv_timeout(left) {
             Ok(t) => match t.event {
                 EngineEvent::TurnDone { error: Some(k), .. } | EngineEvent::Exited { error: k } => {
                     eng.stop();
-                    return EngineTest { ok: false, message: k.message().into(), ms: started.elapsed().as_millis(), sample: None };
+                    return EngineTest { ok: false, message: k.message_for(p), ms: started.elapsed().as_millis(), sample: None };
                 }
                 EngineEvent::TurnDone { text, .. } => {
                     eng.stop();
                     let ms = started.elapsed().as_millis();
                     return match parse_reply(&text) {
-                        Some(r) => EngineTest { ok: true, message: "Claude is connected.".into(), ms, sample: r.variants.first().map(|v| v.text.clone()) },
-                        None => EngineTest { ok: false, message: ErrorKind::BadReply.message().into(), ms, sample: None },
+                        Some(r) => EngineTest { ok: true, message: format!("{} is connected.", p.name()), ms, sample: r.variants.first().map(|v| v.text.clone()) },
+                        None => EngineTest { ok: false, message: ErrorKind::BadReply.message_for(p), ms, sample: None },
                     };
                 }
                 _ => {}
@@ -765,21 +808,22 @@ pub fn run_engine_test(cfg: EngineConfig) -> EngineTest {
 }
 
 #[tauri::command]
-async fn wizard_test_engine(app: AppHandle) -> EngineTest {
+async fn test_provider(app: AppHandle, provider: String) -> EngineTest {
+    let p = Provider::parse(&provider);
     tauri::async_runtime::spawn_blocking(move || {
         let st = app.state::<AppState>();
         let s = st.settings();
-        match engine_config(&s, &st.paths) {
+        match engine_config_for(&s, &st.paths, p) {
             Some(cfg) => {
                 let r = run_engine_test(cfg);
-                logging::event("wizard_engine_test", &[("ok", if r.ok { "1" } else { "0" }), ("ms", &r.ms.to_string())]);
+                logging::event("engine_test", &[("provider", p.key()), ("ok", if r.ok { "1" } else { "0" }), ("ms", &r.ms.to_string())]);
                 r
             }
-            None => EngineTest { ok: false, message: ErrorKind::NotFound.message().into(), ms: 0, sample: None },
+            None => EngineTest { ok: false, message: ErrorKind::NotFound.message_for(p), ms: 0, sample: None },
         }
     })
     .await
-    .unwrap_or(EngineTest { ok: false, message: ErrorKind::Other.message().into(), ms: 0, sample: None })
+    .unwrap_or(EngineTest { ok: false, message: ErrorKind::Other.message_for(p), ms: 0, sample: None })
 }
 
 #[tauri::command]
@@ -787,6 +831,43 @@ fn set_claude_path(app: AppHandle, path: Option<String>) -> Result<(), String> {
     let st = app.state::<AppState>();
     st.settings.lock().unwrap().claude_path = path.filter(|p| !p.trim().is_empty());
     persist(&app)
+}
+
+#[tauri::command]
+fn set_codex_path(app: AppHandle, path: Option<String>) -> Result<(), String> {
+    let st = app.state::<AppState>();
+    st.settings.lock().unwrap().codex_path = path.filter(|p| !p.trim().is_empty());
+    persist(&app)
+}
+
+/// Switches the service that writes drafts. The warm process restarts with the new one.
+pub fn switch_provider(app: &AppHandle, p: Provider) -> Result<(), String> {
+    let st = app.state::<AppState>();
+    st.settings.lock().unwrap().provider = p.key().to_string();
+    persist(app)?;
+    configure_engine(app);
+    refresh_tray(app);
+    logging::event("provider", &[("now", p.key())]);
+    let _ = app.emit("settings:changed", ());
+    Ok(())
+}
+
+#[tauri::command]
+async fn set_provider(app: AppHandle, provider: String) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || switch_provider(&app, Provider::parse(&provider)))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+/// The ChatGPT models this account can use.
+#[tauri::command]
+async fn chatgpt_models(app: AppHandle) -> Vec<codex_path::Model> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let s = app.state::<AppState>().settings();
+        codex_path::resolve(s.codex_path.as_deref()).map(|f| codex_path::models(&f.path)).unwrap_or_default()
+    })
+    .await
+    .unwrap_or_default()
 }
 
 #[tauri::command]
@@ -900,7 +981,7 @@ fn tray_tooltip(s: &Settings) -> String {
         return "Magic Mend is paused".into();
     }
     let hk = hotkey::parse(&s.hotkey).map(|h| h.display()).unwrap_or_else(|| s.hotkey.clone());
-    format!("Magic Mend, press {hk}")
+    format!("Magic Mend, press {hk} ({})", s.provider().name())
 }
 
 fn build_menu(app: &AppHandle, s: &Settings) -> tauri::Result<Menu<tauri::Wry>> {
@@ -909,6 +990,11 @@ fn build_menu(app: &AppHandle, s: &Settings) -> tauri::Result<Menu<tauri::Wry>> 
         menu.append(&MenuItem::with_id(app, "finish_setup", "Finish setup", true, None::<&str>)?)?;
         menu.append(&PredefinedMenuItem::separator(app)?)?;
     }
+    let use_claude = CheckMenuItem::with_id(app, "provider_claude", "Rewrite with Claude", true, s.provider() == Provider::Claude, None::<&str>)?;
+    let use_chatgpt = CheckMenuItem::with_id(app, "provider_chatgpt", "Rewrite with ChatGPT", true, s.provider() == Provider::ChatGpt, None::<&str>)?;
+    menu.append(&use_claude)?;
+    menu.append(&use_chatgpt)?;
+    menu.append(&PredefinedMenuItem::separator(app)?)?;
     menu.append(&MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?)?;
     menu.append(&MenuItem::with_id(app, "setup_again", "Run setup again", true, None::<&str>)?)?;
     menu.append(&MenuItem::with_id(app, "pause", if s.paused { "Resume" } else { "Pause" }, true, None::<&str>)?)?;
@@ -941,6 +1027,13 @@ fn on_menu(app: &AppHandle, id: &str) {
         }
         "settings" => open_settings_window(app),
         "setup_again" => open_wizard(app, Some("welcome")),
+        "provider_claude" | "provider_chatgpt" => {
+            let p = if id == "provider_chatgpt" { Provider::ChatGpt } else { Provider::Claude };
+            let app = app.clone();
+            std::thread::spawn(move || {
+                let _ = switch_provider(&app, p);
+            });
+        }
         "pause" => {
             let st = app.state::<AppState>();
             {
@@ -1000,9 +1093,12 @@ pub fn run() {
             check_hotkey,
             set_hotkey,
             open_settings,
-            wizard_check_claude,
-            wizard_test_engine,
+            check_provider,
+            test_provider,
             set_claude_path,
+            set_codex_path,
+            set_provider,
+            chatgpt_models,
             wizard_complete,
             wizard_save_defaults,
             wizard_finish,

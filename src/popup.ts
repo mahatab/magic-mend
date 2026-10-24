@@ -116,7 +116,7 @@ function render() {
   const header = el(
     "header",
     {},
-    el("div", { class: "brand" }, el("img", { src: logoUrl, alt: "" }), "Magic Mend"),
+    el("div", { class: "brand" }, el("img", { src: logoUrl, alt: "" }), "Magic Mend", ...(s.payload?.provider ? [el("span", { class: "via", title: `Drafts are written by ${s.payload.provider}`, text: s.payload.provider })] : [])),
     target,
   );
   // Esc closes too, so the close button stays out of the Tab order (chips come first).
