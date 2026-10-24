@@ -8,6 +8,8 @@ use std::time::Duration;
 
 pub const FOCUS_SETTLE: Duration = Duration::from_millis(80);
 pub const PASTE_SETTLE: Duration = Duration::from_millis(500);
+/// How long to wait for other programs to let go of the clipboard before pasting.
+pub const CLIPBOARD_FREE_WAIT: Duration = Duration::from_millis(400);
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
 #[serde(tag = "result", rename_all = "snake_case")]
@@ -36,6 +38,9 @@ pub fn replace(target: isize, target_elevated: bool, draft: &str, hide_popup: im
         imp::restore_clipboard(&snapshot);
         return ReplaceOutcome::Failed { reason: "Magic Mend could not use the clipboard.".into() };
     }
+    // Let clipboard monitors finish reading the draft before the target app needs it.
+    std::thread::sleep(Duration::from_millis(30));
+    imp::wait_clipboard_free(CLIPBOARD_FREE_WAIT);
     if !imp::focus_window(target) {
         // Leave the draft on the clipboard as a plain copy so the user can paste by hand.
         copy(&text);
@@ -48,6 +53,7 @@ pub fn replace(target: isize, target_elevated: bool, draft: &str, hide_popup: im
         copy(&text);
         return ReplaceOutcome::WindowLost;
     }
+    imp::wait_clipboard_free(CLIPBOARD_FREE_WAIT);
     let ok = imp::send_paste();
     // Slow apps read the clipboard late.
     std::thread::sleep(PASTE_SETTLE);

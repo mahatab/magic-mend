@@ -42,6 +42,11 @@ fn pasteboard() -> Retained<NSPasteboard> {
     NSPasteboard::generalPasteboard()
 }
 
+/// The Mac pasteboard has no lock, so there is nothing to wait for.
+pub fn wait_clipboard_free(_timeout: std::time::Duration) -> bool {
+    true
+}
+
 pub fn clipboard_seq() -> u64 {
     pasteboard().changeCount() as u64
 }

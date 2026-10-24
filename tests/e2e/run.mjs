@@ -77,7 +77,7 @@ async function main() {
     await app.popup.click(".card .btn-primary");
     await waitFor(() => p.text() === drafts[0], { what: "text replaced" }).catch((e) => {
       const r = app.log().match(/replace result=\w+/g);
-      throw new Error(`${e.message}; app said: ${r ? r.join(", ") : "no replace logged"}; foreground: ${fg()?.title}`);
+      throw new Error(`${e.message}; app said: ${r ? r.join(", ") : "no replace logged"}; foreground: ${fg()?.title}; window got: ${p.keys().slice(-8).join(" | ")}; text now: "${p.text()}"`);
     });
     assert(!p.text().endsWith("\n"), "trailing line break");
     await sleep(700);

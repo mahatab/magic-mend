@@ -3,6 +3,7 @@
 
 use super::{ClipboardSnapshot, WindowInfo};
 
+pub fn wait_clipboard_free(_t: std::time::Duration) -> bool { true }
 pub fn clipboard_seq() -> u64 { 0 }
 pub fn save_clipboard() -> ClipboardSnapshot { ClipboardSnapshot::default() }
 pub fn restore_clipboard(_s: &ClipboardSnapshot) -> bool { true }

@@ -126,6 +126,30 @@ impl Drop for OpenClip {
     }
 }
 
+/// Waits until no other program has the clipboard open. Clipboard history and other monitors
+/// open it to read each new value; an app that pastes at that moment finds it locked and
+/// silently pastes nothing. Being able to open it ourselves (twice, a moment apart) means the
+/// readers are done.
+pub fn wait_clipboard_free(timeout: Duration) -> bool {
+    let deadline = Instant::now() + timeout;
+    let mut free_in_a_row = 0;
+    while Instant::now() < deadline {
+        if unsafe { OpenClipboard(None) }.is_ok() {
+            unsafe {
+                let _ = CloseClipboard();
+            }
+            free_in_a_row += 1;
+            if free_in_a_row >= 2 {
+                return true;
+            }
+        } else {
+            free_in_a_row = 0;
+        }
+        std::thread::sleep(Duration::from_millis(15));
+    }
+    false
+}
+
 pub fn clipboard_seq() -> u64 {
     unsafe { GetClipboardSequenceNumber() as u64 }
 }
