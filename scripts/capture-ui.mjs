@@ -47,7 +47,7 @@ async function shoot(c, selector, file) {
 /** Opens the popup with a target app and a scene's real drafts. */
 async function popup(c, { scene, text, app, color, channel, tone = "Simple", toggles = [], dark = false, file, midStream = false, followupNote }) {
   await setup(c, { width: 480, height: 900, dark });
-  await go(c, `http://localhost:${PORT}/?mock`);
+  await go(c, `http://localhost:${PORT}/?mock&empty`);
   const s = scenes[scene];
   await c.eval(`(() => {
     window.__mm.mock.scripted = ${JSON.stringify(s)};
@@ -62,6 +62,8 @@ async function popup(c, { scene, text, app, color, channel, tone = "Simple", tog
     await waitFor(() => c.eval(`(document.querySelector('.card .body')?.textContent.length ?? 0) > 40`), { what: "partial", timeout: 8000, interval: 20 });
   } else {
     await waitFor(() => c.eval(`document.querySelectorAll('.card .btn-primary:not([disabled])').length >= 1`), { what: "drafts", timeout: 15000 });
+    const shown = await c.eval(`[...document.querySelectorAll(".card .body")].map(b => b.textContent)`);
+    if (shown[0] !== s.drafts[0]) throw new Error(`${file}: shows "${shown[0]?.slice(0, 40)}" instead of the scene draft`);
     if (followupNote) await c.eval(`(() => { const t = document.querySelector('.followup textarea'); t.value = ${JSON.stringify(followupNote)}; return 1; })()`);
   }
   if (!midStream) await c.eval(`(() => { const st = document.createElement("style"); st.textContent = "*{animation:none!important;transition:none!important}"; document.head.appendChild(st); return 1; })()`);
