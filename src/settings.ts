@@ -244,10 +244,10 @@ function render() {
   });
   const model = el("input", { type: "text", id: "model", value: s.model, list: "models" }) as HTMLInputElement;
   model.addEventListener("input", () => {
-    s.model = model.value.trim() || "haiku";
+    s.model = model.value.trim() || "sonnet";
     changed();
   });
-  const models = el("datalist", { id: "models" }, el("option", { value: "haiku" }), el("option", { value: "sonnet" }), el("option", { value: "opus" }));
+  const models = el("datalist", { id: "models" }, el("option", { value: "sonnet" }), el("option", { value: "haiku" }), el("option", { value: "opus" }));
   rewrites.append(
     item("Default tone", "", chips(TONES, () => s.default_tone, (v) => (s.default_tone = v), "Default tone")),
     item("Default length", "", chips(LENGTHS, () => s.default_length, (v) => (s.default_length = v), "Default length")),

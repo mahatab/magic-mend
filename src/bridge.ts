@@ -48,7 +48,7 @@ export const fakeSettings = {
   default_length: "Same",
   default_toggles: [] as string[],
   drafts: 2,
-  model: "haiku",
+  model: "sonnet",
   warm_mode: true,
   priming: false,
   theme: "system",

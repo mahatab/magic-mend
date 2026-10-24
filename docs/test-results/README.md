@@ -9,8 +9,8 @@ Updated 2026-10-23. Details for each suite are in the files next to this one.
 | Engine flags verified against `claude --help` (2.1.296) | Done. Differences from the spec are listed in NOTES.md (`--system-prompt-file` is hidden, `--safe-mode` added, `--bare` refused because it drops the subscription login). |
 | Stream-json protocol (init, partial deltas, result, error lines) | Probed against the real CLI; recorded output is used in the engine unit tests. |
 | Warm-up behavior | The CLI emits `init` only after the first message, so a spare cannot report ready by itself. |
-| Timing report for 20 messages, Haiku and Sonnet, with and without priming | **Waiting for sign-in.** The CLI's login on this computer has expired (`claude auth status` reports `loggedIn: false`). Run `claude auth login`, then `mm-harness timing`. |
-| Setup isolation (acceptance test 18) | **Waiting for sign-in.** `mm-harness isolation` is ready. |
+| Timing report for 20 messages, Haiku and Sonnet, with and without priming | Done: [M1-timing-report.md](../M1-timing-report.md). Warm mode go, priming off, default model sonnet (faster once warm and better at Fix errors only). |
+| Setup isolation (acceptance test 18) | Pass |
 
 ## M2 Popup UI
 
@@ -33,18 +33,18 @@ See [e2e-windows.md](e2e-windows.md). All 18 pass on an unlocked desktop (the wi
 | 2, 3, 4 WhatsApp, Gmail, Messenger, LinkedIn, Outlook | Manual: needs the real apps and accounts. Channel detection is covered by unit tests. |
 | 5 Enter safety | Pass |
 | 6 No selection | Pass |
-| 7 Fix errors only (one draft) | Pass. Wording quality needs the live engine. |
-| 8 Output rules across 20 outputs | Checker logic: pass (unit tests). Live outputs: waiting for sign-in. |
-| 9 Facts kept | Waiting for sign-in (`mm-harness timing` checks every sample) |
-| 10 Follow-ups | Flow: pass. Live wording: waiting for sign-in (`mm-harness quality`). |
+| 7 Fix errors only (one draft) | Pass. Live: sonnet corrected "i has send" to "I sent"; haiku did not, so sonnet is the default. |
+| 8 Output rules across 20 outputs | Pass: 90 of 90 live runs had no contractions and no em dashes |
+| 9 Facts kept | Pass with sonnet (flags read by hand: wording only, such as "Thursday at 2pm"). Haiku once wrote "December 22" for "Dec 22". |
+| 10 Follow-ups | Pass: "remove the apology" removed only the apology |
 | 11 Warm spare | Pass. Popup visible 109 ms after the hotkey (target 150 ms). |
 | 12 Failures: missing, signed out, offline, plan limit, timeout | Pass |
 | 13 Privacy: no text on disk, no app sockets | Pass |
-| 14 Resources | App 43 MB, WebView2 processes 355 MB (shared browser, GPU, and renderer processes); real claude spare to be measured after sign-in |
+| 14 Resources | App 43 MB, WebView2 processes 355 MB (shared browser, GPU, and renderer processes); claude spare 182 MB. About 580 MB in all while idle. |
 | 15 Elevated apps | Detection and fallback are built; not automated, because it needs an administrator window and a UAC prompt |
 | 16 Terminals | Pass |
 | 17 Held modifiers | Pass |
-| 18 Setup isolation | Waiting for sign-in |
+| 18 Setup isolation | Pass: marker and hook reached the control run but not the engine |
 | 19 Rapid chip changes | Pass |
 | 20 Line breaks | Pass |
 | 21, 22, 23 Wizard | Pass |

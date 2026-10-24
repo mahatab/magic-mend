@@ -20,6 +20,8 @@ Decisions, deviations from the spec, and ideas that are not in the spec.
 - **Mac popup.** Tauri has no non-activating panel, so the spec fallback is used: the popup activates, and Replace re-activates the original app before Cmd+V.
 - **Test hooks.** `MAGIC_MEND_DATA_DIR` points the app at a throwaway folder for automated tests. The test window, fake claude, and harness are separate binaries that are not part of the installer.
 
+- **Default model: sonnet, priming off.** From the M1 report: sonnet is faster once warm and handles Fix errors only correctly. Haiku stays available in Settings.
+
 ## Deviations
 
 - **Window corners on Windows 11.** With acrylic turned on, Windows draws the frame, and its rounded corner radius is 8 px, not 16 px. When acrylic is not available (Windows 10) the popup draws its own 16 px corners on a solid background.

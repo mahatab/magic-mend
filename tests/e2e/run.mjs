@@ -68,7 +68,10 @@ async function main() {
     assert(c.text === "ORIGINAL-CLIP-123" && c.custom, `clipboard after capture: ${JSON.stringify(c)}`);
     const drafts = await waitDrafts(app, 2);
     await app.popup.click(".card .btn-primary");
-    await waitFor(() => p.text() === drafts[0], { what: "text replaced" });
+    await waitFor(() => p.text() === drafts[0], { what: "text replaced" }).catch((e) => {
+      const r = app.log().match(/replace result=\w+/g);
+      throw new Error(`${e.message}; app said: ${r ? r.join(", ") : "no replace logged"}; foreground: ${fg()?.title}`);
+    });
     assert(!p.text().endsWith("\n"), "trailing line break");
     await sleep(700);
     c = clipGet();
@@ -369,7 +372,9 @@ async function main() {
 
   // Wizard tests run on a fresh data folder.
   await test("21-23", "Wizard: fresh install, Claude problems, closed early, practice box", async () => {
-    let w = await startApp({ name: "wizard", fresh: true, mode: "signed_out" });
+    // A first-run settings file with only the fake claude path, so the user's real claude
+    // (which may be signed in) is never used here.
+    let w = await startApp({ name: "wizard", mode: "signed_out", settings: { claude_path: FAKE } });
     const wiz = await Cdp.connect((u) => u.includes("wizard.html"));
     await waitFor(() => wiz.eval(`document.querySelector('h1')?.textContent === 'Welcome to Magic Mend'`), { what: "welcome step" });
     // Closed early: the hotkey must reopen the wizard and capture nothing.

@@ -54,7 +54,7 @@ impl Default for Settings {
             default_length: "Same".into(),
             default_toggles: vec![],
             drafts: 2,
-            model: "haiku".into(),
+            model: "sonnet".into(),
             warm_mode: true,
             priming: false,
             theme: "system".into(),
@@ -104,7 +104,7 @@ impl Settings {
             self.hotkey = default_hotkey();
         }
         if self.model.trim().is_empty() {
-            self.model = "haiku".into();
+            self.model = "sonnet".into();
         }
         if !["center", "cursor"].contains(&self.popup_position.as_str()) {
             self.popup_position = "center".into();
@@ -192,6 +192,9 @@ mod tests {
         assert_eq!((s.default_tone.as_str(), s.default_length.as_str()), ("Simple", "Same"));
         assert!(s.default_toggles.is_empty());
         assert_eq!(s.drafts, 2);
+        // Picked in the M1 report: the fastest model that passed the quality checks.
+        assert_eq!(s.model, "sonnet");
+        assert!(!s.priming);
         assert!(s.warm_mode && s.start_at_login && s.no_contractions && s.no_em_dashes);
         assert_eq!(s.theme, "system");
         assert!(s.excluded_apps.iter().any(|a| a == "WindowsTerminal"));
