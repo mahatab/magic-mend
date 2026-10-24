@@ -1,8 +1,71 @@
 [
-  { "name": "whatsapp", "request": { "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late", "tone": "Simple", "length": "Same", "toggles": [], "channel": "WhatsApp", "followup": null } },
-  { "name": "warm", "request": { "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late", "tone": "Warm", "length": "Same", "toggles": [], "channel": "WhatsApp", "followup": null } },
-  { "name": "email", "request": { "text": "Hi David, I am following up on my application for the Data Engineer role (job ID 48213) that I submitted on October 3", "tone": "Professional", "length": "Same", "toggles": [], "channel": "Email", "followup": null } },
-  { "name": "fix", "request": { "text": "i has send the payment yesterday but i didnt got any confirmation email, can you check it", "tone": "Simple", "length": "Same", "toggles": ["Fix errors only"], "channel": "Text", "followup": null } },
-  { "name": "followup", "request": { "text": "Hi Omar, sorry for the delay, I will send the signed contract by Tuesday 3pm and the invoice for $480", "tone": "Simple", "length": "Same", "toggles": [], "channel": "LinkedIn", "followup": null }, "followup": "remove the apology" },
-  { "name": "assalamu", "request": { "text": "Assalamu Alaikum, how much is one share this year and when is the last date to pay", "tone": "Respectful", "length": "Same", "toggles": [], "channel": "WhatsApp", "followup": null } }
+ {
+  "name": "whatsapp",
+  "request": {
+   "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
+   "tone": "Simple",
+   "length": "Same",
+   "toggles": [],
+   "channel": "WhatsApp",
+   "followup": null
+  }
+ },
+ {
+  "name": "warm",
+  "request": {
+   "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
+   "tone": "Warm",
+   "length": "Same",
+   "toggles": [],
+   "channel": "WhatsApp",
+   "followup": null
+  }
+ },
+ {
+  "name": "email",
+  "request": {
+   "text": "Hi Priya, just checking if you had a chance to look at the proposal I sent on March 12, happy to walk through it on a call this week",
+   "tone": "Professional",
+   "length": "Same",
+   "toggles": [],
+   "channel": "Email",
+   "followup": null
+  }
+ },
+ {
+  "name": "fix",
+  "request": {
+   "text": "me and my wife was thinking we could come for dinner on friday if your free, we will bring desert",
+   "tone": "Simple",
+   "length": "Same",
+   "toggles": [
+    "Fix errors only"
+   ],
+   "channel": "Text",
+   "followup": null
+  }
+ },
+ {
+  "name": "followup",
+  "request": {
+   "text": "Hi Daniel, sorry for the late reply, I would be glad to join the panel on May 8 and can share my slides by May 1",
+   "tone": "Simple",
+   "length": "Same",
+   "toggles": [],
+   "channel": "LinkedIn",
+   "followup": null
+  },
+  "followup": "remove the apology"
+ },
+ {
+  "name": "greeting",
+  "request": {
+   "text": "Good morning everyone! quick reminder the community cleanup is this sunday at 9am at Riverside Park, bring gloves if you have them",
+   "tone": "Simple",
+   "length": "Same",
+   "toggles": [],
+   "channel": "WhatsApp",
+   "followup": null
+  }
+ }
 ]

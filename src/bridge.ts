@@ -27,16 +27,16 @@ export async function listen<T>(event: string, handler: Handler<T>): Promise<voi
 // ---------------------------------------------------------------------------------------------
 // Fake backend for design work and browser tests.
 
-const SAMPLE = "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late";
+const SAMPLE = "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble";
 
 const FAKE: Record<string, string[]> = {
   Simple: [
-    "Hi Chi, we had a great stay. Could we check out at 1pm instead of 11? Sorry for asking so late.",
-    "Hi Chi, our stay was great. Is it possible to check out at 1pm instead of 11? Sorry for the late ask.",
+    "Hey Sam, the plumber cannot come until Thursday. Can we push the move-in date to Saturday instead? Sorry for the trouble.",
+    "Hey Sam, the plumber can not make it until Thursday, so can we move the move-in date to Saturday? I am sorry for the trouble.",
   ],
   Respectful: [
-    "Hi Chi, thank you for a wonderful stay. Could you please let us know if we may check out at 1pm instead of 11? I apologize for asking so late.",
-    "Hi Chi, we truly enjoyed our stay. Would it be possible to check out at 1pm instead of 11? I am sorry for the late request.",
+    "Hey Sam, the plumber cannot come until Thursday. Could we please push the move-in date to Saturday instead? Sorry for the trouble.",
+    "Hey Sam, the plumber is not available until Thursday, so could we move the move-in date to Saturday instead? I am sorry for the trouble.",
   ],
 };
 
@@ -145,9 +145,9 @@ export const mock = {
   stream(reqId: number, req: Request) {
     const fix = req.toggles.includes("Fix errors only");
     let drafts = (FAKE[req.tone] ?? FAKE.Simple).slice(0, fix ? 1 : req.drafts ?? 2);
-    if (fix) drafts = ["Hi Chi, we had a great stay. Can we check out at 1pm instead of 11? Sorry for asking so late."];
+    if (fix) drafts = ["Hey Sam, the plumber cannot come till Thursday, so can we push the move-in date to Saturday instead? Sorry for the trouble."];
     if (req.followup) drafts = drafts.map((d) => d.replace(/ ?(Sorry|I apologize|I am sorry)[^.]*\./, ""));
-    if (req.channel === "Email") drafts = drafts.map((d) => d.replace(/^Hi Chi, /, "Hi Chi,\n\n") + "\n\nBest,");
+    if (req.channel === "Email") drafts = drafts.map((d) => d.replace(/^Hey Sam, /, "Hey Sam,\n\n") + "\n\nBest,");
     if (this.scripted) drafts = this.scripted.drafts;
     const words = drafts.map((d) => d.split(/(?<= )/));
     const max = Math.max(...words.map((w) => w.length));

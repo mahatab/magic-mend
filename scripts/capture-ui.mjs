@@ -74,25 +74,25 @@ async function main() {
   await c.send("Page.enable");
   await c.send("Runtime.enable");
 
-  const chi = "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late";
-  await popup(c, { scene: "whatsapp", text: chi, app: "WhatsApp", color: "#25D366", channel: "WhatsApp", file: "popup-light.png" });
-  await popup(c, { scene: "warm", text: chi, app: "WhatsApp", color: "#25D366", channel: "WhatsApp", tone: "Warm", dark: true, file: "popup-dark.png" });
-  await popup(c, { scene: "whatsapp", text: chi, app: "WhatsApp", color: "#25D366", channel: "WhatsApp", file: "popup-streaming.png", midStream: true });
+  const main = "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble";
+  await popup(c, { scene: "whatsapp", text: main, app: "WhatsApp", color: "#25D366", channel: "WhatsApp", file: "popup-light.png" });
+  await popup(c, { scene: "warm", text: main, app: "WhatsApp", color: "#25D366", channel: "WhatsApp", tone: "Warm", dark: true, file: "popup-dark.png" });
+  await popup(c, { scene: "whatsapp", text: main, app: "WhatsApp", color: "#25D366", channel: "WhatsApp", file: "popup-streaming.png", midStream: true });
   await popup(c, {
-    scene: "email", text: "Hi David, I am following up on my application for the Data Engineer role (job ID 48213) that I submitted on October 3",
+    scene: "email", text: "Hi Priya, just checking if you had a chance to look at the proposal I sent on March 12, happy to walk through it on a call this week",
     app: "Outlook", color: "#0F6CBD", channel: "Email", tone: "Professional", file: "popup-email.png",
   });
   await popup(c, {
-    scene: "fix", text: "i has send the payment yesterday but i didnt got any confirmation email, can you check it",
+    scene: "fix", text: "me and my wife was thinking we could come for dinner on friday if your free, we will bring desert",
     app: "Messenger", color: "#0866FF", channel: "Text", toggles: ["Fix errors only"], file: "popup-fix.png",
   });
   await popup(c, {
-    scene: "followup", text: "Hi Omar, sorry for the delay, I will send the signed contract by Tuesday 3pm and the invoice for $480",
+    scene: "followup", text: "Hi Daniel, sorry for the late reply, I would be glad to join the panel on May 8 and can share my slides by May 1",
     app: "LinkedIn", color: "#0A66C2", channel: "LinkedIn", dark: true, file: "popup-followup.png", followupNote: "remove the apology",
   });
   await popup(c, {
-    scene: "assalamu", text: "Assalamu Alaikum, how much is one share this year and when is the last date to pay",
-    app: "WhatsApp", color: "#25D366", channel: "WhatsApp", tone: "Respectful", file: "popup-greeting.png",
+    scene: "greeting", text: "Good morning everyone! quick reminder the community cleanup is this sunday at 9am at Riverside Park, bring gloves if you have them",
+    app: "WhatsApp", color: "#25D366", channel: "WhatsApp", file: "popup-greeting.png",
   });
 
   for (const [step, file, wait] of [["welcome", "wizard-welcome.png", 600], ["connect", "wizard-connect.png", 2600], ["hotkey", "wizard-hotkey.png", 600], ["try", "wizard-try.png", 600]]) {

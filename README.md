@@ -81,7 +81,7 @@ The first launch opens a short setup wizard. It finds `claude`, sends one tiny t
 - **Sounds like a person**: plain words, no corporate filler
 - **No contractions and no em dashes**, ever. Every draft is scanned (straight and curly apostrophes included). If one slips through, Claude is asked once to fix it, and any leftover em dash is fixed locally. Replace and Copy stay off until a draft passes
 - **Facts kept exactly**: names, numbers, dates, times, prices, links, and addresses
-- **Greetings and religious phrases kept as written**, such as *"Assalamu Alaikum"* or *"Jazakallah khair"*
+- **Greetings and special phrases kept as written**, in any language, such as *"Good morning everyone!"*
 - **Never invents** facts, promises, or names, and keeps your first person voice
 
 ### Safe by Design
@@ -131,9 +131,9 @@ The first launch opens a short setup wizard. It finds `claude`, sends one tiny t
 <p align="center">
   <img src="docs/images/screenshots/popup-followup.png" alt="The popup after the follow-up remove the apology, showing drafts without the apology" width="400" />
   &nbsp;&nbsp;
-  <img src="docs/images/screenshots/popup-greeting.png" alt="The popup keeping the greeting Assalamu Alaikum in two Respectful drafts" width="400" />
+  <img src="docs/images/screenshots/popup-greeting.png" alt="The popup keeping the greeting Good morning everyone in two drafts for a community reminder" width="400" />
 </p>
-<p align="center"><em>"Remove the apology" changes only that. Greetings and religious phrases are kept exactly as written.</em></p>
+<p align="center"><em>"Remove the apology" changes only that. Greetings, days, times, and places are kept exactly as written.</em></p>
 
 <p align="center">
   <img src="docs/images/screenshots/popup-streaming.png" alt="Drafts streaming into the popup word by word" width="400" />

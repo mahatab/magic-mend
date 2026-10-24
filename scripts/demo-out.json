@@ -1,63 +1,63 @@
 {
   "Casual": {
     "drafts": [
-      "hi chi, we had a great stay. Can we check out at 1pm instead of 11? Sorry for asking so late.",
-      "hi chi, we really enjoyed our stay. Is it okay if we check out at 1pm instead of 11? Sorry to ask this late."
+      "hey sam, the plumber cannot come until Thursday, so can we push the move-in date to Saturday instead? Sorry for the trouble.",
+      "hey sam, the plumber cannot make it until Thursday. Is it okay if we move the move-in date to Saturday? Sorry about the hassle."
     ],
     "subject": null
   },
   "Firm": {
     "drafts": [
-      "Hi Chi, we had a great stay. I would like to check out at 1pm instead of 11. I am sorry for asking so late.",
-      "Hi Chi, we really enjoyed our stay. I need to check out at 1pm instead of 11. Sorry for the late request."
+      "Hey Sam, the plumber cannot come until Thursday, so we need to push the move-in date to Saturday. I am sorry for the trouble.",
+      "Hey Sam, the plumber cannot come until Thursday. We have to move the move-in date to Saturday instead. Sorry for the trouble."
     ],
     "subject": null
   },
   "Fix errors only": {
     "drafts": [
-      "Hi Chi, we had a great stay. Can we check out at 1pm instead of 11? Sorry for asking so late."
+      "Hey Sam, the plumber cannot come till Thursday, so can we push the move-in date to Saturday instead? Sorry for the trouble."
     ],
     "subject": null
   },
   "Professional": {
     "drafts": [
-      "Hi Chi, we had a great stay. Would it be possible to check out at 1pm instead of 11? I am sorry for asking so late.",
-      "Hi Chi, we enjoyed our stay very much. Could we please check out at 1pm instead of 11? I apologize for the late request."
+      "Hey Sam, the plumber cannot come until Thursday. Could we move the move-in date to Saturday instead? I am sorry for the trouble.",
+      "Hey Sam, the plumber is not available until Thursday, so I would like to ask if we can push the move-in date to Saturday. I apologize for the trouble."
     ],
     "subject": null
   },
   "Respectful": {
     "drafts": [
-      "Hi Chi, we had a great stay. Could we please check out at 1pm instead of 11? I am sorry for asking so late.",
-      "Hi Chi, we really enjoyed our stay. Would it be possible for us to check out at 1pm instead of 11? I am sorry to ask so late."
+      "Hey Sam, the plumber cannot come until Thursday. Could we please push the move-in date to Saturday instead? Sorry for the trouble.",
+      "Hey Sam, the plumber is not available until Thursday, so could we move the move-in date to Saturday instead? I am sorry for the trouble."
     ],
     "subject": null
   },
   "Shorter": {
     "drafts": [
-      "Hi Chi, we had a great stay. Can we check out at 1pm instead of 11? I am sorry for asking so late.",
-      "Hi Chi, we loved our stay. Could we check out at 1pm instead of 11? Sorry for the late ask."
+      "Hey Sam, the plumber cannot come until Thursday. Can we push the move-in to Saturday? Sorry for the trouble.",
+      "Hey Sam, the plumber is not free until Thursday, so can we move the move-in date to Saturday? Sorry about that."
     ],
     "subject": null
   },
   "Simple": {
     "drafts": [
-      "Hi Chi, we had a great stay. Can we check out at 1pm instead of 11? I am sorry for asking so late.",
-      "Hi Chi, we really enjoyed our stay. Could we check out at 1pm instead of 11? Sorry to ask so late."
+      "Hey Sam, the plumber cannot come until Thursday. Can we push the move-in date to Saturday instead? Sorry for the trouble.",
+      "Hey Sam, the plumber can not make it until Thursday, so can we move the move-in date to Saturday? I am sorry for the trouble."
     ],
     "subject": null
   },
   "Softer": {
     "drafts": [
-      "Hi Chi, we had a great stay. Would it be possible to check out at 1pm instead of 11? I am sorry for asking so late.",
-      "Hi Chi, we really enjoyed our stay. Could we check out at 1pm instead of 11 if that works? I am sorry to ask so late."
+      "Hey Sam, the plumber cannot come until Thursday. Would it be okay to push the move-in date to Saturday instead? Sorry for the trouble.",
+      "Hey Sam, the plumber cannot make it until Thursday, so could we move the move-in date to Saturday? Sorry for the trouble."
     ],
     "subject": null
   },
   "Warm": {
     "drafts": [
-      "Hi Chi, we had a great stay. Could we check out at 1pm instead of 11? I am sorry for asking so late.",
-      "Hi Chi, we really enjoyed our stay. Would it be possible to check out at 1pm instead of 11? Sorry for asking so late."
+      "Hey Sam, the plumber cannot come until Thursday, so could we push the move-in date to Saturday instead? I am sorry for the trouble.",
+      "Hey Sam, the plumber is not able to come until Thursday. Would it be okay to move the move-in date to Saturday instead? Sorry for the trouble."
     ],
     "subject": null
   }

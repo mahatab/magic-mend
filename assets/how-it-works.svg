@@ -25,11 +25,11 @@
     <circle cx="26" cy="22" r="6" fill="#FF5F57"/><circle cx="46" cy="22" r="6" fill="#FEBC2E"/><circle cx="66" cy="22" r="6" fill="#28C840"/>
     <text x="104" y="28" font-size="15" fill="#6B7180">Any app</text>
     <rect x="24" y="74" width="190" height="34" rx="17" fill="#E9F8EE"/>
-    <text x="40" y="96" font-size="15" fill="#1B1D24">See you at 5!</text>
+    <text x="40" y="96" font-size="15" fill="#1B1D24">Keys are ready Friday!</text>
     <rect x="24" y="150" width="272" height="96" rx="12" fill="#C9CEFF"/>
-    <text x="38" y="180" font-size="16" fill="#1B1D24">hi chi, we had a great stay,</text>
-    <text x="38" y="204" font-size="16" fill="#1B1D24">can we check out at 1pm</text>
-    <text x="38" y="228" font-size="16" fill="#1B1D24">instead of 11, sorry for asking</text>
+    <text x="38" y="180" font-size="16" fill="#1B1D24">hey sam, the plumber cant come</text>
+    <text x="38" y="204" font-size="16" fill="#1B1D24">till thursday so can we push the</text>
+    <text x="38" y="228" font-size="16" fill="#1B1D24">move-in date to saturday instead</text>
     <rect x="24" y="270" width="272" height="38" rx="19" fill="none" stroke="#E1E3EC" stroke-width="2"/>
     <text x="42" y="295" font-size="14" fill="#9AA0AA">Type a message</text>
   </g>
@@ -82,9 +82,9 @@
       <rect x="272" y="62" width="50" height="28" rx="14" fill="none" stroke="#CDD1DD"/><text x="297" y="81" fill="#1B1D24" text-anchor="middle">Firm</text>
     </g>
     <rect x="20" y="108" width="300" height="108" rx="12" fill="#fff" stroke="#E6E8F0" stroke-width="1.5"/>
-    <text x="34" y="134" font-size="14" fill="#1B1D24">Hi Chi, we had a great stay.</text>
-    <text x="34" y="154" font-size="14" fill="#1B1D24">Can we check out at 1pm instead</text>
-    <text x="34" y="174" font-size="14" fill="#1B1D24">of 11? I am sorry for asking so late.</text>
+    <text x="34" y="134" font-size="14" fill="#1B1D24">Hey Sam, the plumber cannot come</text>
+    <text x="34" y="154" font-size="14" fill="#1B1D24">until Thursday. Can we push the</text>
+    <text x="34" y="174" font-size="14" fill="#1B1D24">move-in date to Saturday instead?</text>
     <rect x="166" y="184" width="60" height="24" rx="7" fill="none" stroke="#CDD1DD"/><text x="196" y="201" font-size="12" font-weight="600" fill="#1B1D24" text-anchor="middle">Copy</text>
     <rect x="234" y="184" width="76" height="24" rx="7" fill="#4C5CE8"/><text x="272" y="201" font-size="12" font-weight="600" fill="#fff" text-anchor="middle">Replace</text>
     <rect x="20" y="228" width="300" height="88" rx="12" fill="#fff" stroke="#E6E8F0" stroke-width="1.5"/>
@@ -109,9 +109,9 @@
     <rect y="22" width="250" height="22" fill="#F2F3F8"/>
     <circle cx="26" cy="22" r="6" fill="#FF5F57"/><circle cx="46" cy="22" r="6" fill="#FEBC2E"/><circle cx="66" cy="22" r="6" fill="#28C840"/>
     <rect x="20" y="150" width="210" height="104" rx="14" fill="none" stroke="#4C5CE8" stroke-width="2"/>
-    <text x="34" y="180" font-size="15" fill="#1B1D24">Hi Chi, we had a great</text>
-    <text x="34" y="202" font-size="15" fill="#1B1D24">stay. Can we check out at</text>
-    <text x="34" y="224" font-size="15" fill="#1B1D24">1pm instead of 11?</text>
+    <text x="34" y="180" font-size="15" fill="#1B1D24">Hey Sam, the plumber</text>
+    <text x="34" y="202" font-size="15" fill="#1B1D24">cannot come until Thursday.</text>
+    <text x="34" y="224" font-size="15" fill="#1B1D24">Can we push the move-in...</text>
     <rect x="20" y="270" width="210" height="36" rx="18" fill="#F4F5FA"/>
     <text x="125" y="294" font-size="14" fill="#5D6372" text-anchor="middle">You press Send</text>
     <circle cx="200" cy="100" r="26" fill="#E7F7EF"/>

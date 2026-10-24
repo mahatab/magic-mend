@@ -2,104 +2,104 @@
  {
   "name": "Simple",
   "request": {
-   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
+   "tone": "Simple",
    "length": "Same",
    "toggles": [],
    "channel": "WhatsApp",
-   "followup": null,
-   "tone": "Simple"
+   "followup": null
   }
  },
  {
   "name": "Respectful",
   "request": {
-   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
+   "tone": "Respectful",
    "length": "Same",
    "toggles": [],
    "channel": "WhatsApp",
-   "followup": null,
-   "tone": "Respectful"
+   "followup": null
   }
  },
  {
   "name": "Warm",
   "request": {
-   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
+   "tone": "Warm",
    "length": "Same",
    "toggles": [],
    "channel": "WhatsApp",
-   "followup": null,
-   "tone": "Warm"
+   "followup": null
   }
  },
  {
   "name": "Casual",
   "request": {
-   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
+   "tone": "Casual",
    "length": "Same",
    "toggles": [],
    "channel": "WhatsApp",
-   "followup": null,
-   "tone": "Casual"
+   "followup": null
   }
  },
  {
   "name": "Professional",
   "request": {
-   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
+   "tone": "Professional",
    "length": "Same",
    "toggles": [],
    "channel": "WhatsApp",
-   "followup": null,
-   "tone": "Professional"
+   "followup": null
   }
  },
  {
   "name": "Firm",
   "request": {
-   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
+   "tone": "Firm",
    "length": "Same",
    "toggles": [],
    "channel": "WhatsApp",
-   "followup": null,
-   "tone": "Firm"
+   "followup": null
   }
  },
  {
   "name": "Shorter",
   "request": {
-   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
+   "tone": "Simple",
    "length": "Shorter",
    "toggles": [],
    "channel": "WhatsApp",
-   "followup": null,
-   "tone": "Simple"
+   "followup": null
   }
  },
  {
   "name": "Fix errors only",
   "request": {
-   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
+   "tone": "Simple",
    "length": "Same",
    "toggles": [
     "Fix errors only"
    ],
    "channel": "WhatsApp",
-   "followup": null,
-   "tone": "Simple"
+   "followup": null
   }
  },
  {
   "name": "Softer",
   "request": {
-   "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late",
+   "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
+   "tone": "Simple",
    "length": "Same",
    "toggles": [
     "Softer"
    ],
    "channel": "WhatsApp",
-   "followup": null,
-   "tone": "Simple"
+   "followup": null
   }
  }
 ]

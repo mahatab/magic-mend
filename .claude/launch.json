@@ -1,6 +1,28 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "ui", "runtimeExecutable": "npx", "runtimeArgs": ["vite", "--port", "1420"], "port": 1420 }
+    {
+      "name": "ui",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--port",
+        "1420"
+      ],
+      "port": 1420
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "../magic-mend-landing",
+        "--port",
+        "4173",
+        "--strictPort"
+      ],
+      "port": 4173
+    }
   ]
 }
