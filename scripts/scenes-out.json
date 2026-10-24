@@ -1,0 +1,43 @@
+{
+  "assalamu": {
+    "drafts": [
+      "Assalamu Alaikum, could you please tell me how much one share is this year and what the last date to pay is?",
+      "Assalamu Alaikum, could you please let me know the price of one share this year and the last date to pay?"
+    ],
+    "subject": null
+  },
+  "email": {
+    "drafts": [
+      "Hi David,\n\nI am following up on my application for the Data Engineer role (job ID 48213), which I submitted on October 3.\n\nBest,",
+      "Hi David,\n\nI am writing to follow up on the Data Engineer application (job ID 48213) that I submitted on October 3.\n\nBest,"
+    ],
+    "subject": "Following up on Data Engineer application, job ID 48213"
+  },
+  "fix": {
+    "drafts": [
+      "I sent the payment yesterday but I did not get any confirmation email. Can you check it?"
+    ],
+    "subject": null
+  },
+  "followup": {
+    "drafts": [
+      "Hi Omar,\n\nI will send the signed contract by Tuesday 3pm, along with the invoice for $480.",
+      "Hi Omar,\n\nThe signed contract and the invoice for $480 will be with you by Tuesday 3pm."
+    ],
+    "subject": null
+  },
+  "warm": {
+    "drafts": [
+      "Hi Chi, we had a great stay. Could we check out at 1pm instead of 11? I am sorry for asking so late.",
+      "Hi Chi, we really enjoyed our stay. Would it be possible to check out at 1pm instead of 11? Sorry for the late request."
+    ],
+    "subject": null
+  },
+  "whatsapp": {
+    "drafts": [
+      "Hi Chi, we had a great stay. Can we check out at 1pm instead of 11? I am sorry for asking so late.",
+      "Hi Chi, we really enjoyed our stay. Would it be okay to check out at 1pm instead of 11? Sorry for asking so late."
+    ],
+    "subject": null
+  }
+}

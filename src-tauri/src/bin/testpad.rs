@@ -113,7 +113,7 @@ mod win {
         }
     }
 
-    fn window(dir: PathBuf, text: String) {
+    fn window(dir: PathBuf, text: String, title: String) {
         std::fs::create_dir_all(&dir).unwrap();
         let _ = std::fs::remove_file(dir.join("keys.log"));
         *OUT.lock().unwrap() = Some(dir);
@@ -131,7 +131,7 @@ mod win {
             let hwnd = CreateWindowExW(
                 WINDOW_EX_STYLE(0),
                 class,
-                w!("MM Testpad"),
+                PCWSTR(wide(&title).as_ptr()),
                 WS_OVERLAPPEDWINDOW | WS_VISIBLE,
                 200,
                 200,
@@ -304,7 +304,7 @@ mod win {
     pub fn main() {
         let args: Vec<String> = std::env::args().collect();
         match args.get(1).map(String::as_str) {
-            Some("window") => window(PathBuf::from(&args[2]), args.get(3).cloned().unwrap_or_default()),
+            Some("window") => window(PathBuf::from(&args[2]), args.get(3).cloned().unwrap_or_default(), args.get(4).cloned().unwrap_or_else(|| "MM Testpad".into())),
             Some("keys") => keys(&args[2], args.get(3).and_then(|s| s.parse().ok()).unwrap_or(20)),
             Some("clip-set") => clip_set(&args[2]),
             Some("clip-get") => clip_get(),

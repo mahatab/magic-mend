@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 600" font-family="Segoe UI, Segoe UI Variable Display, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F5F6FF"/>
+      <stop offset="1" stop-color="#EEF0FB"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7B88FF"/>
+      <stop offset="1" stop-color="#4C5CE8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#1B1D3A" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#9AA3F5"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="600" rx="36" fill="url(#bg)"/>
+
+  <!-- Step 1: select -->
+  <g transform="translate(60 90)" filter="url(#shadow)">
+    <rect width="320" height="330" rx="22" fill="#fff"/>
+    <rect width="320" height="44" rx="22" fill="#F2F3F8"/>
+    <rect y="22" width="320" height="22" fill="#F2F3F8"/>
+    <circle cx="26" cy="22" r="6" fill="#FF5F57"/><circle cx="46" cy="22" r="6" fill="#FEBC2E"/><circle cx="66" cy="22" r="6" fill="#28C840"/>
+    <text x="104" y="28" font-size="15" fill="#6B7180">Any app</text>
+    <rect x="24" y="74" width="190" height="34" rx="17" fill="#E9F8EE"/>
+    <text x="40" y="96" font-size="15" fill="#1B1D24">See you at 5!</text>
+    <rect x="24" y="150" width="272" height="96" rx="12" fill="#C9CEFF"/>
+    <text x="38" y="180" font-size="16" fill="#1B1D24">hi chi, we had a great stay,</text>
+    <text x="38" y="204" font-size="16" fill="#1B1D24">can we check out at 1pm</text>
+    <text x="38" y="228" font-size="16" fill="#1B1D24">instead of 11, sorry for asking</text>
+    <rect x="24" y="270" width="272" height="38" rx="19" fill="none" stroke="#E1E3EC" stroke-width="2"/>
+    <text x="42" y="295" font-size="14" fill="#9AA0AA">Type a message</text>
+  </g>
+  <g transform="translate(60 470)">
+    <circle cx="20" cy="20" r="20" fill="url(#accent)"/><text x="20" y="27" font-size="19" font-weight="700" fill="#fff" text-anchor="middle">1</text>
+    <text x="54" y="20" font-size="22" font-weight="700" fill="#1B1D24">Select text</text>
+    <text x="54" y="46" font-size="16" fill="#5D6372">in any app you write in</text>
+  </g>
+
+  <path d="M398 255 L448 255" stroke="#9AA3F5" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <!-- Step 2: hotkey -->
+  <g transform="translate(470 90)" filter="url(#shadow)">
+    <rect width="300" height="330" rx="22" fill="#fff"/>
+  </g>
+  <g transform="translate(470 90)">
+    <g transform="translate(26 120)">
+      <rect width="74" height="74" rx="14" fill="#F4F5FA" stroke="#D9DCE8" stroke-width="2"/>
+      <rect y="66" width="74" height="8" rx="4" fill="#D9DCE8"/>
+      <text x="37" y="45" font-size="20" font-weight="600" fill="#1B1D24" text-anchor="middle">Ctrl</text>
+      <rect x="87" width="74" height="74" rx="14" fill="#F4F5FA" stroke="#D9DCE8" stroke-width="2"/>
+      <rect x="87" y="66" width="74" height="8" rx="4" fill="#D9DCE8"/>
+      <text x="124" y="45" font-size="20" font-weight="600" fill="#1B1D24" text-anchor="middle">Alt</text>
+      <rect x="174" width="74" height="74" rx="14" fill="url(#accent)"/>
+      <text x="211" y="47" font-size="26" font-weight="700" fill="#fff" text-anchor="middle">R</text>
+    </g>
+    <text x="150" y="250" font-size="15" fill="#6B7180" text-anchor="middle">Ctrl+Option+R on Mac</text>
+    <path d="M240 70 l6 16 l16 6 l-16 6 l-6 16 l-6 -16 l-16 -6 l16 -6 z" fill="#7B88FF"/>
+    <path d="M66 270 l4 10 l10 4 l-10 4 l-4 10 l-4 -10 l-10 -4 l10 -4 z" fill="#B7BEFF"/>
+  </g>
+  <g transform="translate(470 470)">
+    <circle cx="20" cy="20" r="20" fill="url(#accent)"/><text x="20" y="27" font-size="19" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+    <text x="54" y="20" font-size="22" font-weight="700" fill="#1B1D24">Press the hotkey</text>
+    <text x="54" y="46" font-size="16" fill="#5D6372">two drafts start at once</text>
+  </g>
+
+  <path d="M788 255 L838 255" stroke="#9AA3F5" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <!-- Step 3: popup -->
+  <g transform="translate(860 70)" filter="url(#shadow)">
+    <rect width="340" height="370" rx="22" fill="#fff"/>
+  </g>
+  <g transform="translate(860 70)">
+    <rect x="20" y="20" width="20" height="20" rx="5" fill="url(#accent)"/>
+    <text x="50" y="36" font-size="15" font-weight="700" fill="#1B1D24">Magic Mend</text>
+    <g font-size="13">
+      <rect x="20" y="62" width="70" height="28" rx="14" fill="#4C5CE8"/><text x="55" y="81" fill="#fff" font-weight="600" text-anchor="middle">Simple</text>
+      <rect x="98" y="62" width="96" height="28" rx="14" fill="none" stroke="#CDD1DD"/><text x="146" y="81" fill="#1B1D24" text-anchor="middle">Respectful</text>
+      <rect x="202" y="62" width="62" height="28" rx="14" fill="none" stroke="#CDD1DD"/><text x="233" y="81" fill="#1B1D24" text-anchor="middle">Warm</text>
+      <rect x="272" y="62" width="50" height="28" rx="14" fill="none" stroke="#CDD1DD"/><text x="297" y="81" fill="#1B1D24" text-anchor="middle">Firm</text>
+    </g>
+    <rect x="20" y="108" width="300" height="108" rx="12" fill="#fff" stroke="#E6E8F0" stroke-width="1.5"/>
+    <text x="34" y="134" font-size="14" fill="#1B1D24">Hi Chi, we had a great stay.</text>
+    <text x="34" y="154" font-size="14" fill="#1B1D24">Can we check out at 1pm instead</text>
+    <text x="34" y="174" font-size="14" fill="#1B1D24">of 11? I am sorry for asking so late.</text>
+    <rect x="166" y="184" width="60" height="24" rx="7" fill="none" stroke="#CDD1DD"/><text x="196" y="201" font-size="12" font-weight="600" fill="#1B1D24" text-anchor="middle">Copy</text>
+    <rect x="234" y="184" width="76" height="24" rx="7" fill="#4C5CE8"/><text x="272" y="201" font-size="12" font-weight="600" fill="#fff" text-anchor="middle">Replace</text>
+    <rect x="20" y="228" width="300" height="88" rx="12" fill="#fff" stroke="#E6E8F0" stroke-width="1.5"/>
+    <rect x="34" y="248" width="250" height="10" rx="5" fill="#ECEEF5"/>
+    <rect x="34" y="268" width="210" height="10" rx="5" fill="#ECEEF5"/>
+    <rect x="34" y="288" width="140" height="10" rx="5" fill="#ECEEF5"/>
+    <rect x="20" y="328" width="300" height="28" rx="9" fill="#F4F5FA" stroke="#E1E3EC"/>
+    <text x="32" y="347" font-size="12" fill="#9AA0AA">Ask for a change...</text>
+  </g>
+  <g transform="translate(860 470)">
+    <circle cx="20" cy="20" r="20" fill="url(#accent)"/><text x="20" y="27" font-size="19" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+    <text x="54" y="20" font-size="22" font-weight="700" fill="#1B1D24">Pick a tone</text>
+    <text x="54" y="46" font-size="16" fill="#5D6372">or ask for a change</text>
+  </g>
+
+  <path d="M1218 255 L1268 255" stroke="#9AA3F5" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <!-- Step 4: replaced -->
+  <g transform="translate(1290 90)" filter="url(#shadow)">
+    <rect width="250" height="330" rx="22" fill="#fff"/>
+    <rect width="250" height="44" rx="22" fill="#F2F3F8"/>
+    <rect y="22" width="250" height="22" fill="#F2F3F8"/>
+    <circle cx="26" cy="22" r="6" fill="#FF5F57"/><circle cx="46" cy="22" r="6" fill="#FEBC2E"/><circle cx="66" cy="22" r="6" fill="#28C840"/>
+    <rect x="20" y="150" width="210" height="104" rx="14" fill="none" stroke="#4C5CE8" stroke-width="2"/>
+    <text x="34" y="180" font-size="15" fill="#1B1D24">Hi Chi, we had a great</text>
+    <text x="34" y="202" font-size="15" fill="#1B1D24">stay. Can we check out at</text>
+    <text x="34" y="224" font-size="15" fill="#1B1D24">1pm instead of 11?</text>
+    <rect x="20" y="270" width="210" height="36" rx="18" fill="#F4F5FA"/>
+    <text x="125" y="294" font-size="14" fill="#5D6372" text-anchor="middle">You press Send</text>
+    <circle cx="200" cy="100" r="26" fill="#E7F7EF"/>
+    <path d="M188 100 l8 8 l16 -16" stroke="#12805C" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g transform="translate(1290 470)">
+    <circle cx="20" cy="20" r="20" fill="url(#accent)"/><text x="20" y="27" font-size="19" font-weight="700" fill="#fff" text-anchor="middle">4</text>
+    <text x="54" y="20" font-size="22" font-weight="700" fill="#1B1D24">Click Replace</text>
+    <text x="54" y="46" font-size="16" fill="#5D6372">never sent for you</text>
+  </g>
+</svg>

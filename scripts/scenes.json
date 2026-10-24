@@ -1,0 +1,8 @@
+[
+  { "name": "whatsapp", "request": { "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late", "tone": "Simple", "length": "Same", "toggles": [], "channel": "WhatsApp", "followup": null } },
+  { "name": "warm", "request": { "text": "hi chi, we had a great stay, can we check out at 1pm instead of 11, sorry for asking so late", "tone": "Warm", "length": "Same", "toggles": [], "channel": "WhatsApp", "followup": null } },
+  { "name": "email", "request": { "text": "Hi David, I am following up on my application for the Data Engineer role (job ID 48213) that I submitted on October 3", "tone": "Professional", "length": "Same", "toggles": [], "channel": "Email", "followup": null } },
+  { "name": "fix", "request": { "text": "i has send the payment yesterday but i didnt got any confirmation email, can you check it", "tone": "Simple", "length": "Same", "toggles": ["Fix errors only"], "channel": "Text", "followup": null } },
+  { "name": "followup", "request": { "text": "Hi Omar, sorry for the delay, I will send the signed contract by Tuesday 3pm and the invoice for $480", "tone": "Simple", "length": "Same", "toggles": [], "channel": "LinkedIn", "followup": null }, "followup": "remove the apology" },
+  { "name": "assalamu", "request": { "text": "Assalamu Alaikum, how much is one share this year and when is the last date to pay", "tone": "Respectful", "length": "Same", "toggles": [], "channel": "WhatsApp", "followup": null } }
+]

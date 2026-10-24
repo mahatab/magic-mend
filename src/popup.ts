@@ -506,6 +506,6 @@ if (!inTauri) {
   if (q.has("error")) over.engine_error = "Claude is not signed in. Open a terminal, run claude, sign in, and then click Retry.";
   if (q.has("dark")) over.theme = "dark";
   if (q.has("fix")) over.toggles = ["Fix errors only"];
-  (window as unknown as { __mm: unknown }).__mm = { mock, state: () => state, expectedDrafts: () => expectedDrafts(state) };
+  (window as unknown as { __mm: unknown }).__mm = { mock, open, state: () => state, expectedDrafts: () => expectedDrafts(state) };
   open(mock.payload(over));
 }

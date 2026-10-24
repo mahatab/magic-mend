@@ -71,6 +71,8 @@ export const fakeSettings = {
 const listeners = new Map<string, Handler<unknown>[]>();
 
 export const mock = {
+  /** Drafts to replay instead of the built-in samples (used for screenshots). */
+  scripted: null as null | { drafts: string[]; subject?: string | null },
   log: [] as { cmd: string; args: Record<string, unknown> }[],
   on(event: string, h: Handler<unknown>) {
     listeners.set(event, [...(listeners.get(event) ?? []), h]);
@@ -146,6 +148,7 @@ export const mock = {
     if (fix) drafts = ["Hi Chi, we had a great stay. Can we check out at 1pm instead of 11? Sorry for asking so late."];
     if (req.followup) drafts = drafts.map((d) => d.replace(/ ?(Sorry|I apologize|I am sorry)[^.]*\./, ""));
     if (req.channel === "Email") drafts = drafts.map((d) => d.replace(/^Hi Chi, /, "Hi Chi,\n\n") + "\n\nBest,");
+    if (this.scripted) drafts = this.scripted.drafts;
     const words = drafts.map((d) => d.split(/(?<= )/));
     const max = Math.max(...words.map((w) => w.length));
     let i = 0;
@@ -160,7 +163,7 @@ export const mock = {
             type: "final",
             req_id: reqId,
             drafts: drafts.map((text) => ({ text, ok: true, issues: [] })),
-            subject: req.channel === "Email" ? "Late checkout request" : null,
+            subject: this.scripted ? this.scripted.subject ?? null : req.channel === "Email" ? "Late checkout request" : null,
           } satisfies Output);
         }, 120);
     };

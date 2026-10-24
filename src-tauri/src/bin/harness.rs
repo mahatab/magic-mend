@@ -489,6 +489,46 @@ fn wait_text(rx: &Receiver<Tagged>, id: u64) -> String {
     "(timeout)".into()
 }
 
+#[derive(Deserialize)]
+struct Scene {
+    name: String,
+    request: Request,
+    #[serde(default)]
+    followup: Option<String>,
+}
+
+/// Real drafts for the screenshots: `mm-harness scenes <in.json> <out.json> [--model sonnet]`.
+/// Each scene runs on a fresh engine; a follow-up, when given, continues the same conversation.
+fn scenes(args: &[String]) {
+    let input = args.get(2).expect("scenes file");
+    let output = args.get(3).expect("output file");
+    let model = arg(args, "--model").unwrap_or("sonnet".into());
+    let list: Vec<Scene> = serde_json::from_str(&std::fs::read_to_string(input).unwrap()).unwrap();
+    let mut out = serde_json::Map::new();
+    for s in list {
+        let (tx, rx) = std::sync::mpsc::channel();
+        let mut eng = ClaudeEngine::new(base_config(&model, false), tx);
+        eng.start().expect("start");
+        let mut flow = DraftFlow::new(Rules::default());
+        let mut run = Run::default();
+        let mut result = drive(&mut eng, &rx, &mut flow, 1, s.request.clone(), &mut run, Instant::now());
+        if let (Some(f), Some(_)) = (&s.followup, &result) {
+            let mut req = s.request.clone();
+            req.followup = Some(f.clone());
+            let mut run2 = Run::default();
+            result = drive(&mut eng, &rx, &mut flow, 2, req, &mut run2, Instant::now());
+        }
+        eng.stop();
+        let (drafts, subject) = result.unwrap_or_default();
+        eprintln!("{}: {:?}", s.name, drafts.iter().map(|d| d.text.clone()).collect::<Vec<_>>());
+        out.insert(
+            s.name,
+            serde_json::json!({ "drafts": drafts.iter().map(|d| d.text.clone()).collect::<Vec<_>>(), "subject": subject }),
+        );
+    }
+    std::fs::write(output, serde_json::to_string_pretty(&out).unwrap()).unwrap();
+}
+
 fn once(args: &[String]) {
     let text = args.get(2).cloned().unwrap_or_else(|| "hi, can you send me the file by friday".into());
     let model = arg(args, "--model").unwrap_or("haiku".into());
@@ -505,6 +545,7 @@ fn main() {
         Some("quality") => quality(&args),
         Some("isolation") => isolation(),
         Some("once") => once(&args),
+        Some("scenes") => scenes(&args),
         _ => eprintln!("usage: mm-harness timing|quality|isolation|once"),
     }
 }

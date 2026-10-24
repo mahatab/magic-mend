@@ -173,6 +173,8 @@ export async function startApp({ settings = defaultSettings(), mode = "normal", 
     MM_FAKE_LOG: fakeLog,
     MM_FAKE_MODE_FILE: modeFile,
     WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${CDP_PORT}`,
+    // Keep the test browser data apart from an installed copy of the app.
+    WEBVIEW2_USER_DATA_FOLDER: join(dir, "webview"),
   };
   for (const k of Object.keys(env)) if (/^(CLAUDECODE|CLAUDE_CODE_|CLAUDE_AGENT_SDK)/.test(k)) delete env[k];
   const proc = spawn(APP, [], { env, stdio: "ignore" });
