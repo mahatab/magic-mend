@@ -1,7 +1,8 @@
 [package]
 name = "magic-mend"
 version = "1.1.0"
-description = "Magic Mend: rewrite selected text with your own Claude login"
+description = "Magic Mend: rewrite selected text with your own Claude or ChatGPT login"
+license = "MIT"
 authors = ["M2 Labs"]
 edition = "2021"
 default-run = "magic-mend"

@@ -17,6 +17,7 @@
   <img src="https://img.shields.io/badge/works%20with-Claude-D97757" alt="Works with Claude" />
   <img src="https://img.shields.io/badge/works%20with-ChatGPT-10A37F" alt="Works with ChatGPT" />
   <img src="https://img.shields.io/badge/tests-53%20Rust%20%C2%B7%2019%20UI%20%C2%B7%2023%20end%20to%20end-12805C" alt="Tests" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
 </p>
 
 ---
@@ -347,6 +348,10 @@ magic-mend/
 - OpenAI labels `codex app-server` experimental; Magic Mend is tested against `codex-cli` 0.163, and a future change may need an update
 - GPT-6-Luna follows the repeated-word rule less reliably than Claude (about one draft in four on the move-in example)
 - The Windows installer is not code signed, so SmartScreen may ask you to confirm the first run
+
+## License
+
+MIT. See [LICENSE](LICENSE) for details.
 
 ---
 
