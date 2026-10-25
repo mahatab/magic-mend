@@ -205,6 +205,12 @@ pub fn foreground_window() -> Option<WindowInfo> {
 }
 
 /// Re-activates the original app. Replace calls this before the paste shortcut.
+/// Showing a window on the Mac activates the app, which would take focus before Cmd+C, so the
+/// popup waits for the selection there.
+pub fn show_without_focus(_h: isize) -> bool {
+    false
+}
+
 pub fn focus_window(h: isize) -> bool {
     let Some(app) = app_for(h) else { return false };
     #[allow(deprecated)]

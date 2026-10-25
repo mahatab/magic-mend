@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/typescript-5.9-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/works%20with-Claude-D97757" alt="Works with Claude" />
   <img src="https://img.shields.io/badge/works%20with-ChatGPT-10A37F" alt="Works with ChatGPT" />
-  <img src="https://img.shields.io/badge/tests-53%20Rust%20%C2%B7%2019%20UI%20%C2%B7%2023%20end%20to%20end-12805C" alt="Tests" />
+  <img src="https://img.shields.io/badge/tests-53%20Rust%20%C2%B7%2020%20UI%20%C2%B7%2023%20end%20to%20end-12805C" alt="Tests" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
 </p>
 
@@ -114,7 +114,7 @@ The first launch opens a short setup wizard. It finds `claude` and `codex`, chec
 - One `claude` or `codex` process **waits in the background**, so the hotkey skips the start-up delay
 - After Replace, Copy, or close, that process ends and a fresh one starts: **every message begins with a clean context**
 - Recycled after 6 idle hours and after the computer wakes from sleep
-- **Popup visible in about 0.1 s. First words in about 1.2 s. Finished drafts in about 1.6 s.** (Measured below)
+- **Popup visible in under 0.1 s, even while you still hold the keys. First words in about 1.2 s. Finished drafts in about 1.6 s.** (Measured below)
 
 ### Polished Details
 - **Light and dark** themes that follow your system, with a translucent acrylic background on Windows 11 and vibrancy on macOS
@@ -185,7 +185,7 @@ Measured on Windows 11 over 20 sample messages per mode, with `claude` 2.1.296 a
 
 | Other measurements | |
 | --- | ---: |
-| Hotkey to visible popup | 70 to 125 ms |
+| Hotkey to visible popup | under 60 ms, before you let go of the keys |
 | Memory while idle | app 43 MB, WebView2 about 360 MB, warm `claude` 182 MB |
 | Installer size | 1.7 MB |
 
@@ -241,7 +241,7 @@ ChatGPT runs the same way through OpenAI's official `codex app-server` on your C
 
 Isolation is proven for both: a marker in your user CLAUDE.md or `~/.codex/AGENTS.md` (and a logging hook in your Claude settings) never reaches the engine, while a control run without the isolation settings shows it.
 
-**Capture.** Save every clipboard format, wait for Ctrl, Alt, Shift, and Win to be released (so the copy shortcut never turns into another shortcut), send Ctrl+C, wait for the clipboard sequence number to move (up to 400 ms), read the text, restore the clipboard.
+**Capture.** Show the popup at once without taking focus (on Windows), so it is on screen while you let go of the keys. Then save every clipboard format, wait for Ctrl, Alt, Shift, and Win to be released (so the copy shortcut never turns into another shortcut), send Ctrl+C, wait for the clipboard sequence number to move (up to 400 ms), read the text, restore the clipboard, and fill in the popup. If another window came to the front in the meantime, nothing is copied.
 
 **Replace.** Write the draft to the clipboard (hidden from clipboard history), wait until clipboard history and other monitors have let go of it (an app that pastes while they read gets nothing), bring the original window back, wait 80 ms, check that it really is in front, send Ctrl+V, wait 500 ms for slow apps, restore the clipboard.
 
@@ -271,8 +271,8 @@ For development: `npm run dev` serves the popup with a built-in fake backend at 
 | Suite | Command | Result | What it covers |
 | --- | --- | :---: | --- |
 | Rust unit tests | `cd src-tauri && cargo test --lib` | 53 pass | Output checker, request and reply parsing, streaming extraction, draft flow (stale replies, fix round, JSON repair, timeout), channel rules, excluded apps, settings, hotkeys |
-| UI unit tests | `npm test` | 19 pass | Popup logic, Replace button states, hotkey capture, and a scan of every source file, comment, and doc for contractions and em dashes |
-| Windows end to end | see below | 23 pass | The real app, real clipboard, and real key presses against a test window, with a fake `claude` and a fake `codex`, including switching between them |
+| UI unit tests | `npm test` | 20 pass | Popup logic, Replace button states, hotkey capture, and a scan of every source file, comment, and doc for contractions and em dashes |
+| Windows end to end | see below | 22 pass, 1 intermittent | The real app, real clipboard, and real key presses against a test window, with a fake `claude` and a fake `codex`, including switching between them |
 | Live harness | `mm-harness timing`, `quality`, `isolation` (add `--provider chatgpt`) | pass | Timings, output rules over 159 live runs across both services, facts, follow-ups, setup isolation |
 | Accessibility | axe-core | 0 violations | Popup (light and dark), wizard, settings |
 | CI | GitHub Actions | passing | Windows tests and lints on every push, a macOS build and test run, and a signed release build verified with `codesign`, `spctl` (Notarized Developer ID), and `stapler` |

@@ -230,7 +230,9 @@ function renderOriginal() {
   if (!refs) return;
   const o = refs.original;
   o.replaceChildren();
-  if (!state.editable) {
+  if (state.pending) {
+    o.append(el("span", { class: "label", text: "Original" }), el("div", { class: "text reading", text: "Reading your selection..." }));
+  } else if (!state.editable) {
     o.append(el("span", { class: "label", text: "Original" }), el("div", { class: "text", text: state.text }));
   } else {
     const id = "orig-input";
@@ -451,14 +453,18 @@ new ResizeObserver(scheduleResize).observe(app);
 
 function open(p: OpenPayload) {
   window.clearTimeout(debounce);
+  // The second open of a session fills in a popup that is already showing: no new animation.
+  const filling = state.pending && state.payload?.session_id === p.session_id;
   state = fromPayload(p);
   applyTheme(p.theme);
   document.body.classList.toggle("translucent", p.translucent);
   document.body.classList.toggle("solid", !p.translucent);
   render();
-  app.classList.remove("open");
-  void app.offsetWidth; // restart the open animation
-  app.classList.add("open");
+  if (!filling) {
+    app.classList.remove("open");
+    void app.offsetWidth; // restart the open animation
+    app.classList.add("open");
+  }
   // Keyboard focus lands on the first chip, so Esc and Tab work at once.
   const first = (state.editable ? app.querySelector("#orig-input") : app.querySelector(".tone-row .chip[aria-checked='true']")) as HTMLElement | null;
   (first ?? app).focus();
@@ -506,6 +512,7 @@ if (!inTauri) {
   if (q.has("error")) over.engine_error = "Claude is not signed in. Open a terminal, run claude, sign in, and then click Retry.";
   if (q.has("dark")) over.theme = "dark";
   if (q.has("fix")) over.toggles = ["Fix errors only"];
+  if (q.has("pending")) over.capture = { kind: "pending" };
   (window as unknown as { __mm: unknown }).__mm = { mock, open, state: () => state, expectedDrafts: () => expectedDrafts(state) };
   open(mock.payload(over));
 }

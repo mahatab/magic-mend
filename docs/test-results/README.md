@@ -7,8 +7,8 @@ Updated 2026-10-24 for v1.1.0 (Claude and ChatGPT). Details for each suite are i
 | Suite | Result |
 | --- | --- |
 | Rust unit tests (`cargo test --lib`) | 53 pass, on Windows and on macOS (CI) |
-| UI unit tests (`npm test`), including a scan of every source, comment, and doc for contractions and em dashes | 19 pass |
-| Windows end to end ([e2e-windows.md](e2e-windows.md)): real app, real clipboard, real keys, fake Claude and fake Codex | 23 pass |
+| UI unit tests (`npm test`), including a scan of every source, comment, and doc for contractions and em dashes | 20 pass |
+| Windows end to end ([e2e-windows.md](e2e-windows.md)): real app, real clipboard, real keys, fake Claude and fake Codex | 22 pass; the multi-line paste test (20) is intermittent, also before this release |
 | Live Claude: 20 messages, Haiku and Sonnet, cold, warm, primed ([report](../M1-timing-report.md)) | pass |
 | Live ChatGPT: 20 messages, GPT-5.6-Luna, GPT-6-Luna, GPT-6.1-Sol, cold and warm ([report](../ChatGPT-timing-report.md)) | pass |
 | Setup isolation, live: marker in user CLAUDE.md plus a hook (Claude), marker in `~/.codex/AGENTS.md` (ChatGPT) | pass for both; control runs picked up the marker |
@@ -28,7 +28,7 @@ Updated 2026-10-24 for v1.1.0 (Claude and ChatGPT). Details for each suite are i
 | 8 No contractions or em dashes | Pass: 90 of 90 live runs | Pass: 69 of 69 live runs | Live harness |
 | 9 Facts kept | Pass (Sonnet) | Pass (GPT-6-Luna) | Live harness, flags read by hand |
 | 10 Follow-ups | Pass | Pass | Live harness and end to end |
-| 11 Warm spare, speed | Pass: drafts 1.6 s | Pass: drafts 1.6 s | Popup visible in 70 to 125 ms |
+| 11 Warm spare, speed | Pass: drafts 1.6 s | Pass: drafts 1.6 s | Popup visible in under 60 ms, before the keys are released |
 | 12 Failures: missing, signed out, offline, plan limit, timeout | Pass | Pass, plus "model not on your plan" | End to end |
 | 13 Privacy: no text on disk, no app sockets | Pass | Pass (same app process) | End to end |
 | 14 Resources | App 43 MB, WebView2 about 360 MB, claude spare 182 MB | codex spare similar | Measured |

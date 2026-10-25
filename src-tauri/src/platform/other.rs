@@ -18,6 +18,7 @@ pub fn is_window_alive(_h: isize) -> bool { false }
 pub fn window_visible(_h: isize) -> bool { false }
 pub fn window_info(_h: isize) -> Option<WindowInfo> { None }
 pub fn foreground_window() -> Option<WindowInfo> { None }
+pub fn show_without_focus(_h: isize) -> bool { false }
 pub fn focus_window(_h: isize) -> bool { false }
 pub fn self_elevated() -> bool { false }
 pub fn process_elevated(_p: u32) -> bool { false }

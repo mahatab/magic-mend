@@ -39,7 +39,7 @@ use windows::Win32::UI::Shell::{SHGetFileInfoW, SHFILEINFOW, SHGFI_ICON, SHGFI_L
 use windows::Win32::UI::WindowsAndMessaging::{
     BringWindowToTop, CreateWindowExW, DestroyIcon, DestroyWindow, EnumChildWindows, GetAncestor, GetCursorPos,
     GetForegroundWindow, GetIconInfo, GetWindowTextW, GetWindowThreadProcessId, IsIconic, IsWindow,
-    IsWindowVisible, SetForegroundWindow, ShowWindow, GA_ROOT, HICON, HWND_MESSAGE, ICONINFO, SW_RESTORE,
+    IsWindowVisible, SetForegroundWindow, ShowWindow, GA_ROOT, HICON, HWND_MESSAGE, ICONINFO, SW_RESTORE, SW_SHOWNOACTIVATE,
     WINDOW_EX_STYLE, WINDOW_STYLE,
 };
 
@@ -361,6 +361,15 @@ pub fn modifiers_held(extra_vk: Option<u16>) -> bool {
         VK_RWIN,
     ];
     mods.iter().any(|k| key_down(k.0 as i32)) || extra_vk.map(|k| key_down(k as i32)).unwrap_or(false)
+}
+
+/// Shows a window without taking focus from the app in front, so the selection can still be
+/// copied from it while the popup is already on screen.
+pub fn show_without_focus(h: isize) -> bool {
+    unsafe {
+        let _ = ShowWindow(hwnd_from(h), SW_SHOWNOACTIVATE);
+    }
+    true
 }
 
 pub fn foreground_handle() -> isize {

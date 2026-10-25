@@ -9,7 +9,9 @@ export const CHANNELS = ["Text", "Email", "WhatsApp", "LinkedIn"] as const;
 export type Capture =
   | { kind: "text"; text: string }
   | { kind: "nothing" }
-  | { kind: "unreadable"; reason: string };
+  | { kind: "unreadable"; reason: string }
+  /** The popup is up while the hotkey keys are still held; the selection is read next. */
+  | { kind: "pending" };
 
 export interface Target {
   app_name: string;
@@ -83,6 +85,8 @@ export interface PopupState {
   targetFocused: boolean;
   targetAlive: boolean;
   busy: boolean;
+  /** Waiting for the selection: placeholders show and nothing is sent. */
+  pending: boolean;
 }
 
 export function initialState(): PopupState {
@@ -105,6 +109,7 @@ export function initialState(): PopupState {
     targetFocused: false,
     targetAlive: true,
     busy: false,
+    pending: false,
   };
 }
 
@@ -120,6 +125,10 @@ export function fromPayload(p: OpenPayload): PopupState {
     s.text = p.capture.text;
     s.editable = false;
     s.needsLongConfirm = p.capture.text.length > p.long_text_limit;
+  } else if (p.capture.kind === "pending") {
+    s.pending = true;
+    s.editable = false;
+    s.drafts = Array.from({ length: expectedDrafts(s) }, () => ({ text: "", status: "waiting" as DraftStatus, issues: [] }));
   } else if (p.capture.kind === "unreadable") {
     s.notice = p.capture.reason;
   }
@@ -139,7 +148,7 @@ export function expectedDrafts(s: PopupState): number {
 
 /** Drafts start immediately unless there is no text or a long text still needs a yes. */
 export function shouldAutoStart(s: PopupState): boolean {
-  return s.text.trim().length > 0 && !s.needsLongConfirm && !s.error;
+  return !s.pending && s.text.trim().length > 0 && !s.needsLongConfirm && !s.error;
 }
 
 export function buildRequest(s: PopupState, followup: string | null = null): Request {

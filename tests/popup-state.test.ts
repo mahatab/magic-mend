@@ -48,6 +48,19 @@ describe("opening", () => {
     expect(replaceMode(s).enabled).toBe(false);
   });
 
+  it("pending selection shows placeholders and sends nothing until the text arrives", () => {
+    const s = fromPayload(payload({ capture: { kind: "pending" } }));
+    expect(s.pending).toBe(true);
+    expect(s.editable).toBe(false);
+    expect(s.drafts).toHaveLength(2);
+    expect(s.drafts.every((d) => d.status === "waiting" && !d.text)).toBe(true);
+    expect(shouldAutoStart(s)).toBe(false);
+    expect(s.drafts.some((d) => canActOn(d))).toBe(false);
+    const filled = fromPayload(payload({ capture: { kind: "text", text: "hello there" } }));
+    expect(filled.pending).toBe(false);
+    expect(shouldAutoStart(filled)).toBe(true);
+  });
+
   it("unreadable selection shows one plain line", () => {
     const s = fromPayload(payload({ capture: { kind: "unreadable", reason: "The selection is not text." } }));
     expect(s.notice).toBe("The selection is not text.");

@@ -176,11 +176,26 @@ fn hotkey_pressed(app: &AppHandle) {
         }
     }
     let vk = hotkey::parse(&s.hotkey).and_then(|h| h.virtual_key());
+    let channel_name = match (&fg, own_window) {
+        (Some(w), false) => channel::detect(&s.channel_rules, &w.process, &w.title),
+        _ => "Text".to_string(),
+    };
+    let id = st.session_ids.fetch_add(1, Ordering::SeqCst) + 1;
+    *st.session.lock().unwrap() = Some(PopupSession { id, target: fg.clone(), own_window, target_focused: false });
+    // Show the popup right away, without focus, while the user is still letting go of the keys.
+    // The selection is copied from the app in front, so the popup must not take focus yet.
+    let elevated = fg.as_ref().map(|w| w.elevated).unwrap_or(false);
+    let shown_early = !elevated
+        && fg.is_some()
+        && show_popup_early(app, fg.as_ref().map(|w| w.handle), &s.popup_position, &popup_payload(id, &s, fg.as_ref(), own_window, Capture::Pending, &channel_name, None));
+    if shown_early {
+        logging::timing("popup_visible", pressed_at.elapsed().as_millis());
+    }
     let mut clipboard_warning = false;
     let capture = match &fg {
         Some(w) if w.elevated => Capture::Unreadable { reason: ADMIN_MESSAGE.into() },
         _ => {
-            let (c, t) = selection::capture(vk);
+            let (c, t) = selection::capture(vk, if shown_early { fg.as_ref().map(|w| w.handle) } else { None });
             clipboard_warning = t.unrestorable > 0;
             logging::event(
                 "capture",
@@ -189,17 +204,34 @@ fn hotkey_pressed(app: &AppHandle) {
             c
         }
     };
-    let channel_name = match (&fg, own_window) {
-        (Some(w), false) => channel::detect(&s.channel_rules, &w.process, &w.title),
-        _ => "Text".to_string(),
-    };
+    // Esc during the wait closes the popup and ends the session: do not bring it back.
+    if st.session.lock().unwrap().as_ref().map(|p| p.id) != Some(id) {
+        logging::event("closed_before_capture", &[]);
+        return;
+    }
     let engine_error = st.engine.lock().unwrap().begin_session().err();
-    let id = st.session_ids.fetch_add(1, Ordering::SeqCst) + 1;
-    *st.session.lock().unwrap() = Some(PopupSession { id, target: fg.clone(), own_window, target_focused: false });
     let mut payload = popup_payload(id, &s, fg.as_ref(), own_window, capture, &channel_name, engine_error);
     payload.clipboard_warning = clipboard_warning;
     show_popup(app, fg.as_ref().map(|w| w.handle), &s.popup_position, &payload);
-    logging::timing("popup_visible", pressed_at.elapsed().as_millis());
+    logging::timing(if shown_early { "popup_ready" } else { "popup_visible" }, pressed_at.elapsed().as_millis());
+}
+
+/// Shows the popup in its "reading your selection" state without taking focus. Returns false
+/// where that is not possible (the Mac), and the popup then opens after the capture as before.
+fn show_popup_early(app: &AppHandle, target: Option<isize>, position: &str, payload: &PopupPayload) -> bool {
+    #[cfg(windows)]
+    {
+        let Some(popup) = app.get_webview_window("popup") else { return false };
+        let Ok(handle) = popup.hwnd().map(|h| h.0 as isize) else { return false };
+        let _ = popup.emit("popup:open", payload);
+        place_popup(&popup, target, position, 420.0);
+        imp::show_without_focus(handle)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (app, target, position, payload);
+        false
+    }
 }
 
 /// Whether this window is the one in front. Tauri's focus flag can lag behind on Windows, so

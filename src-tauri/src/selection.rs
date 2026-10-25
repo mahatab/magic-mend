@@ -18,6 +18,8 @@ pub enum Capture {
     Nothing,
     /// The selection cannot be read (password field, locked or elevated app).
     Unreadable { reason: String },
+    /// The popup is on screen and the selection is read next (sent to the popup only).
+    Pending,
 }
 
 /// Waits until no modifier key is held, so a simulated Ctrl+C is never combined with Alt or
@@ -50,13 +52,20 @@ pub fn wait_for_change(before: u64, timeout: Duration) -> bool {
 }
 
 /// Runs the full capture. The original clipboard is always restored before returning.
-pub fn capture(extra_vk: Option<u16>) -> (Capture, CaptureTimings) {
+/// `expected` is the window the hotkey was pressed in. If another window came to the front
+/// while the keys were held (the user clicked the popup, for example), nothing is copied.
+pub fn capture(extra_vk: Option<u16>, expected: Option<isize>) -> (Capture, CaptureTimings) {
     let mut t = CaptureTimings::default();
     let start = Instant::now();
     if !wait_for_release(extra_vk, RELEASE_WAIT) {
         return (Capture::Unreadable { reason: "The hotkey keys were held down too long.".into() }, t);
     }
     t.release_ms = start.elapsed().as_millis() as u64;
+    if let Some(h) = expected {
+        if imp::root_handle(imp::foreground_handle()) != imp::root_handle(h) {
+            return (Capture::Unreadable { reason: "Another window came to the front before Magic Mend could read the selection. Paste or type the text here.".into() }, t);
+        }
+    }
     let snapshot = imp::save_clipboard();
     t.unrestorable = snapshot.unrestorable;
     let before = imp::clipboard_seq();

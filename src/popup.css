@@ -148,6 +148,10 @@ header {
   word-break: break-word;
   color: var(--text);
 }
+.original .text.reading {
+  color: var(--muted);
+  font-style: italic;
+}
 .original textarea {
   width: 100%;
   min-height: 56px;
