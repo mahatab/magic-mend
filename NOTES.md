@@ -18,7 +18,8 @@ Decisions, deviations from the spec, and ideas that are not in the spec.
 - **Enter in the follow-up box.** Kept as the spec default. The end-to-end test sends a real Enter key while the popup is in front and confirms nothing reaches the app underneath.
 - **Modifier wait.** Capture waits for Ctrl, Alt, Shift, and Win to be released, not the hotkey letter. Windows can report a letter as held long after it was released (after a lock screen, for example), which blocked capture for 10 seconds in testing. A held letter cannot turn Ctrl+C into another shortcut.
 - **Mac popup.** Tauri has no non-activating panel, so the spec fallback is used: the popup activates, and Replace re-activates the original app before Cmd+V.
-- **Test hooks.** `MAGIC_MEND_DATA_DIR` points the app at a throwaway folder for automated tests. The test window, fake claude, and harness are separate binaries that are not part of the installer.
+- **Test hooks.** `MAGIC_MEND_DATA_DIR` points the app at a throwaway folder for automated tests. The test window, fake claude, fake codex, and harness are separate binaries that build only with `--features test-tools`, so they never end up in the installer.
+- **Clipboard wait before paste.** Clipboard history and other monitors open the clipboard to read each new value. An app that pastes at that moment finds it locked and silently pastes nothing, which happened about once in six Replace runs in testing. Replace now waits (up to 400 ms) until Magic Mend can open the clipboard twice in a row before it sends the paste shortcut. The Mac pasteboard has no lock, so the wait is a no-op there.
 
 - **Default model: sonnet, priming off.** From the M1 report: sonnet is faster once warm and handles Fix errors only correctly. Haiku stays available in Settings.
 
@@ -39,6 +40,14 @@ Decisions, deviations from the spec, and ideas that are not in the spec.
 
 - OpenAI labels `app-server` experimental. Magic Mend was built and tested against `codex-cli 0.163.0-alpha`; a future protocol change may need an update. The fake codex used by the tests documents the subset Magic Mend relies on.
 - GPT-6-Luna follows the repeated-word rule less reliably than Claude: on the "move-in date" example, about one draft in four still said "move the move-in date".
+
+## Mac signing and notarization
+
+- **Workflow.** `.github/workflows/release-mac.yml`, modeled on the Synode release workflow: import the Developer ID certificate into a temporary keychain, build the universal app, let Tauri sign it (hardened runtime) and notarize it, verify with `codesign --verify --strict`, `spctl --assess` (must say "Notarized Developer ID"), and `stapler validate`, then attach the `.dmg` to the release. It runs on `v*` tags and by hand with a tag.
+- **Secrets.** `APPLE_CERTIFICATE` (base64 of the `.p12`), `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD` (an app-specific password, not the Apple ID password), and `APPLE_TEAM_ID`.
+- **No Mac needed.** The certificate request and the `.p12` were made on Windows with the OpenSSL that ships with Git. The `.p12` uses the older SHA1 and 3DES encryption (`-keypbe PBE-SHA1-3DES -certpbe PBE-SHA1-3DES -macalg sha1`) so the macOS `security import` on the build machine accepts it. In Git Bash, `-subj "/CN=..."` needs `MSYS_NO_PATHCONV=1`, or Git Bash turns it into a Windows path.
+- **Stapling.** The ticket is stapled to the app inside the `.dmg`, so it opens offline. The `.dmg` file itself carries no ticket, which Gatekeeper does not need.
+- **Certificate expiry.** The current Developer ID certificate is valid until 24 November 2027. Replace the two certificate secrets before then.
 
 ## Deviations
 

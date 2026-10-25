@@ -21,7 +21,7 @@
 
 ---
 
-Magic Mend is a small tray app for **Windows and macOS** that rewrites the text you select, in any app, into a clear and human message. Select a message in WhatsApp, Outlook, LinkedIn, a browser, or anywhere else, press **Ctrl+Alt+R**, pick a tone in a calm popup, and click **Replace**. The new text drops right back where the old text was.
+Magic Mend is a small tray app for **Windows and macOS** that rewrites the text you select, in any app, into a clear and human message. Select a message in WhatsApp, Outlook, LinkedIn, a browser, or anywhere else, press **Ctrl+Alt+R** (**Ctrl+Option+R** on a Mac), pick a tone in a calm popup, and click **Replace**. The new text drops right back where the old text was.
 
 It runs on **your own Claude or ChatGPT login** through each service's official command (`claude` for Claude, OpenAI's `codex` for ChatGPT), so there is no account, no extra subscription, and no server in between. Have both? Pick one in setup and switch from the tray any time.
 
@@ -87,7 +87,7 @@ The first launch opens a short setup wizard. It finds `claude` and `codex`, chec
 
 ### Output You Can Trust
 - **Sounds like a person**: plain words, no corporate filler
-- **No contractions and no em dashes**, ever. Every draft is scanned (straight and curly apostrophes included). If one slips through, Claude is asked once to fix it, and any leftover em dash is fixed locally. Replace and Copy stay off until a draft passes
+- **No contractions and no em dashes**, ever. Every draft is scanned (straight and curly apostrophes included). If one slips through, Claude or ChatGPT is asked once to fix it, and any leftover em dash is fixed locally. Replace and Copy stay off until a draft passes
 - **Facts kept exactly**: names, numbers, dates, times, prices, links, and addresses
 - **Greetings and special phrases kept as written**, in any language, such as *"Good morning everyone!"*
 - **Never invents** facts, promises, or names, and keeps your first person voice
@@ -115,7 +115,7 @@ The first launch opens a short setup wizard. It finds `claude` and `codex`, chec
 
 ### Polished Details
 - **Light and dark** themes that follow your system, with a translucent acrylic background on Windows 11 and vibrancy on macOS
-- **Streaming drafts** that fade in word by word, with a soft shimmer while Claude starts
+- **Streaming drafts** that fade in word by word, with a soft shimmer while the first words are on their way
 - **Reduced motion** respected everywhere
 - **Accessible**: WCAG AA contrast, visible focus rings, screen reader labels on every control, zero axe-core violations
 - **Plain error messages** that name the service and the fix: command missing, signed out, plan limit reached, offline, model not on your plan, or a 30 second timeout with Retry
@@ -153,7 +153,7 @@ The first launch opens a short setup wizard. It finds `claude` and `codex`, chec
 <p align="center">
   <img src="docs/images/screenshots/popup-streaming.png" alt="Drafts streaming into the popup word by word" width="400" />
 </p>
-<p align="center"><em>Drafts stream in as Claude writes them. Replace and Copy turn on once a draft passes the output check.</em></p>
+<p align="center"><em>Drafts stream in as Claude or ChatGPT writes them. Replace and Copy turn on once a draft passes the output check.</em></p>
 
 <p align="center">
   <img src="docs/images/screenshots/wizard-welcome.png" alt="Setup wizard welcome screen" width="270" />
@@ -203,9 +203,10 @@ Measured on Windows 11 over 20 sample messages per mode, with `claude` 2.1.296 a
 
 **Good to know**
 - **Nothing selected?** The popup opens with an empty box. Paste or type, and Copy works.
-- **Long text?** Over 4,000 characters, Magic Mend asks before anything goes to Claude.
-- **Tray menu** (right-click the needle icon): Settings, Run setup again, Pause, Quit.
-- **Rewrites count toward your Claude plan limits.**
+- **Long text?** Over 4,000 characters, Magic Mend asks before anything goes to Claude or ChatGPT.
+- **Tray menu** (right-click the needle icon; on a Mac, click it in the menu bar): Rewrite with Claude, Rewrite with ChatGPT, Settings, Run setup again, Pause, Quit.
+- **Rewrites count toward the plan limits** of the service you chose.
+- **On a Mac**, the shortcuts are Cmd+C and Cmd+V, and setup asks for the Accessibility permission, which macOS requires for copying the selection and pasting the draft.
 
 ## Under the Hood
 
@@ -239,7 +240,7 @@ Isolation is proven for both: a marker in your user CLAUDE.md or `~/.codex/AGENT
 
 **Capture.** Save every clipboard format, wait for Ctrl, Alt, Shift, and Win to be released (so the copy shortcut never turns into another shortcut), send Ctrl+C, wait for the clipboard sequence number to move (up to 400 ms), read the text, restore the clipboard.
 
-**Replace.** Write the draft to the clipboard (hidden from clipboard history), bring the original window back, wait 80 ms, check that it really is in front, send Ctrl+V, wait 500 ms for slow apps, restore the clipboard.
+**Replace.** Write the draft to the clipboard (hidden from clipboard history), wait until clipboard history and other monitors have let go of it (an app that pastes while they read gets nothing), bring the original window back, wait 80 ms, check that it really is in front, send Ctrl+V, wait 500 ms for slow apps, restore the clipboard.
 
 **Reading the stream.** An incremental parser pulls each draft out of the half-finished JSON so words appear as they arrive. Only the reply to the newest request is shown, chip changes wait 300 ms to settle, an invalid reply gets one repair request, and a 30 second timeout offers Retry.
 
@@ -258,6 +259,8 @@ cd magic-mend && npm install && npx tauri build
 **Windows** produces `src-tauri/target/release/bundle/nsis/Magic Mend_1.1.0_x64-setup.exe`.
 **macOS** run `npx tauri build --target universal-apple-darwin --bundles app,dmg` (add both Rust Apple targets first) to produce `Magic Mend.app` and a `.dmg`. On first run the wizard asks for the Accessibility permission, which macOS requires for copying the selection and pasting the draft.
 
+**Releases.** The Windows installer is built locally. The signed and notarized Mac `.dmg` comes from the [Release macOS](.github/workflows/release-mac.yml) workflow, which runs on every `v*` tag (or by hand with a tag) and attaches the `.dmg` to that release. It needs six repository secrets for the Developer ID certificate and Apple notarization; the workflow file lists them.
+
 For development: `npm run dev` serves the popup with a built-in fake backend at `http://localhost:1420/?mock` (add `&email`, `&empty`, `&long`, `&error`, `&fix`, or `&dark`).
 
 ## Testing
@@ -269,7 +272,7 @@ For development: `npm run dev` serves the popup with a built-in fake backend at 
 | Windows end to end | see below | 23 pass | The real app, real clipboard, and real key presses against a test window, with a fake `claude` and a fake `codex`, including switching between them |
 | Live harness | `mm-harness timing`, `quality`, `isolation` (add `--provider chatgpt`) | pass | Timings, output rules over 159 live runs across both services, facts, follow-ups, setup isolation |
 | Accessibility | axe-core | 0 violations | Popup (light and dark), wizard, settings |
-| CI | GitHub Actions | passing | Windows tests and lints on every push, plus a macOS build and test run |
+| CI | GitHub Actions | passing | Windows tests and lints on every push, a macOS build and test run, and a signed release build verified with `codesign`, `spctl` (Notarized Developer ID), and `stapler` |
 
 The end-to-end suite proves the hard rules on a real desktop: text replaced and Ctrl+Z restores it, the clipboard comes back with every format, no Enter ever reaches the app underneath, terminals are skipped, the warm spare is replaced after each session, and every failure shows a plain message. To run it:
 
@@ -310,7 +313,8 @@ magic-mend/
 ├── src/                    Popup, wizard, and settings UI (TypeScript, CSS design tokens)
 ├── prompts/system.txt      The rewrite prompt
 ├── tests/                  UI unit tests, 20 sample messages, end-to-end suite
-└── docs/                   Spec, M1 timing report, test results
+├── .github/workflows/      CI, and the signed and notarized Mac release
+└── docs/                   Spec, Claude and ChatGPT timing reports, test results
 ```
 
 ### Tech Stack
