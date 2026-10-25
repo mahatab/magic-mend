@@ -7,7 +7,7 @@ use super::{ClipboardSnapshot, SavedFormat, WindowInfo};
 use std::ffi::c_void;
 use std::time::{Duration, Instant};
 use windows::core::{PCWSTR, PWSTR};
-use windows::Win32::Foundation::{CloseHandle, GlobalFree, HANDLE, HGLOBAL, HWND, LPARAM, POINT, RECT};
+use windows::Win32::Foundation::{CloseHandle, GlobalFree, HANDLE, HGLOBAL, HWND, LPARAM, POINT, RECT, WPARAM};
 use windows::Win32::Graphics::Gdi::{
     DeleteObject, GetDC, GetDIBits, GetMonitorInfoW, GetObjectW, MonitorFromPoint, MonitorFromWindow, ReleaseDC,
     BITMAP, BITMAPINFO, BITMAPINFOHEADER, BI_RGB, DIB_RGB_COLORS, HBITMAP, HGDIOBJ, MONITORINFO,
@@ -37,10 +37,11 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
 };
 use windows::Win32::UI::Shell::{SHGetFileInfoW, SHFILEINFOW, SHGFI_ICON, SHGFI_LARGEICON};
 use windows::Win32::UI::WindowsAndMessaging::{
-    BringWindowToTop, CreateWindowExW, DestroyIcon, DestroyWindow, EnumChildWindows, GetAncestor, GetCursorPos,
-    GetForegroundWindow, GetIconInfo, GetWindowTextW, GetWindowThreadProcessId, IsIconic, IsWindow,
-    IsWindowVisible, SetForegroundWindow, ShowWindow, GA_ROOT, HICON, HWND_MESSAGE, ICONINFO, SW_RESTORE, SW_SHOWNOACTIVATE,
-    WINDOW_EX_STYLE, WINDOW_STYLE,
+    BringWindowToTop, CreateWindowExW, DestroyIcon, DestroyWindow, EnumChildWindows, GetAncestor, GetClassNameW,
+    GetCursorPos, GetForegroundWindow, GetGUIThreadInfo, GetIconInfo, GetWindowTextW, GetWindowThreadProcessId,
+    IsIconic, IsWindow, IsWindowVisible, SendMessageTimeoutW, SetForegroundWindow, ShowWindow, GA_ROOT,
+    GUITHREADINFO, HICON, HWND_MESSAGE, ICONINFO, SMTO_ABORTIFHUNG, SW_RESTORE, SW_SHOWNOACTIVATE, WINDOW_EX_STYLE,
+    WINDOW_STYLE, WM_PASTE,
 };
 
 // Standard clipboard formats that are not plain memory blocks.
@@ -348,6 +349,32 @@ pub fn send_copy() -> bool {
 
 pub fn send_paste() -> bool {
     send_ctrl_letter(super::Letter::V)
+}
+
+/// Pastes into a classic Windows edit box with WM_PASTE instead of Ctrl+V. These boxes try to
+/// open the clipboard only once, and some background apps open it whenever Ctrl is pressed,
+/// so Ctrl+V can paste nothing. WM_PASTE presses no key at all. Returns None when the focused
+/// control in the target window is not a classic edit box, so Ctrl+V is used as usual.
+pub fn paste_without_keys(target: isize) -> Option<bool> {
+    unsafe {
+        let thread = GetWindowThreadProcessId(hwnd_from(target), None);
+        let mut gui = GUITHREADINFO { cbSize: std::mem::size_of::<GUITHREADINFO>() as u32, ..Default::default() };
+        GetGUIThreadInfo(thread, &mut gui).ok()?;
+        let focus = gui.hwndFocus;
+        if focus.0.is_null() || !same_root(focus.0 as isize, target) {
+            return None;
+        }
+        let mut buf = [0u16; 64];
+        let n = GetClassNameW(focus, &mut buf);
+        let class = String::from_utf16_lossy(&buf[..n.max(0) as usize]);
+        // WinForms text boxes are classic edit boxes with a longer class name.
+        if !class.eq_ignore_ascii_case("Edit") && !class.to_ascii_uppercase().starts_with("WINDOWSFORMS10.EDIT.") {
+            return None;
+        }
+        let mut result = 0usize;
+        let sent = SendMessageTimeoutW(focus, WM_PASTE, WPARAM(0), LPARAM(0), SMTO_ABORTIFHUNG, 2000, Some(&mut result));
+        Some(sent.0 != 0)
+    }
 }
 
 fn key_down(vk: i32) -> bool {
