@@ -22,7 +22,7 @@ const ALLOWED = new Set([
 function files(dir: string): string[] {
   const out: string[] = [];
   for (const e of readdirSync(dir)) {
-    if (["node_modules", "target", "dist", "gen", ".git", "spec", "icons", "reports"].includes(e)) continue;
+    if (["node_modules", "target", "dist", "gen", ".git", ".claude", "spec", "icons", "reports"].includes(e)) continue;
     const p = join(dir, e);
     if (statSync(p).isDirectory()) out.push(...files(p));
     else if (/\.(ts|mjs|rs|html|css|md|txt|json|nsh)$/.test(e) && !/package-lock|Cargo\.lock|SPEC\.md|M1-timing-report/.test(e)) out.push(p);
