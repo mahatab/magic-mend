@@ -52,6 +52,7 @@ Decisions, deviations from the spec, and ideas that are not in the spec.
 
 ## Deviations
 
+- **WM_PASTE for classic edit boxes.** The spec says paste is simulated with Ctrl+V. A classic Windows edit box (and a WinForms text box built on one) gets a WM_PASTE message instead. That box tries to open the clipboard only once, and a background app that reads the clipboard while Ctrl is held made about 1 paste in 8 land on nothing. WM_PASTE presses no key and returns after the paste. Rich edit boxes, browsers, and every other app still get Ctrl+V. No Enter is ever sent either way.
 - **Window corners on Windows 11.** With acrylic turned on, Windows draws the frame, and its rounded corner radius is 8 px, not 16 px. When acrylic is not available (Windows 10) the popup draws its own 16 px corners on a solid background.
 - **Channel title rule for "Mail".** Title words match whole words only, so "Mailchimp" does not count as email.
 

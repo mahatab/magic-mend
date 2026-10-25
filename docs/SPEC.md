@@ -262,7 +262,7 @@ Build Windows first, but keep platform code behind one interface per feature (ho
 
 **Windows**
 
-- Copy and paste are simulated with Ctrl+C and Ctrl+V. A classic Windows edit box gets a WM_PASTE message instead of Ctrl+V, because it tries to open the clipboard only once and a background app that reacts to Ctrl can be holding it at that moment.
+- Copy and paste are simulated with Ctrl+C and Ctrl+V.
 - At hotkey time, record the foreground window handle. On Replace, hide the popup, bring that window back to the front, wait about 80 ms, then paste. Windows restricts which process may take focus, so Claude Code must test this carefully.
 - An app running as administrator ignores keys from a normal app. Detect this case and show a plain message with Copy still working.
 - Use acrylic or Mica on Windows 11 and a solid background on Windows 10.
