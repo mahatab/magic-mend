@@ -31,12 +31,12 @@ const SAMPLE = "hey sam, the plumber cant come till thursday so can we push the 
 
 const FAKE: Record<string, string[]> = {
   Simple: [
-    "Hey Sam, the plumber cannot come until Thursday. Can we push the move-in date to Saturday instead? Sorry for the trouble.",
-    "Hey Sam, the plumber can not make it until Thursday, so can we move the move-in date to Saturday? I am sorry for the trouble.",
+    "Hey Sam, the plumber cannot come until Thursday, so can we change the move-in date to Saturday instead? Sorry for the trouble.",
+    "Hey Sam, the plumber is not able to come until Thursday. Can we shift the move-in date to Saturday? Sorry for the trouble.",
   ],
   Respectful: [
-    "Hey Sam, the plumber cannot come until Thursday. Could we please push the move-in date to Saturday instead? Sorry for the trouble.",
-    "Hey Sam, the plumber is not available until Thursday, so could we move the move-in date to Saturday instead? I am sorry for the trouble.",
+    "Hey Sam, the plumber cannot come until Thursday. Could we please change the move-in date to Saturday instead? Sorry for the trouble.",
+    "Hey Sam, the plumber is not able to come until Thursday, so could we please shift the move-in date to Saturday instead? I am sorry for the trouble.",
   ],
 };
 

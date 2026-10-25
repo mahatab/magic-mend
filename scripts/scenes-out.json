@@ -1,8 +1,8 @@
 {
   "email": {
     "drafts": [
-      "Hi Priya,\n\nI am following up to see if you had a chance to review the proposal I sent on March 12. I would be happy to walk you through it on a call this week.\n\nBest,",
-      "Hi Priya,\n\nI wanted to check whether you have had a chance to look at the proposal I sent on March 12. I am available to go over it with you on a call this week.\n\nBest,"
+      "Hi Priya,\n\nI am following up to see if you have had a chance to review the proposal I sent on March 12. I would be glad to walk you through it on a call this week.\n\nBest,",
+      "Hi Priya,\n\nI wanted to check whether you have had time to look at the proposal I sent on March 12. I am happy to go over it with you on a call this week.\n\nBest,"
     ],
     "subject": "Following up on my March 12 proposal"
   },
@@ -15,28 +15,28 @@
   "followup": {
     "drafts": [
       "Hi Daniel,\n\nI would be glad to join the panel on May 8.\n\nI can share my slides by May 1.",
-      "Hi Daniel,\n\nI would be happy to join the panel on May 8, and I can send my slides by May 1."
+      "Hi Daniel,\n\nI am happy to join the panel on May 8 and I can send my slides by May 1."
     ],
     "subject": null
   },
   "greeting": {
     "drafts": [
-      "Good morning everyone! Quick reminder, the community cleanup is this Sunday at 9am at Riverside Park. Bring gloves if you have them.",
-      "Good morning everyone! Just a reminder that the community cleanup is this Sunday at 9am at Riverside Park. Please bring gloves if you have them."
+      "Good morning everyone! Just a reminder that the community cleanup is this Sunday at 9am at Riverside Park. Bring gloves if you have them.",
+      "Good morning everyone! A quick reminder that the community cleanup is this Sunday at 9am at Riverside Park. Please bring gloves if you have any."
     ],
     "subject": null
   },
   "warm": {
     "drafts": [
-      "Hey Sam, the plumber cannot come until Thursday, so could we push the move-in date to Saturday instead? I am sorry for the trouble.",
-      "Hey Sam, the plumber is not able to come until Thursday. Would it be okay to move the move-in date to Saturday? Sorry for the trouble."
+      "Hey Sam, the plumber cannot come until Thursday, so could we change the move-in date to Saturday instead? I am sorry for the trouble.",
+      "Hey Sam, the plumber is not able to come until Thursday. Would it be okay to shift the move-in date to Saturday? Sorry for the trouble."
     ],
     "subject": null
   },
   "whatsapp": {
     "drafts": [
-      "Hey Sam, the plumber cannot come until Thursday. Can we push the move-in date to Saturday instead? Sorry for the trouble.",
-      "Hey Sam, the plumber can not make it until Thursday, so can we move the move-in date to Saturday? I am sorry for the trouble."
+      "Hey Sam, the plumber cannot come until Thursday, so can we change the move-in date to Saturday instead? Sorry for the trouble.",
+      "Hey Sam, the plumber is not able to come until Thursday. Can we shift the move-in to Saturday instead? Sorry for the trouble."
     ],
     "subject": null
   }
