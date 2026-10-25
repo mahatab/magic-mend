@@ -40,12 +40,14 @@ You select text and press the hotkey. Magic Mend copies the selection (and puts 
 
 <p>
   <a href="https://github.com/mahatab/magic-mend/releases/download/v1.1.0/Magic.Mend_1.1.0_x64-setup.exe"><img src="https://img.shields.io/badge/Download%20for%20Windows-1.7%20MB-4C5CE8?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" /></a>
+  &nbsp;
+  <a href="https://github.com/mahatab/magic-mend/releases/download/v1.1.0/Magic.Mend_1.1.0_universal.dmg"><img src="https://img.shields.io/badge/Download%20for%20macOS-4.9%20MB-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS" /></a>
 </p>
 
 | | |
 | --- | --- |
 | **Windows** | Windows 10 or 11, 64-bit. Installs for your user only (no admin prompt) and starts at login. |
-| **macOS** | `Magic.Mend_1.1.0_universal.dmg` on the [release page](https://github.com/mahatab/magic-mend/releases/latest) (Apple silicon and Intel). Signed with a Developer ID and notarized by Apple, so it opens like any other app. |
+| **macOS** | macOS 11 or later, Apple silicon and Intel. Open the `.dmg` and drag Magic Mend to Applications. Signed with a Developer ID and notarized by Apple, so it opens like any other app. |
 | **You also need** | Claude, ChatGPT, or both:<br>**Claude**: [Claude Code](https://claude.com/product/claude-code), signed in once with `claude auth login`.<br>**ChatGPT**: the [Codex app](https://openai.com/codex), the ChatGPT extension for VS Code, or `npm i -g @openai/codex`, signed in once with `codex login`. |
 
 The first launch opens a short setup wizard. It finds `claude` and `codex`, checks that each is signed in, sends one tiny test rewrite through each, lets you choose which one writes your drafts, lets you choose a hotkey and your default tone, and ends with a practice box where you try the whole thing. It takes under two minutes.
