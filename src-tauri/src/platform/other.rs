@@ -11,6 +11,7 @@ pub fn read_clipboard_text() -> Option<String> { None }
 pub fn write_clipboard_text(_t: &str, _private: bool) -> bool { false }
 pub fn send_copy() -> bool { false }
 pub fn send_paste() -> bool { false }
+pub fn paste_without_keys(_t: isize) -> Option<bool> { None }
 pub fn modifiers_held(_v: Option<u16>) -> bool { false }
 pub fn foreground_handle() -> isize { 0 }
 pub fn root_handle(h: isize) -> isize { h }

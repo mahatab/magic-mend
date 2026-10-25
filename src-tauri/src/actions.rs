@@ -1,5 +1,6 @@
 //! Replace and Copy (spec, "User flow" step 7). Replace never presses Enter: its only key
-//! output is the paste shortcut, and the pasted text never ends with a line break.
+//! output is the paste shortcut (classic Windows edit boxes get a paste message and no key at
+//! all), and the pasted text never ends with a line break.
 
 use crate::platform::imp;
 use crate::protocol::clean_draft;
@@ -54,9 +55,13 @@ pub fn replace(target: isize, target_elevated: bool, draft: &str, hide_popup: im
         return ReplaceOutcome::WindowLost;
     }
     imp::wait_clipboard_free(CLIPBOARD_FREE_WAIT);
-    let ok = imp::send_paste();
-    // Slow apps read the clipboard late.
-    std::thread::sleep(PASTE_SETTLE);
+    // A paste message returns after the edit box has pasted, so no settle time is needed.
+    let ok = imp::paste_without_keys(target).unwrap_or_else(|| {
+        let ok = imp::send_paste();
+        // Slow apps read the clipboard late.
+        std::thread::sleep(PASTE_SETTLE);
+        ok
+    });
     imp::restore_clipboard(&snapshot);
     if ok {
         ReplaceOutcome::Pasted

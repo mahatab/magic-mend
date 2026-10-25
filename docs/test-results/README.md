@@ -8,7 +8,7 @@ Updated 2026-10-24 for v1.1.0 (Claude and ChatGPT). Details for each suite are i
 | --- | --- |
 | Rust unit tests (`cargo test --lib`) | 53 pass, on Windows and on macOS (CI) |
 | UI unit tests (`npm test`), including a scan of every source, comment, and doc for contractions and em dashes | 20 pass |
-| Windows end to end ([e2e-windows.md](e2e-windows.md)): real app, real clipboard, real keys, fake Claude and fake Codex | 22 pass; the multi-line paste test (20) is intermittent, also before this release |
+| Windows end to end ([e2e-windows.md](e2e-windows.md)): real app, real clipboard, real keys, fake Claude and fake Codex | 23 pass. The multi-line paste test (20), once intermittent, passed 20 of 20 runs after classic edit boxes started getting WM_PASTE instead of Ctrl+V |
 | Live Claude: 20 messages, Haiku and Sonnet, cold, warm, primed ([report](../M1-timing-report.md)) | pass |
 | Live ChatGPT: 20 messages, GPT-5.6-Luna, GPT-6-Luna, GPT-6.1-Sol, cold and warm ([report](../ChatGPT-timing-report.md)) | pass |
 | Setup isolation, live: marker in user CLAUDE.md plus a hook (Claude), marker in `~/.codex/AGENTS.md` (ChatGPT) | pass for both; control runs picked up the marker |

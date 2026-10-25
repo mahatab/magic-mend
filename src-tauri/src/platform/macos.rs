@@ -128,6 +128,11 @@ pub fn send_paste() -> bool {
     send_cmd(KVK_ANSI_V, super::Letter::V)
 }
 
+/// Mac apps all paste through Command+V.
+pub fn paste_without_keys(_target: isize) -> Option<bool> {
+    None
+}
+
 pub fn modifiers_held(_extra_vk: Option<u16>) -> bool {
     // 1 is kCGEventSourceStateHIDSystemState.
     let flags = CGEventFlags::from_bits_truncate(unsafe { CGEventSourceFlagsState(1) });

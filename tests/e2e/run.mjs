@@ -86,7 +86,8 @@ async function main() {
     assert(!popupVisible(), "popup still open after Replace");
     const k = p.keys();
     assert(enterKeys(k).length === 0, `Enter reached the app: ${enterKeys(k)}`);
-    assert(k.includes("keydown ctrl+0x43") && k.includes("keydown ctrl+0x56"), `copy and paste keys missing: ${k.join(", ")}`);
+    // A classic edit box gets WM_PASTE instead of the Ctrl+V shortcut.
+    assert(k.includes("keydown ctrl+0x43") && k.includes("paste") && !k.includes("keydown ctrl+0x56"), `expected Ctrl+C, then WM_PASTE and no Ctrl+V: ${k.join(", ")}`);
     p.focus();
     await sleep(150);
     keys("ctrl+z");
@@ -237,9 +238,15 @@ async function main() {
     await waitDrafts(app, 2);
     await app.popup.click(".card .btn-primary");
     const want = "[Simple] Draft A: First line of the draft.\nSecond line of the draft.\n\nLast line.";
-    await waitFor(() => p.text() === want, { what: "multi-line text pasted" });
-    assert(enterKeys(p.keys()).length === 0, "Enter reached the app");
+    await waitFor(() => p.text() === want, { what: "multi-line text pasted" }).catch((e) => {
+      const r = app.log().match(/replace result=\w+/g);
+      throw new Error(`${e.message}; app said: ${r ? r.join(", ") : "no replace logged"}; foreground: ${fg()?.title}; window got: ${p.keys().slice(-8).join(" | ")}; text now: ${JSON.stringify(p.text())}`);
+    });
+    const k = p.keys();
+    assert(enterKeys(k).length === 0, "Enter reached the app");
+    assert(k.includes("paste") && !k.includes("keydown ctrl+0x56"), `expected WM_PASTE and no Ctrl+V: ${k.join(", ")}`);
     p.close();
+    return "pasted with WM_PASTE, no Ctrl+V and no Enter";
   });
 
   await test("12a", "Failure: signed out shows a plain message", async () => {
