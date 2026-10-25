@@ -14,6 +14,7 @@ Updated 2026-10-24 for v1.1.0 (Claude and ChatGPT). Details for each suite are i
 | Setup isolation, live: marker in user CLAUDE.md plus a hook (Claude), marker in `~/.codex/AGENTS.md` (ChatGPT) | pass for both; control runs picked up the marker |
 | Accessibility (axe-core): popup light and dark, wizard, settings | 0 violations |
 | macOS: universal build and unit tests in CI | pass |
+| macOS: Developer ID signature and Apple notarization (`codesign --verify --strict`, `spctl`: "Notarized Developer ID", `stapler validate`) | pass |
 
 ## Acceptance tests from the spec
 

@@ -45,7 +45,7 @@ You select text and press the hotkey. Magic Mend copies the selection (and puts 
 | | |
 | --- | --- |
 | **Windows** | Windows 10 or 11, 64-bit. Installs for your user only (no admin prompt) and starts at login. |
-| **macOS** | `Magic.Mend_1.1.0_universal.dmg` on the [release page](https://github.com/mahatab/magic-mend/releases/latest) (Apple silicon and Intel). Not notarized yet: right-click the app and choose Open the first time. |
+| **macOS** | `Magic.Mend_1.1.0_universal.dmg` on the [release page](https://github.com/mahatab/magic-mend/releases/latest) (Apple silicon and Intel). Signed with a Developer ID and notarized by Apple, so it opens like any other app. |
 | **You also need** | Claude, ChatGPT, or both:<br>**Claude**: [Claude Code](https://claude.com/product/claude-code), signed in once with `claude auth login`.<br>**ChatGPT**: the [Codex app](https://openai.com/codex), the ChatGPT extension for VS Code, or `npm i -g @openai/codex`, signed in once with `codex login`. |
 
 The first launch opens a short setup wizard. It finds `claude` and `codex`, checks that each is signed in, sends one tiny test rewrite through each, lets you choose which one writes your drafts, lets you choose a hotkey and your default tone, and ends with a practice box where you try the whole thing. It takes under two minutes.
@@ -337,7 +337,7 @@ magic-mend/
 
 - Replace in WhatsApp, Gmail, Messenger, LinkedIn, and Outlook was checked by design and channel tests; a hands-on pass in each app is still worth doing
 - Windows 11 draws 8 px window corners when the acrylic background is on (the design asks for 16 px)
-- The macOS build is made and tested in CI but has not had a hands-on run yet, and it is not notarized
+- The macOS build is made, signed, notarized, and tested in CI but has not had a hands-on run yet
 - OpenAI labels `codex app-server` experimental; Magic Mend is tested against `codex-cli` 0.163, and a future change may need an update
 - GPT-6-Luna follows the repeated-word rule less reliably than Claude (about one draft in four on the move-in example)
 - The Windows installer is not code signed, so SmartScreen may ask you to confirm the first run
