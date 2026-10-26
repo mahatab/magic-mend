@@ -64,14 +64,14 @@ The first launch opens a short setup wizard. It finds `claude` and `codex`, chec
 
 ### One Hotkey, Three Steps
 - **Works in any app** where you can select text: chat apps, email, browsers, documents, forms
-- **Popup on the same screen** as the window you are writing in, ready the moment the hotkey is released
+- **Popup on the same screen** as the window you are writing in. On Windows it appears the moment you press the hotkey, before you let go of the keys
 - **Two drafts start immediately** with your default tone. No clicking, no questions first
 - **Replace** pastes the draft back into the original text box. **Copy** keeps it on the clipboard instead
 
 ### Tones, Lengths, and Toggles
 - **Six tones**: Clear (default), Respectful, Warm, Casual, Professional, Firm
 - **Three lengths**: Shorter, Same (default), Fuller
-- **Proofread** ![Popular](https://img.shields.io/badge/popular-A33B2E): corrects spelling, grammar, and word slips while keeping your own words, and returns one draft
+- **Proofread** ![Popular](https://img.shields.io/badge/popular-A33B2E): corrects spelling, grammar, and word slips while keeping your own words, and returns one draft. While it is on, tone, length, and the other toggles are locked, and turning it off brings your earlier choices back
 - **Softer** turns demands into suggestions (*"you can adjust"* instead of *"adjust"*)
 - **Less thankful** keeps at most one thank-you and one apology
 - Every chip change redoes the drafts, and five quick clicks still send just one request
@@ -185,7 +185,7 @@ Measured on Windows 11 over 20 sample messages per mode, with `claude` 2.1.296 a
 
 | Other measurements | |
 | --- | ---: |
-| Hotkey to visible popup | under 60 ms, before you let go of the keys |
+| Hotkey to visible popup | under 60 ms on Windows, before you let go of the keys |
 | Memory while idle | app 43 MB, WebView2 about 360 MB, warm `claude` 182 MB |
 | Installer size | 1.7 MB |
 
@@ -270,8 +270,8 @@ For development: `npm run dev` serves the popup with a built-in fake backend at 
 
 | Suite | Command | Result | What it covers |
 | --- | --- | :---: | --- |
-| Rust unit tests | `cd src-tauri && cargo test --lib` | 53 pass | Output checker, request and reply parsing, streaming extraction, draft flow (stale replies, fix round, JSON repair, timeout), channel rules, excluded apps, settings, hotkeys |
-| UI unit tests | `npm test` | 20 pass | Popup logic, Replace button states, hotkey capture, and a scan of every source file, comment, and doc for contractions and em dashes |
+| Rust unit tests | `cd src-tauri && cargo test --lib` | 55 pass | Output checker, request and reply parsing, streaming extraction, draft flow (stale replies, fix round, JSON repair, timeout), channel rules, excluded apps, settings, hotkeys |
+| UI unit tests | `npm test` | 22 pass | Popup logic, Replace button states, hotkey capture, and a scan of every source file, comment, and doc for contractions and em dashes |
 | Windows end to end | see below | 22 pass, 1 intermittent | The real app, real clipboard, and real key presses against a test window, with a fake `claude` and a fake `codex`, including switching between them |
 | Live harness | `mm-harness timing`, `quality`, `isolation` (add `--provider chatgpt`) | pass | Timings, output rules over 159 live runs across both services, facts, follow-ups, setup isolation |
 | Accessibility | axe-core | 0 violations | Popup (light and dark), wizard, settings |
