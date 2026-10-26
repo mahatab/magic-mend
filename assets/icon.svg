@@ -1,20 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#7B88FF"/>
-      <stop offset="1" stop-color="#4A55E0"/>
-    </linearGradient>
-  </defs>
-  <rect x="64" y="64" width="896" height="896" rx="208" fill="url(#bg)"/>
-  <!-- thread -->
-  <path d="M676 300 C 760 380, 700 470, 560 520 S 300 640, 330 760 S 520 820, 560 740"
-        fill="none" stroke="#FFD27A" stroke-width="34" stroke-linecap="round"/>
-  <!-- needle -->
-  <g transform="rotate(45 512 512)">
-    <path d="M512 150 C 540 150, 552 180, 552 210 L 540 760 L 512 900 L 484 760 L 472 210 C 472 180, 484 150, 512 150 Z" fill="#FFFFFF"/>
-    <rect x="497" y="200" width="30" height="110" rx="15" fill="#5A66F0"/>
+  <!-- paper tile with an ink outline -->
+  <rect x="80" y="80" width="864" height="864" rx="200" fill="#F5F4F1" stroke="#1C1B19" stroke-width="32"/>
+  <!-- mirrored so the stitches run left to right and the needle leads -->
+  <g transform="translate(1024 0) scale(-1 1) translate(-100 -80)">
+    <!-- madder thread: two running stitches, then up to the eye of the needle -->
+    <g stroke="#A33B2E" stroke-width="44" stroke-linecap="round" fill="none">
+      <path d="M462 764 H 530"/>
+      <path d="M606 764 H 674"/>
+      <path d="M750 764 C 800 764, 812 700, 806 600 C 800 470, 790 380, 746 336"/>
+    </g>
+    <!-- ink needle -->
+    <g transform="rotate(38 600 520)">
+      <path d="M600 210 C 626 210, 638 236, 638 262 L 630 700 L 600 836 L 570 700 L 562 262 C 562 236, 574 210, 600 210 Z" fill="#1C1B19"/>
+      <rect x="588" y="236" width="24" height="96" rx="12" fill="#F5F4F1"/>
+    </g>
   </g>
-  <!-- sparkle -->
-  <path d="M290 230 C 300 290, 310 300, 370 310 C 310 320, 300 330, 290 390 C 280 330, 270 320, 210 310 C 270 300, 280 290, 290 230 Z" fill="#FFFFFF"/>
-  <path d="M780 640 C 786 676, 792 682, 828 688 C 792 694, 786 700, 780 736 C 774 700, 768 694, 732 688 C 768 682, 774 676, 780 640 Z" fill="#FFFFFF" opacity="0.9"/>
 </svg>

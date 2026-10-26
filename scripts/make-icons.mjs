@@ -10,7 +10,7 @@ mkdirSync("src-tauri/icons", { recursive: true });
 render(1024, "assets/icon-1024.png");
 render(64, "src/assets/logo-64.png");
 render(32, "src-tauri/icons/tray.png");
-// Paused tray icon: the same mark in gray.
-const gray = svg.replace("#7B88FF", "#9AA0AA").replace("#4A55E0", "#6B7180");
+// Paused tray icon: the same mark with gray ink and thread.
+const gray = svg.replaceAll("#A33B2E", "#A3A6AD").replaceAll("#1C1B19", "#7A7E87");
 render(32, "src-tauri/icons/tray-paused.png", gray);
 console.log("icons written");
