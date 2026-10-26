@@ -1,13 +1,13 @@
 # Test results
 
-Updated 2026-10-24 for v1.1.0 (Claude and ChatGPT). Details for each suite are in the files next to this one and in the timing reports.
+Updated 2026-10-25 for v1.1.2 (Clear and Proofread, Proofread locking tone and length, the popup on key press, WM_PASTE for classic edit boxes). Details for each suite are in the files next to this one and in the timing reports.
 
 ## Summary
 
 | Suite | Result |
 | --- | --- |
-| Rust unit tests (`cargo test --lib`) | 53 pass, on Windows and on macOS (CI) |
-| UI unit tests (`npm test`), including a scan of every source, comment, and doc for contractions and em dashes | 20 pass |
+| Rust unit tests (`cargo test --lib`) | 55 pass, on Windows and on macOS (CI) |
+| UI unit tests (`npm test`), including a scan of every source, comment, and doc for contractions and em dashes | 22 pass |
 | Windows end to end ([e2e-windows.md](e2e-windows.md)): real app, real clipboard, real keys, fake Claude and fake Codex | 23 pass. The multi-line paste test (20), once intermittent, passed 20 of 20 runs after classic edit boxes started getting WM_PASTE instead of Ctrl+V |
 | Live Claude: 20 messages, Haiku and Sonnet, cold, warm, primed ([report](../M1-timing-report.md)) | pass |
 | Live ChatGPT: 20 messages, GPT-5.6-Luna, GPT-6-Luna, GPT-6.1-Sol, cold and warm ([report](../ChatGPT-timing-report.md)) | pass |
@@ -24,7 +24,7 @@ Updated 2026-10-24 for v1.1.0 (Claude and ChatGPT). Details for each suite are i
 | 2, 3, 4 WhatsApp, Gmail, Messenger, LinkedIn, Outlook | Manual | Manual | Needs the real apps and accounts; channel rules are unit tested |
 | 5 Enter never reaches the app underneath | Pass | Pass (same popup) | End to end |
 | 6 No selection | Pass | Pass (same popup) | End to end |
-| 7 Proofread | Pass | Pass | End to end, plus live: both correct "i has send" to "I sent" (Claude Haiku does not, so Sonnet is the Claude default) |
+| 7 Proofread | Pass | Pass | End to end (one draft; tone, length, and toggles locked and sending nothing; turning it off brings two drafts back), plus live: both correct "i has send" to "I sent" (Claude Haiku does not, so Sonnet is the Claude default) |
 | 8 No contractions or em dashes | Pass: 90 of 90 live runs | Pass: 69 of 69 live runs | Live harness |
 | 9 Facts kept | Pass (Sonnet) | Pass (GPT-6-Luna) | Live harness, flags read by hand |
 | 10 Follow-ups | Pass | Pass | Live harness and end to end |
