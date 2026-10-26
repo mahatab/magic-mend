@@ -8,9 +8,12 @@ const render = (size, file, src = svg) => {
 };
 mkdirSync("src-tauri/icons", { recursive: true });
 render(1024, "assets/icon-1024.png");
-render(64, "src/assets/logo-64.png");
+// Rendered at 128 px so the in-app logo stays sharp on high-DPI screens.
+render(128, "src/assets/logo-64.png");
 render(32, "src-tauri/icons/tray.png");
-// Paused tray icon: the same mark with gray ink and thread.
-const gray = svg.replaceAll("#A33B2E", "#A3A6AD").replaceAll("#1C1B19", "#7A7E87");
+// Paused tray icon: the same mark in gray.
+const gray = svg
+  .replace(/<svg([^>]*)>/, '<svg$1><defs><filter id="paused"><feColorMatrix type="saturate" values="0"/></filter></defs><g filter="url(#paused)" opacity="0.75">')
+  .replace("</svg>", "</g></svg>");
 render(32, "src-tauri/icons/tray-paused.png", gray);
 console.log("icons written");
