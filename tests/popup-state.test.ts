@@ -8,6 +8,10 @@ import {
   expectedDrafts,
   headerLine,
   canActOn,
+  locked,
+  pickChip,
+  flipToggle,
+  buildRequest,
   type OpenPayload,
 } from "../src/popup-state";
 import { comboFrom } from "../src/keys";
@@ -100,6 +104,29 @@ describe("requests", () => {
     expect(expectedDrafts(s)).toBe(1);
     beginRequest(s);
     expect(s.drafts).toHaveLength(1);
+  });
+
+  it("proofread locks tone, length, and the other toggles", () => {
+    const s = fromPayload(payload({ toggles: ["Proofread"] }));
+    expect(locked(s)).toBe(true);
+    expect(locked(s, "Softer")).toBe(true);
+    expect(locked(s, "Proofread")).toBe(false);
+    expect(pickChip(s, "tone", "Warm")).toBe(false);
+    expect(pickChip(s, "length", "Shorter")).toBe(false);
+    expect(flipToggle(s, "Softer")).toBe(false);
+    expect([s.tone, s.length, s.toggles]).toEqual(["Clear", "Same", ["Proofread"]]);
+  });
+
+  it("proofread sends no other toggles and turning it off restores the picks", () => {
+    const s = fromPayload(payload({ toggles: ["Softer"] }));
+    expect(pickChip(s, "tone", "Warm")).toBe(true);
+    expect(pickChip(s, "length", "Shorter")).toBe(true);
+    expect(flipToggle(s, "Proofread")).toBe(true);
+    expect(buildRequest(s).toggles).toEqual(["Proofread"]);
+    expect(flipToggle(s, "Proofread")).toBe(true);
+    expect(locked(s)).toBe(false);
+    const r = buildRequest(s);
+    expect([r.tone, r.length, r.toggles]).toEqual(["Warm", "Shorter", ["Softer"]]);
   });
 
   it("follow-ups keep the old text while new drafts stream", () => {

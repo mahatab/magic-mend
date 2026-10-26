@@ -155,15 +155,29 @@ async function main() {
     return "Copy left the draft on the clipboard as intended";
   });
 
-  await test("7", "Proofread gives one draft", async () => {
+  await test("7", "Proofread gives one draft and locks the other chips", async () => {
     const p = await openOn(app, "i has a eror", "t7");
     await waitDrafts(app, 2);
     await app.popup.click('.switch[data-toggle="Proofread"]');
     await waitFor(() => app.popup.eval(`document.querySelectorAll('.card').length === 1 && document.querySelector('.card .body').textContent.includes('Draft A')`), { what: "one draft" });
     const req = app.fakeLog().filter((l) => l.message?.includes("Proofread")).pop();
     assert(req, "request without the toggle");
+    // Tone, length, and the other toggles are locked: clicks and keys send nothing.
+    const locked = await app.popup.eval(`[...document.querySelectorAll('.tone-row .chip, .length-row .chip, .switch:not([data-toggle="Proofread"])')].every(b => b.disabled) && getComputedStyle(document.querySelector('.proof-note')).display !== 'none'`);
+    assert(locked, "controls not disabled or note hidden under Proofread");
+    const before = app.fakeLog().filter((l) => l.message?.startsWith("{")).length;
+    await app.popup.click(".tone-row .chip:nth-child(3)");
+    await app.popup.click(".length-row .chip:nth-child(1)");
+    await app.popup.click('.switch[data-toggle="Softer"]');
+    await sleep(800);
+    const extra = app.fakeLog().filter((l) => l.message?.startsWith("{")).length - before;
+    assert(extra === 0, `${extra} requests sent from locked controls`);
+    // Turning Proofread off brings back two drafts in the tone picked before.
+    await app.popup.click('.switch[data-toggle="Proofread"]');
+    await waitFor(() => app.popup.eval(`document.querySelectorAll('.card .body').length === 2 && [...document.querySelectorAll('.card .body')].every(b => b.textContent.startsWith('[Clear]')) && !document.querySelector('.tone-row .chip').disabled`), { what: "two Clear drafts after Proofread off" });
     await closePopup(app);
     p.close();
+    return "one draft; locked chips sent no request; turning Proofread off restored the picks";
   });
 
   await test("11", "Warm spare: a new process is ready after Replace", async () => {

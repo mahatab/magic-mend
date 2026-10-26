@@ -142,8 +142,34 @@ export function fromPayload(p: OpenPayload): PopupState {
 }
 
 export function expectedDrafts(s: PopupState): number {
-  if (s.toggles.includes("Proofread")) return 1;
+  if (proofreading(s)) return 1;
   return s.payload?.drafts ?? 2;
+}
+
+export function proofreading(s: PopupState): boolean {
+  return s.toggles.includes("Proofread");
+}
+
+/**
+ * Proofread ignores tone, length, and the other toggles, so those controls are locked while it
+ * is on. Their picks stay in the state and come back when Proofread is turned off.
+ */
+export function locked(s: PopupState, toggle?: string): boolean {
+  return proofreading(s) && toggle !== "Proofread";
+}
+
+/** Picks a tone or length chip. Returns true when a new request is needed. */
+export function pickChip(s: PopupState, kind: "tone" | "length", value: string): boolean {
+  if (locked(s) || s[kind] === value) return false;
+  s[kind] = value;
+  return true;
+}
+
+/** Flips a toggle. Returns true when a new request is needed. */
+export function flipToggle(s: PopupState, t: string): boolean {
+  if (locked(s, t)) return false;
+  s.toggles = s.toggles.includes(t) ? s.toggles.filter((x) => x !== t) : [...s.toggles, t];
+  return true;
 }
 
 /** Drafts start immediately unless there is no text or a long text still needs a yes. */
@@ -156,7 +182,8 @@ export function buildRequest(s: PopupState, followup: string | null = null): Req
     text: s.text,
     tone: s.tone,
     length: s.length,
-    toggles: TOGGLES.filter((t) => s.toggles.includes(t)),
+    // Softer and Less thankful stay picked under Proofread but are not sent with it.
+    toggles: proofreading(s) ? ["Proofread"] : TOGGLES.filter((t) => s.toggles.includes(t)),
     channel: s.channel,
     followup: followup && followup.trim() ? followup.trim() : null,
   };

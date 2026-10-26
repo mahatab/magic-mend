@@ -19,6 +19,10 @@ import {
   canActOn,
   headerLine,
   expectedDrafts,
+  proofreading,
+  locked,
+  pickChip,
+  flipToggle,
 } from "./popup-state";
 import logoUrl from "./assets/logo-64.png";
 
@@ -141,6 +145,7 @@ function render() {
     sw.addEventListener("click", () => toggle(t));
     toggles.append(sw);
   }
+  toggles.append(el("span", { class: "proof-note", id: "proof-note", text: "Proofread keeps your words" }));
   controls.append(toggles);
   controls.append(el("span", { class: "label", id: "channel-label", text: "Channel" }));
   const select = el("select", { "aria-labelledby": "channel-label" }) as HTMLSelectElement;
@@ -255,7 +260,13 @@ function updateControls() {
   c.querySelectorAll<HTMLElement>(".tone-row .chip").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.value === state.tone)));
   c.querySelectorAll<HTMLElement>(".length-row .chip").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.value === state.length)));
   c.querySelectorAll<HTMLElement>(".switch").forEach((b) => b.setAttribute("aria-checked", String(state.toggles.includes(b.dataset.toggle!))));
-  c.classList.toggle("fixing", state.toggles.includes("Proofread"));
+  c.classList.toggle("fixing", proofreading(state));
+  c.querySelectorAll<HTMLButtonElement>(".tone-row .chip, .length-row .chip, .switch").forEach((b) => {
+    const off = locked(state, b.dataset.toggle);
+    b.disabled = off;
+    if (off) b.setAttribute("aria-describedby", "proof-note");
+    else b.removeAttribute("aria-describedby");
+  });
   const sel = c.querySelector("select") as HTMLSelectElement;
   if (sel) sel.value = state.channel;
   refs.channelHint.textContent = state.channelAuto && state.payload?.target.present ? "(auto-detected)" : "";
@@ -359,14 +370,13 @@ function renderDrafts() {
 // Actions
 
 function setChip(kind: "tone" | "length", value: string) {
-  if (state[kind] === value) return;
-  state[kind] = value;
+  if (!pickChip(state, kind, value)) return;
   updateControls();
   scheduleRequest(CHIP_DEBOUNCE_MS);
 }
 
 function toggle(t: string) {
-  state.toggles = state.toggles.includes(t) ? state.toggles.filter((x) => x !== t) : [...state.toggles, t];
+  if (!flipToggle(state, t)) return;
   updateControls();
   scheduleRequest(CHIP_DEBOUNCE_MS);
 }
@@ -465,8 +475,9 @@ function open(p: OpenPayload) {
     void app.offsetWidth; // restart the open animation
     app.classList.add("open");
   }
-  // Keyboard focus lands on the first chip, so Esc and Tab work at once.
-  const first = (state.editable ? app.querySelector("#orig-input") : app.querySelector(".tone-row .chip[aria-checked='true']")) as HTMLElement | null;
+  // Keyboard focus lands on the first chip (or the Proofread switch when the chips are locked),
+  // so Esc and Tab work at once.
+  const first = (state.editable ? app.querySelector("#orig-input") : app.querySelector(".tone-row .chip[aria-checked='true']:not([disabled]), .switch:not([disabled])")) as HTMLElement | null;
   (first ?? app).focus();
   watchTarget();
   if (shouldAutoStart(state)) startRequest();
