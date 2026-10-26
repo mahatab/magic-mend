@@ -8,6 +8,10 @@ import {
   expectedDrafts,
   headerLine,
   canActOn,
+  locked,
+  pickChip,
+  flipToggle,
+  buildRequest,
   type OpenPayload,
 } from "../src/popup-state";
 import { comboFrom } from "../src/keys";
@@ -18,7 +22,7 @@ function payload(over: Partial<OpenPayload> = {}): OpenPayload {
     capture: { kind: "text", text: "hi there" },
     target: { app_name: "Notepad", process: "notepad.exe", icon: null, elevated: false, own_window: false, present: true },
     channel: "Text",
-    tone: "Simple",
+    tone: "Clear",
     length: "Same",
     toggles: [],
     drafts: 2,
@@ -35,7 +39,7 @@ function payload(over: Partial<OpenPayload> = {}): OpenPayload {
 describe("opening", () => {
   it("preselects defaults and starts at once", () => {
     const s = fromPayload(payload());
-    expect(s.tone).toBe("Simple");
+    expect(s.tone).toBe("Clear");
     expect(s.length).toBe("Same");
     expect(s.editable).toBe(false);
     expect(shouldAutoStart(s)).toBe(true);
@@ -89,17 +93,40 @@ describe("requests", () => {
   it("matches the spec request shape", () => {
     const s = fromPayload(payload({ toggles: ["Softer"] }));
     const r = beginRequest(s);
-    expect(r).toEqual({ text: "hi there", tone: "Simple", length: "Same", toggles: ["Softer"], channel: "Text", followup: null });
+    expect(r).toEqual({ text: "hi there", tone: "Clear", length: "Same", toggles: ["Softer"], channel: "Text", followup: null });
     expect(s.reqId).toBe(1);
     expect(s.drafts).toHaveLength(2);
     expect(s.drafts.every((d) => d.status === "waiting")).toBe(true);
   });
 
-  it("fix errors only expects one draft", () => {
-    const s = fromPayload(payload({ toggles: ["Fix errors only"] }));
+  it("proofread expects one draft", () => {
+    const s = fromPayload(payload({ toggles: ["Proofread"] }));
     expect(expectedDrafts(s)).toBe(1);
     beginRequest(s);
     expect(s.drafts).toHaveLength(1);
+  });
+
+  it("proofread locks tone, length, and the other toggles", () => {
+    const s = fromPayload(payload({ toggles: ["Proofread"] }));
+    expect(locked(s)).toBe(true);
+    expect(locked(s, "Softer")).toBe(true);
+    expect(locked(s, "Proofread")).toBe(false);
+    expect(pickChip(s, "tone", "Warm")).toBe(false);
+    expect(pickChip(s, "length", "Shorter")).toBe(false);
+    expect(flipToggle(s, "Softer")).toBe(false);
+    expect([s.tone, s.length, s.toggles]).toEqual(["Clear", "Same", ["Proofread"]]);
+  });
+
+  it("proofread sends no other toggles and turning it off restores the picks", () => {
+    const s = fromPayload(payload({ toggles: ["Softer"] }));
+    expect(pickChip(s, "tone", "Warm")).toBe(true);
+    expect(pickChip(s, "length", "Shorter")).toBe(true);
+    expect(flipToggle(s, "Proofread")).toBe(true);
+    expect(buildRequest(s).toggles).toEqual(["Proofread"]);
+    expect(flipToggle(s, "Proofread")).toBe(true);
+    expect(locked(s)).toBe(false);
+    const r = buildRequest(s);
+    expect([r.tone, r.length, r.toggles]).toEqual(["Warm", "Shorter", ["Softer"]]);
   });
 
   it("follow-ups keep the old text while new drafts stream", () => {

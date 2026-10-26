@@ -46,9 +46,9 @@ fn reply_text(user: &str, mode: &str, fixed: &mut bool) -> String {
         return json!({"variants": [{"text": "I don't know yet \u{2014} I'll tell you soon."}], "subject": null}).to_string();
     }
     let text = req["text"].as_str().unwrap_or("").trim();
-    let tone = req["tone"].as_str().unwrap_or("Simple");
+    let tone = req["tone"].as_str().unwrap_or("Clear");
     let channel = req["channel"].as_str().unwrap_or("Text");
-    let fix = req["toggles"].as_array().map(|a| a.iter().any(|t| t == "Fix errors only")).unwrap_or(false);
+    let fix = req["toggles"].as_array().map(|a| a.iter().any(|t| t == "Proofread")).unwrap_or(false);
     let mut base = text.to_string();
     if let Some(f) = req["followup"].as_str() {
         base = format!("{base} (after: {f})");

@@ -1,7 +1,7 @@
 //! M1 engine harness. Command line only, no UI.
 //!
 //!   mm-harness timing   [--models haiku,sonnet] [--limit N] [--out docs/M1-timing-report.md]
-//!   mm-harness quality  [--model haiku]   follow-up, fix errors only, output rules, facts
+//!   mm-harness quality  [--model haiku]   follow-up, proofread, output rules, facts
 //!   mm-harness isolation                  proves the personal Claude Code setup does not load
 //!   mm-harness once "text"                one rewrite, printed
 //!
@@ -370,7 +370,7 @@ fn report(runs: &[Run], models: &[String], version: &str) -> String {
     s
 }
 
-/// Follow-up, fix errors only, and the output rules across 20 outputs.
+/// Follow-up, proofread, and the output rules across 20 outputs.
 fn quality(args: &[String]) {
     let model = arg(args, "--model").unwrap_or("haiku".into());
     let (tx, rx) = std::sync::mpsc::channel();
@@ -379,7 +379,7 @@ fn quality(args: &[String]) {
     let mut flow = DraftFlow::new(Rules::default());
     let sample = Sample {
         text: "Hi Omar, sorry for the delay, I will send the signed contract by Tuesday 3pm and the invoice for $480".into(),
-        tone: "Simple".into(),
+        tone: "Clear".into(),
         length: "Same".into(),
         toggles: vec![],
         channel: "Text".into(),
@@ -595,7 +595,7 @@ fn scenes(args: &[String]) {
 fn once(args: &[String]) {
     let text = args.get(2).cloned().unwrap_or_else(|| "hi, can you send me the file by friday".into());
     let model = arg(args, "--model").unwrap_or("haiku".into());
-    let sample = Sample { text, tone: "Simple".into(), length: "Same".into(), toggles: vec![], channel: "Text".into(), keep: vec![] };
+    let sample = Sample { text, tone: "Clear".into(), length: "Same".into(), toggles: vec![], channel: "Text".into(), keep: vec![] };
     let r = measure(&model, "cold", 0, &sample, Duration::ZERO);
     println!("{}", serde_json::to_string_pretty(&r).unwrap());
 }

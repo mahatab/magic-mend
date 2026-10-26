@@ -3,7 +3,7 @@
   "name": "whatsapp",
   "request": {
    "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
-   "tone": "Simple",
+   "tone": "Clear",
    "length": "Same",
    "toggles": [],
    "channel": "WhatsApp",
@@ -36,10 +36,10 @@
   "name": "fix",
   "request": {
    "text": "me and my wife was thinking we could come for dinner on friday if your free, we will bring desert",
-   "tone": "Simple",
+   "tone": "Clear",
    "length": "Same",
    "toggles": [
-    "Fix errors only"
+    "Proofread"
    ],
    "channel": "Text",
    "followup": null
@@ -49,7 +49,7 @@
   "name": "followup",
   "request": {
    "text": "Hi Daniel, sorry for the late reply, I would be glad to join the panel on May 8 and can share my slides by May 1",
-   "tone": "Simple",
+   "tone": "Clear",
    "length": "Same",
    "toggles": [],
    "channel": "LinkedIn",
@@ -61,7 +61,7 @@
   "name": "greeting",
   "request": {
    "text": "Good morning everyone! quick reminder the community cleanup is this sunday at 9am at Riverside Park, bring gloves if you have them",
-   "tone": "Simple",
+   "tone": "Clear",
    "length": "Same",
    "toggles": [],
    "channel": "WhatsApp",

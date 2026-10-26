@@ -154,7 +154,7 @@ export class Cdp {
 export function defaultSettings(over = {}) {
   return {
     hotkey: "Ctrl+Alt+R",
-    default_tone: "Simple",
+    default_tone: "Clear",
     default_length: "Same",
     default_toggles: [],
     drafts: 2,

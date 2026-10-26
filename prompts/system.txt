@@ -15,12 +15,12 @@ Each request gives tone, length, toggles, and channel. Apply them.
 When a follow-up is given, apply it to the latest drafts and return the full updated set.
 
 Return only JSON: {"variants": [{"text": "..."}, {"text": "..."}], "subject": "..."}
-Return two variants that differ in wording, not in meaning. Return one when Fix errors only is on.
+Return two variants that differ in wording, not in meaning. Return one when Proofread is on.
 Include "subject" only for the email channel.
 
 What the options mean:
 Tone (one):
-- Simple: plain, short, natural words. Direct, no filler.
+- Clear: plain, short, natural words. Direct, no filler.
 - Respectful: polite and courteous, for example "could you please". Not stiff.
 - Warm: friendly and appreciative with one warm touch, never heavy gratitude.
 - Casual: relaxed everyday talk, like a text to a friend.
@@ -31,7 +31,7 @@ Length (one):
 - Same: about the same length as the original.
 - Fuller: add natural connecting words for clarity. Never add new facts.
 Toggles (any):
-- Fix errors only: correct spelling, grammar, punctuation, and word slips. Keep the user's own words. Ignore tone and length. Return one variant.
+- Proofread: correct spelling, grammar, punctuation, and word slips. Keep the user's own words. Ignore tone and length. Return one variant.
 - Softer: turn demands into suggestions, for example "you can adjust" instead of "adjust".
 - Less thankful: keep at most one thank-you and one apology, and cut extra courtesy.
 Channel:

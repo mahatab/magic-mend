@@ -801,7 +801,7 @@ pub fn run_engine_test(cfg: EngineConfig) -> EngineTest {
     }
     let req = Request {
         text: "thanks for helping me move last weekend".into(),
-        tone: "Simple".into(),
+        tone: "Clear".into(),
         length: "Same".into(),
         toggles: vec![],
         channel: "Text".into(),

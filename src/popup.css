@@ -206,9 +206,25 @@ header {
   font-size: 12px;
   color: var(--muted);
 }
-.controls.fixing .tone-row,
-.controls.fixing .length-row {
+.controls .chip:disabled,
+.controls .switch:disabled {
   opacity: 0.45;
+  cursor: default;
+}
+.controls .chip:disabled:hover {
+  background: transparent;
+}
+.controls .chip[aria-checked="true"]:disabled:hover {
+  background: var(--accent);
+}
+.proof-note {
+  display: none;
+  font-size: 12px;
+  color: var(--muted);
+  align-self: center;
+}
+.controls.fixing .proof-note {
+  display: inline;
 }
 
 .drafts {

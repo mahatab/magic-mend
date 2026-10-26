@@ -30,7 +30,7 @@ export async function listen<T>(event: string, handler: Handler<T>): Promise<voi
 const SAMPLE = "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble";
 
 const FAKE: Record<string, string[]> = {
-  Simple: [
+  Clear: [
     "Hey Sam, the plumber cannot come until Thursday, so can we change the move-in date to Saturday instead? Sorry for the trouble.",
     "Hey Sam, the plumber is not able to come until Thursday. Can we shift the move-in date to Saturday? Sorry for the trouble.",
   ],
@@ -44,7 +44,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export const fakeSettings = {
   hotkey: "Ctrl+Alt+R",
-  default_tone: "Simple",
+  default_tone: "Clear",
   default_length: "Same",
   default_toggles: [] as string[],
   drafts: 2,
@@ -89,7 +89,7 @@ export const mock = {
       capture: { kind: "text", text: SAMPLE },
       target: { app_name: "WhatsApp", process: "WhatsApp.exe", icon: null, elevated: false, own_window: false, present: true },
       channel: "WhatsApp",
-      tone: "Simple",
+      tone: "Clear",
       length: "Same",
       toggles: [],
       drafts: 2,
@@ -161,8 +161,8 @@ export const mock = {
   },
   /** Streams fake drafts word by word, like the real engine. */
   stream(reqId: number, req: Request) {
-    const fix = req.toggles.includes("Fix errors only");
-    let drafts = (FAKE[req.tone] ?? FAKE.Simple).slice(0, fix ? 1 : req.drafts ?? 2);
+    const fix = req.toggles.includes("Proofread");
+    let drafts = (FAKE[req.tone] ?? FAKE.Clear).slice(0, fix ? 1 : req.drafts ?? 2);
     if (fix) drafts = ["Hey Sam, the plumber cannot come till Thursday, so can we push the move-in date to Saturday instead? Sorry for the trouble."];
     if (req.followup) drafts = drafts.map((d) => d.replace(/ ?(Sorry|I apologize|I am sorry)[^.]*\./, ""));
     if (req.channel === "Email") drafts = drafts.map((d) => d.replace(/^Hey Sam, /, "Hey Sam,\n\n") + "\n\nBest,");

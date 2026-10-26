@@ -94,7 +94,7 @@ async function main() {
   });
   await popupShot(app, {
     text: "me and my wife was thinking we could come for dinner on friday if your free, we will bring desert",
-    appName: "Messenger", letterColor: "#0866FF", toggles: ["Fix errors only"], file: "popup-fix.png",
+    appName: "Messenger", letterColor: "#0866FF", toggles: ["Proofread"], file: "popup-fix.png",
   });
   await popupShot(app, {
     text: "Hi Daniel, sorry for the late reply, I would be glad to join the panel on May 8 and can share my slides by May 1",

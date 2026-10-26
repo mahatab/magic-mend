@@ -38,7 +38,7 @@ fn reply_text(user: &str, mode: &str, fixed: &mut bool) -> String {
         return "Hello there.".into();
     };
     let text = req["text"].as_str().unwrap_or("").trim().to_string();
-    let tone = req["tone"].as_str().unwrap_or("Simple");
+    let tone = req["tone"].as_str().unwrap_or("Clear");
     let channel = req["channel"].as_str().unwrap_or("Text");
     let toggles: Vec<String> = req["toggles"].as_array().map(|a| a.iter().filter_map(|t| t.as_str().map(String::from)).collect()).unwrap_or_default();
     let followup = req["followup"].as_str();
@@ -55,7 +55,7 @@ fn reply_text(user: &str, mode: &str, fixed: &mut bool) -> String {
     if text.contains("MULTILINE") {
         base = "First line of the draft.\nSecond line of the draft.\n\nLast line.\n".into();
     }
-    let n = if toggles.iter().any(|t| t == "Fix errors only") { 1 } else { req["drafts"].as_u64().unwrap_or(2) as usize };
+    let n = if toggles.iter().any(|t| t == "Proofread") { 1 } else { req["drafts"].as_u64().unwrap_or(2) as usize };
     let variants: Vec<Value> = (0..n)
         .map(|i| json!({"text": format!("[{tone}] {} {}", ["Draft A:", "Draft B:", "Draft C:", "Draft D:"][i], base)}))
         .collect();

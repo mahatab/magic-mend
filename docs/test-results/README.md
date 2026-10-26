@@ -24,7 +24,7 @@ Updated 2026-10-24 for v1.1.0 (Claude and ChatGPT). Details for each suite are i
 | 2, 3, 4 WhatsApp, Gmail, Messenger, LinkedIn, Outlook | Manual | Manual | Needs the real apps and accounts; channel rules are unit tested |
 | 5 Enter never reaches the app underneath | Pass | Pass (same popup) | End to end |
 | 6 No selection | Pass | Pass (same popup) | End to end |
-| 7 Fix errors only | Pass | Pass | End to end, plus live: both correct "i has send" to "I sent" (Claude Haiku does not, so Sonnet is the Claude default) |
+| 7 Proofread | Pass | Pass | End to end, plus live: both correct "i has send" to "I sent" (Claude Haiku does not, so Sonnet is the Claude default) |
 | 8 No contractions or em dashes | Pass: 90 of 90 live runs | Pass: 69 of 69 live runs | Live harness |
 | 9 Facts kept | Pass (Sonnet) | Pass (GPT-6-Luna) | Live harness, flags read by hand |
 | 10 Follow-ups | Pass | Pass | Live harness and end to end |

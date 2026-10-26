@@ -1,9 +1,9 @@
 [
  {
-  "name": "Simple",
+  "name": "Clear",
   "request": {
    "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
-   "tone": "Simple",
+   "tone": "Clear",
    "length": "Same",
    "toggles": [],
    "channel": "WhatsApp",
@@ -69,7 +69,7 @@
   "name": "Shorter",
   "request": {
    "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
-   "tone": "Simple",
+   "tone": "Clear",
    "length": "Shorter",
    "toggles": [],
    "channel": "WhatsApp",
@@ -77,13 +77,13 @@
   }
  },
  {
-  "name": "Fix errors only",
+  "name": "Proofread",
   "request": {
    "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
-   "tone": "Simple",
+   "tone": "Clear",
    "length": "Same",
    "toggles": [
-    "Fix errors only"
+    "Proofread"
    ],
    "channel": "WhatsApp",
    "followup": null
@@ -93,7 +93,7 @@
   "name": "Softer",
   "request": {
    "text": "hey sam, the plumber cant come till thursday so can we push the move-in date to saturday instead, sorry for the trouble",
-   "tone": "Simple",
+   "tone": "Clear",
    "length": "Same",
    "toggles": [
     "Softer"
