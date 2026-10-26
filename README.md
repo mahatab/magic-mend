@@ -9,14 +9,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/mahatab/magic-mend/releases/latest"><img src="https://img.shields.io/badge/release-v1.1.0-A33B2E" alt="Release v1.1.0" /></a>
+  <a href="https://github.com/mahatab/magic-mend/releases/latest"><img src="https://img.shields.io/badge/release-v1.1.2-A33B2E" alt="Release v1.1.2" /></a>
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS-1C1B19?logo=windows&logoColor=white" alt="Windows | macOS" />
   <img src="https://img.shields.io/badge/tauri-v2-24C8D8?logo=tauri&logoColor=white" alt="Tauri v2" />
   <img src="https://img.shields.io/badge/rust-1.93-DEA584?logo=rust&logoColor=white" alt="Rust" />
   <img src="https://img.shields.io/badge/typescript-5.9-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/works%20with-Claude-D97757" alt="Works with Claude" />
   <img src="https://img.shields.io/badge/works%20with-ChatGPT-10A37F" alt="Works with ChatGPT" />
-  <img src="https://img.shields.io/badge/tests-53%20Rust%20%C2%B7%2020%20UI%20%C2%B7%2023%20end%20to%20end-12805C" alt="Tests" />
+  <img src="https://img.shields.io/badge/tests-55%20Rust%20%C2%B7%2022%20UI%20%C2%B7%2023%20end%20to%20end-12805C" alt="Tests" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
 </p>
 
@@ -40,9 +40,9 @@ You select text and press the hotkey. Magic Mend copies the selection (and puts 
 ## Download
 
 <p>
-  <a href="https://github.com/mahatab/magic-mend/releases/download/v1.1.0/Magic.Mend_1.1.0_x64-setup.exe"><img src="https://img.shields.io/badge/Download%20for%20Windows-1.7%20MB-A33B2E?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" /></a>
+  <a href="https://github.com/mahatab/magic-mend/releases/download/v1.1.2/Magic.Mend_1.1.2_x64-setup.exe"><img src="https://img.shields.io/badge/Download%20for%20Windows-1.7%20MB-A33B2E?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" /></a>
   &nbsp;
-  <a href="https://github.com/mahatab/magic-mend/releases/download/v1.1.0/Magic.Mend_1.1.0_universal.dmg"><img src="https://img.shields.io/badge/Download%20for%20macOS-4.9%20MB-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS" /></a>
+  <a href="https://github.com/mahatab/magic-mend/releases/download/v1.1.2/Magic.Mend_1.1.2_universal.dmg"><img src="https://img.shields.io/badge/Download%20for%20macOS-4.9%20MB-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS" /></a>
 </p>
 
 | | |
@@ -259,7 +259,7 @@ git clone https://github.com/mahatab/magic-mend.git
 cd magic-mend && npm install && npx tauri build
 ```
 
-**Windows** produces `src-tauri/target/release/bundle/nsis/Magic Mend_1.1.0_x64-setup.exe`.
+**Windows** produces `src-tauri/target/release/bundle/nsis/Magic Mend_1.1.2_x64-setup.exe`.
 **macOS** run `npx tauri build --target universal-apple-darwin --bundles app,dmg` (add both Rust Apple targets first) to produce `Magic Mend.app` and a `.dmg`. On first run the wizard asks for the Accessibility permission, which macOS requires for copying the selection and pasting the draft.
 
 **Releases.** The Windows installer is built locally. The signed and notarized Mac `.dmg` comes from the [Release macOS](.github/workflows/release-mac.yml) workflow, which runs on every `v*` tag (or by hand with a tag) and attaches the `.dmg` to that release. It needs six repository secrets for the Developer ID certificate and Apple notarization; the workflow file lists them.
