@@ -3,10 +3,32 @@
 
 use serde::{Deserialize, Serialize};
 
-pub const TONES: [&str; 6] = ["Simple", "Respectful", "Warm", "Casual", "Professional", "Firm"];
+pub const TONES: [&str; 6] = ["Clear", "Respectful", "Warm", "Casual", "Professional", "Firm"];
 pub const LENGTHS: [&str; 3] = ["Shorter", "Same", "Fuller"];
-pub const TOGGLES: [&str; 3] = ["Fix errors only", "Softer", "Less thankful"];
+pub const TOGGLES: [&str; 3] = ["Proofread", "Softer", "Less thankful"];
 pub const CHANNELS: [&str; 4] = ["Text", "Email", "WhatsApp", "LinkedIn"];
+
+/// Maps a tone or toggle name from older versions to its current name, so saved
+/// settings and requests that still use the old names keep working.
+pub fn current_name(name: &str) -> &str {
+    match name {
+        "Simple" => "Clear",
+        "Fix errors only" => "Proofread",
+        other => other,
+    }
+}
+
+/// Renames old toggles and keeps only known ones, each once.
+pub fn known_toggles(toggles: &mut Vec<String>) {
+    let mut kept: Vec<String> = Vec::new();
+    for t in toggles.drain(..) {
+        let t = current_name(&t).to_string();
+        if TOGGLES.contains(&t.as_str()) && !kept.contains(&t) {
+            kept.push(t);
+        }
+    }
+    *toggles = kept;
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Request {
@@ -22,13 +44,13 @@ pub struct Request {
 }
 
 impl Request {
-    pub fn fix_errors_only(&self) -> bool {
-        self.toggles.iter().any(|t| t == "Fix errors only")
+    pub fn proofread(&self) -> bool {
+        self.toggles.iter().any(|t| t == "Proofread")
     }
 
     /// How many drafts to expect back.
     pub fn expected_drafts(&self) -> usize {
-        if self.fix_errors_only() {
+        if self.proofread() {
             1
         } else {
             self.drafts.map(|d| d as usize).unwrap_or(2)
@@ -37,14 +59,14 @@ impl Request {
 
     /// Keeps only known values, so nothing odd reaches the prompt.
     pub fn sanitized(mut self) -> Request {
+        self.tone = current_name(&self.tone).to_string();
         if !TONES.contains(&self.tone.as_str()) {
-            self.tone = "Simple".into();
+            self.tone = "Clear".into();
         }
         if !LENGTHS.contains(&self.length.as_str()) {
             self.length = "Same".into();
         }
-        self.toggles.retain(|t| TOGGLES.contains(&t.as_str()));
-        self.toggles.dedup();
+        known_toggles(&mut self.toggles);
         if !CHANNELS.contains(&self.channel.as_str()) {
             self.channel = "Text".into();
         }
@@ -243,7 +265,7 @@ mod tests {
     fn req() -> Request {
         Request {
             text: "hi".into(),
-            tone: "Simple".into(),
+            tone: "Clear".into(),
             length: "Same".into(),
             toggles: vec!["Softer".into()],
             channel: "Text".into(),
@@ -256,7 +278,7 @@ mod tests {
     fn request_matches_spec_shape() {
         assert_eq!(
             req().to_json(),
-            r#"{"text":"hi","tone":"Simple","length":"Same","toggles":["Softer"],"channel":"Text","followup":null}"#
+            r#"{"text":"hi","tone":"Clear","length":"Same","toggles":["Softer"],"channel":"Text","followup":null}"#
         );
     }
 
@@ -270,10 +292,21 @@ mod tests {
         r.followup = Some("   ".into());
         r.drafts = Some(2);
         let s = r.sanitized();
-        assert_eq!((s.tone.as_str(), s.length.as_str(), s.channel.as_str()), ("Simple", "Same", "Text"));
+        assert_eq!((s.tone.as_str(), s.length.as_str(), s.channel.as_str()), ("Clear", "Same", "Text"));
         assert_eq!(s.toggles, vec!["Softer".to_string()]);
         assert_eq!(s.followup, None);
         assert_eq!(s.drafts, None);
+    }
+
+    #[test]
+    fn old_names_map_to_new_ones() {
+        let mut r = req();
+        r.tone = "Simple".into();
+        r.toggles = vec!["Fix errors only".into(), "Softer".into(), "Proofread".into()];
+        let s = r.sanitized();
+        assert_eq!(s.tone, "Clear");
+        assert_eq!(s.toggles, vec!["Proofread".to_string(), "Softer".to_string()]);
+        assert_eq!(s.expected_drafts(), 1);
     }
 
     #[test]
@@ -282,7 +315,7 @@ mod tests {
         assert_eq!(r.expected_drafts(), 2);
         r.drafts = Some(3);
         assert_eq!(r.expected_drafts(), 3);
-        r.toggles.push("Fix errors only".into());
+        r.toggles.push("Proofread".into());
         assert_eq!(r.expected_drafts(), 1);
     }
 

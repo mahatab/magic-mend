@@ -220,7 +220,7 @@ mod tests {
     fn req(text: &str) -> Request {
         Request {
             text: text.into(),
-            tone: "Simple".into(),
+            tone: "Clear".into(),
             length: "Same".into(),
             toggles: vec![],
             channel: "Text".into(),
@@ -338,10 +338,10 @@ mod tests {
     }
 
     #[test]
-    fn fix_errors_only_returns_one_draft_and_subject_only_for_email() {
+    fn proofread_returns_one_draft_and_subject_only_for_email() {
         let mut f = DraftFlow::new(Rules::default());
         let mut r = req("i has a typo");
-        r.toggles = vec!["Fix errors only".into()];
+        r.toggles = vec!["Proofread".into()];
         f.begin(1, r);
         f.sent(1, 1, TurnKind::Request);
         let out = f.on_event(&done(1, r#"{"variants":[{"text":"I have a typo"},{"text":"extra"}],"subject":"S"}"#));

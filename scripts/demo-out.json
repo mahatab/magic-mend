@@ -13,7 +13,7 @@
     ],
     "subject": null
   },
-  "Fix errors only": {
+  "Proofread": {
     "drafts": [
       "Hey Sam, the plumber cannot come until Thursday, so can we push the move-in date to Saturday instead? Sorry for the trouble."
     ],
@@ -40,7 +40,7 @@
     ],
     "subject": null
   },
-  "Simple": {
+  "Clear": {
     "drafts": [
       "Hey Sam, the plumber cannot come until Thursday, so can we change the move-in date to Saturday instead? Sorry for the trouble.",
       "Hey Sam, the plumber is not able to come until Thursday. Can we shift the move-in date to Saturday? Sorry for the trouble."

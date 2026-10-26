@@ -1,9 +1,9 @@
 // Pure popup logic: requests, outputs, and what the Replace button may do.
 // No DOM here, so it is covered by unit tests.
 
-export const TONES = ["Simple", "Respectful", "Warm", "Casual", "Professional", "Firm"] as const;
+export const TONES = ["Clear", "Respectful", "Warm", "Casual", "Professional", "Firm"] as const;
 export const LENGTHS = ["Shorter", "Same", "Fuller"] as const;
-export const TOGGLES = ["Fix errors only", "Softer", "Less thankful"] as const;
+export const TOGGLES = ["Proofread", "Softer", "Less thankful"] as const;
 export const CHANNELS = ["Text", "Email", "WhatsApp", "LinkedIn"] as const;
 
 export type Capture =
@@ -95,7 +95,7 @@ export function initialState(): PopupState {
     text: "",
     editable: true,
     notice: null,
-    tone: "Simple",
+    tone: "Clear",
     length: "Same",
     toggles: [],
     channel: "Text",
@@ -142,7 +142,7 @@ export function fromPayload(p: OpenPayload): PopupState {
 }
 
 export function expectedDrafts(s: PopupState): number {
-  if (s.toggles.includes("Fix errors only")) return 1;
+  if (s.toggles.includes("Proofread")) return 1;
   return s.payload?.drafts ?? 2;
 }
 

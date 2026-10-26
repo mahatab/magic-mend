@@ -255,7 +255,7 @@ function updateControls() {
   c.querySelectorAll<HTMLElement>(".tone-row .chip").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.value === state.tone)));
   c.querySelectorAll<HTMLElement>(".length-row .chip").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.value === state.length)));
   c.querySelectorAll<HTMLElement>(".switch").forEach((b) => b.setAttribute("aria-checked", String(state.toggles.includes(b.dataset.toggle!))));
-  c.classList.toggle("fixing", state.toggles.includes("Fix errors only"));
+  c.classList.toggle("fixing", state.toggles.includes("Proofread"));
   const sel = c.querySelector("select") as HTMLSelectElement;
   if (sel) sel.value = state.channel;
   refs.channelHint.textContent = state.channelAuto && state.payload?.target.present ? "(auto-detected)" : "";
@@ -511,7 +511,7 @@ if (!inTauri) {
   if (q.has("long")) over.capture = { kind: "text", text: "word ".repeat(900) };
   if (q.has("error")) over.engine_error = "Claude is not signed in. Open a terminal, run claude, sign in, and then click Retry.";
   if (q.has("dark")) over.theme = "dark";
-  if (q.has("fix")) over.toggles = ["Fix errors only"];
+  if (q.has("fix")) over.toggles = ["Proofread"];
   if (q.has("pending")) over.capture = { kind: "pending" };
   (window as unknown as { __mm: unknown }).__mm = { mock, open, state: () => state, expectedDrafts: () => expectedDrafts(state) };
   open(mock.payload(over));

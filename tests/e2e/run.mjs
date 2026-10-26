@@ -149,18 +149,18 @@ async function main() {
     assert(states.every(([r, c]) => r && !c), `buttons: ${JSON.stringify(states)}`);
     assert(clipGet().text === "KEEP-ME", "clipboard changed");
     await app.popup.click(".card .btn-secondary");
-    await waitFor(() => clipGet().text.startsWith("[Simple] Draft A: hi"), { what: "Copy put the draft on the clipboard" });
+    await waitFor(() => clipGet().text.startsWith("[Clear] Draft A: hi"), { what: "Copy put the draft on the clipboard" });
     await waitFor(() => !popupVisible(), { what: "popup closes after Copy", timeout: 3000 });
     p.close();
     return "Copy left the draft on the clipboard as intended";
   });
 
-  await test("7", "Fix errors only gives one draft", async () => {
+  await test("7", "Proofread gives one draft", async () => {
     const p = await openOn(app, "i has a eror", "t7");
     await waitDrafts(app, 2);
-    await app.popup.click('.switch[data-toggle="Fix errors only"]');
+    await app.popup.click('.switch[data-toggle="Proofread"]');
     await waitFor(() => app.popup.eval(`document.querySelectorAll('.card').length === 1 && document.querySelector('.card .body').textContent.includes('Draft A')`), { what: "one draft" });
-    const req = app.fakeLog().filter((l) => l.message?.includes("Fix errors only")).pop();
+    const req = app.fakeLog().filter((l) => l.message?.includes("Proofread")).pop();
     assert(req, "request without the toggle");
     await closePopup(app);
     p.close();
@@ -237,7 +237,7 @@ async function main() {
     const p = await openOn(app, "MULTILINE please", "t20");
     await waitDrafts(app, 2);
     await app.popup.click(".card .btn-primary");
-    const want = "[Simple] Draft A: First line of the draft.\nSecond line of the draft.\n\nLast line.";
+    const want = "[Clear] Draft A: First line of the draft.\nSecond line of the draft.\n\nLast line.";
     await waitFor(() => p.text() === want, { what: "multi-line text pasted" }).catch((e) => {
       const r = app.log().match(/replace result=\w+/g);
       throw new Error(`${e.message}; app said: ${r ? r.join(", ") : "no replace logged"}; foreground: ${fg()?.title}; window got: ${p.keys().slice(-8).join(" | ")}; text now: ${JSON.stringify(p.text())}`);
@@ -391,7 +391,7 @@ async function main() {
     clipSet("CLIP-BEFORE-GPT");
     const p = await openOn(app, "chatgpt replace check", "g1");
     const drafts = await waitDrafts(app, 2);
-    assert(drafts[0].startsWith("[ChatGPT Simple] Draft A:"), `draft from ${drafts[0]}`);
+    assert(drafts[0].startsWith("[ChatGPT Clear] Draft A:"), `draft from ${drafts[0]}`);
     const badge = await app.popup.eval(`document.querySelector('.brand .via')?.textContent`);
     assert(badge === "ChatGPT", `badge ${badge}`);
     await app.popup.click(".card .btn-primary");
@@ -414,26 +414,26 @@ async function main() {
     return "replaced via ChatGPT; ephemeral read-only thread with our prompt; tools, plugins, hooks, memories, project docs, skills off";
   });
 
-  await test("gpt-2", "ChatGPT: follow-up, Fix errors only, rapid chip changes", async () => {
+  await test("gpt-2", "ChatGPT: follow-up, Proofread, rapid chip changes", async () => {
     const p = await openOn(app, "chatgpt flow check", "g2");
     await waitDrafts(app, 2);
     await app.popup.click(".followup textarea");
     keys("x");
     keys("enter");
     await waitFor(() => app.popup.eval(`[...document.querySelectorAll('.card .body')].every(b => b.textContent.includes('(after: x)')) && document.querySelectorAll('.card .btn-secondary:not([disabled])').length === 2`), { what: "follow-up drafts" });
-    await app.popup.click('.switch[data-toggle="Fix errors only"]');
+    await app.popup.click('.switch[data-toggle="Proofread"]');
     await waitFor(() => app.popup.eval(`document.querySelectorAll('.card').length === 1 && !!document.querySelector('.card .btn-secondary:not([disabled])')`), { what: "one draft" });
-    await app.popup.click('.switch[data-toggle="Fix errors only"]');
+    await app.popup.click('.switch[data-toggle="Proofread"]');
     for (const n of [2, 3, 4, 5, 6]) await app.popup.click(`.tone-row .chip:nth-child(${n})`);
     await waitFor(() => app.popup.eval(`[...document.querySelectorAll('.card .body')].every(b => b.textContent.startsWith('[ChatGPT Firm]')) && document.querySelectorAll('.card .btn-secondary:not([disabled])').length === 2`), { what: "Firm drafts" });
     await closePopup(app);
     p.close();
-    return "follow-up kept context, Fix errors only gave one draft, five quick clicks ended on Firm";
+    return "follow-up kept context, Proofread gave one draft, five quick clicks ended on Firm";
   });
 
   await test("gpt-3", "Switching between Claude and ChatGPT applies to the next popup", async () => {
     const order = [];
-    for (const [provider, prefix, badge] of [["claude", "[Simple] Draft A:", "Claude"], ["chatgpt", "[ChatGPT Simple] Draft A:", "ChatGPT"], ["claude", "[Simple] Draft A:", "Claude"]]) {
+    for (const [provider, prefix, badge] of [["claude", "[Clear] Draft A:", "Claude"], ["chatgpt", "[ChatGPT Clear] Draft A:", "ChatGPT"], ["claude", "[Clear] Draft A:", "Claude"]]) {
       await app.popup.eval(`window.__TAURI_INTERNALS__.invoke('set_provider', { provider: '${provider}' })`);
       await sleep(800);
       const p = await openOn(app, `switch to ${provider}`, "g3");
@@ -554,7 +554,7 @@ async function main() {
     await waitFor(popupVisible, { what: "popup over the wizard" });
     await waitDrafts(w, 2);
     await w.popup.click(".card .btn-primary");
-    await waitFor(() => wiz2.eval(`document.querySelector('.practice').value.startsWith('[ChatGPT Simple] Draft A:')`), { what: "practice box replaced by ChatGPT" });
+    await waitFor(() => wiz2.eval(`document.querySelector('.practice').value.startsWith('[ChatGPT Clear] Draft A:')`), { what: "practice box replaced by ChatGPT" });
     const ok = await wiz2.eval(`!!document.querySelector('.check.ok')`);
     assert(ok, "wizard did not confirm the change");
     const practiceMs = Date.now() - t0;

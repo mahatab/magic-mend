@@ -69,9 +69,9 @@ The first launch opens a short setup wizard. It finds `claude` and `codex`, chec
 - **Replace** pastes the draft back into the original text box. **Copy** keeps it on the clipboard instead
 
 ### Tones, Lengths, and Toggles
-- **Six tones**: Simple (default), Respectful, Warm, Casual, Professional, Firm
+- **Six tones**: Clear (default), Respectful, Warm, Casual, Professional, Firm
 - **Three lengths**: Shorter, Same (default), Fuller
-- **Fix errors only** ![Popular](https://img.shields.io/badge/popular-4C5CE8): corrects spelling, grammar, and word slips while keeping your own words, and returns one draft
+- **Proofread** ![Popular](https://img.shields.io/badge/popular-4C5CE8): corrects spelling, grammar, and word slips while keeping your own words, and returns one draft
 - **Softer** turns demands into suggestions (*"you can adjust"* instead of *"adjust"*)
 - **Less thankful** keeps at most one thank-you and one apology
 - Every chip change redoes the drafts, and five quick clicks still send just one request
@@ -126,7 +126,7 @@ The first launch opens a short setup wizard. It finds `claude` and `codex`, chec
 ## Screenshots
 
 <p align="center">
-  <img src="docs/images/screenshots/popup-light.png" alt="The Magic Mend popup in light mode with two Simple drafts for a WhatsApp message" width="400" />
+  <img src="docs/images/screenshots/popup-light.png" alt="The Magic Mend popup in light mode with two Clear drafts for a WhatsApp message" width="400" />
   &nbsp;&nbsp;
   <img src="docs/images/screenshots/popup-dark.png" alt="The Magic Mend popup in dark mode with two Warm drafts" width="400" />
 </p>
@@ -142,9 +142,9 @@ The first launch opens a short setup wizard. It finds `claude` and `codex`, chec
 <p align="center">
   <img src="docs/images/screenshots/popup-email.png" alt="The popup on the Email channel with a subject line and a draft that has a greeting and a sign-off" width="400" />
   &nbsp;&nbsp;
-  <img src="docs/images/screenshots/popup-fix.png" alt="The popup with Fix errors only on, showing one corrected draft" width="400" />
+  <img src="docs/images/screenshots/popup-fix.png" alt="The popup with Proofread on, showing one corrected draft" width="400" />
 </p>
-<p align="center"><em>Email adds a greeting, a sign-off, and a subject line. Fix errors only keeps your words and fixes the mistakes.</em></p>
+<p align="center"><em>Email adds a greeting, a sign-off, and a subject line. Proofread keeps your words and fixes the mistakes.</em></p>
 
 <p align="center">
   <img src="docs/images/screenshots/popup-followup.png" alt="The popup after the follow-up remove the apology, showing drafts without the apology" width="400" />
@@ -181,7 +181,7 @@ Measured on Windows 11 over 20 sample messages per mode, with `claude` 2.1.296 a
 | Finished drafts, warm spare (median) | **1.6 s** | **1.6 s** | 3.1 s | 3.3 s |
 | First words, no spare (median) | 1.6 s | 2.5 s | 3.6 s | 3.7 s |
 | Drafts free of contractions and em dashes | 45 of 45 | 23 of 23 | 45 of 45 | 23 of 23 |
-| *"i has send the payment"* with Fix errors only | *"I sent the payment"* | *"I sent the payment"* | *"I have sent the payment"* | *"I sent the payment"* |
+| *"i has send the payment"* with Proofread | *"I sent the payment"* | *"I sent the payment"* | *"I have sent the payment"* | *"I sent the payment"* |
 
 | Other measurements | |
 | --- | ---: |
@@ -193,9 +193,9 @@ Measured on Windows 11 over 20 sample messages per mode, with `claude` 2.1.296 a
 
 | Control | What it does |
 | --- | --- |
-| **Tone** | Simple, Respectful, Warm, Casual, Professional, Firm |
+| **Tone** | Clear, Respectful, Warm, Casual, Professional, Firm |
 | **Length** | Shorter, Same, Fuller |
-| **Fix errors only** | Corrects mistakes, keeps your words, one draft |
+| **Proofread** | Corrects mistakes, keeps your words, one draft |
 | **Softer** | Suggestions instead of demands |
 | **Less thankful** | At most one thank-you and one apology |
 | **Channel** | Text, Email, WhatsApp, LinkedIn |

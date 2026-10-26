@@ -45,7 +45,7 @@ async function shoot(c, selector, file) {
 }
 
 /** Opens the popup with a target app and a scene's real drafts. */
-async function popup(c, { scene, text, app, color, channel, tone = "Simple", toggles = [], dark = false, file, midStream = false, followupNote, provider = "Claude" }) {
+async function popup(c, { scene, text, app, color, channel, tone = "Clear", toggles = [], dark = false, file, midStream = false, followupNote, provider = "Claude" }) {
   await setup(c, { width: 480, height: 900, dark });
   await go(c, `http://localhost:${PORT}/?mock&empty`);
   const s = scenes[scene];
@@ -87,7 +87,7 @@ async function main() {
   });
   await popup(c, {
     scene: "fix", text: "me and my wife was thinking we could come for dinner on friday if your free, we will bring desert",
-    app: "Messenger", color: "#0866FF", channel: "Text", toggles: ["Fix errors only"], file: "popup-fix.png",
+    app: "Messenger", color: "#0866FF", channel: "Text", toggles: ["Proofread"], file: "popup-fix.png",
   });
   await popup(c, {
     scene: "followup", text: "Hi Daniel, sorry for the late reply, I would be glad to join the panel on May 8 and can share my slides by May 1",

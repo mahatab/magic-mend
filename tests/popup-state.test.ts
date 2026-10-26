@@ -18,7 +18,7 @@ function payload(over: Partial<OpenPayload> = {}): OpenPayload {
     capture: { kind: "text", text: "hi there" },
     target: { app_name: "Notepad", process: "notepad.exe", icon: null, elevated: false, own_window: false, present: true },
     channel: "Text",
-    tone: "Simple",
+    tone: "Clear",
     length: "Same",
     toggles: [],
     drafts: 2,
@@ -35,7 +35,7 @@ function payload(over: Partial<OpenPayload> = {}): OpenPayload {
 describe("opening", () => {
   it("preselects defaults and starts at once", () => {
     const s = fromPayload(payload());
-    expect(s.tone).toBe("Simple");
+    expect(s.tone).toBe("Clear");
     expect(s.length).toBe("Same");
     expect(s.editable).toBe(false);
     expect(shouldAutoStart(s)).toBe(true);
@@ -89,14 +89,14 @@ describe("requests", () => {
   it("matches the spec request shape", () => {
     const s = fromPayload(payload({ toggles: ["Softer"] }));
     const r = beginRequest(s);
-    expect(r).toEqual({ text: "hi there", tone: "Simple", length: "Same", toggles: ["Softer"], channel: "Text", followup: null });
+    expect(r).toEqual({ text: "hi there", tone: "Clear", length: "Same", toggles: ["Softer"], channel: "Text", followup: null });
     expect(s.reqId).toBe(1);
     expect(s.drafts).toHaveLength(2);
     expect(s.drafts.every((d) => d.status === "waiting")).toBe(true);
   });
 
-  it("fix errors only expects one draft", () => {
-    const s = fromPayload(payload({ toggles: ["Fix errors only"] }));
+  it("proofread expects one draft", () => {
+    const s = fromPayload(payload({ toggles: ["Proofread"] }));
     expect(expectedDrafts(s)).toBe(1);
     beginRequest(s);
     expect(s.drafts).toHaveLength(1);

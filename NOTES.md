@@ -22,7 +22,7 @@ Decisions, deviations from the spec, and ideas that are not in the spec.
 - **Popup before the keys are released.** The copy shortcut can only be sent after Ctrl and Alt are let go, and real use showed people hold the hotkey for 0.5 to 7 seconds (median 2.4 s), so a popup that waited for the copy seemed to appear only when the drafts did. On Windows the popup now shows at once without taking focus (`SW_SHOWNOACTIVATE`), with placeholders and "Reading your selection...", then the selection is copied from the app still in front, and the popup fills in and takes focus. Ctrl+C is sent only if the original window is still in front, so clicking the popup early can never copy from it. Esc during the wait ends the session and the popup does not come back. On the Mac, showing a window activates the app, so the popup still opens after the copy there.
 - **Clipboard wait before paste.** Clipboard history and other monitors open the clipboard to read each new value. An app that pastes at that moment finds it locked and silently pastes nothing, which happened about once in six Replace runs in testing. Replace now waits (up to 400 ms) until Magic Mend can open the clipboard twice in a row before it sends the paste shortcut. The Mac pasteboard has no lock, so the wait is a no-op there.
 
-- **Default model: sonnet, priming off.** From the M1 report: sonnet is faster once warm and handles Fix errors only correctly. Haiku stays available in Settings.
+- **Default model: sonnet, priming off.** From the M1 report: sonnet is faster once warm and handles Proofread (then called "Fix errors only") correctly. Haiku stays available in Settings.
 
 ## ChatGPT support (v1.1.0)
 
@@ -52,6 +52,7 @@ Decisions, deviations from the spec, and ideas that are not in the spec.
 
 ## Deviations
 
+- **Tone "Clear" and toggle "Proofread".** The spec calls them "Simple" and "Fix errors only". "Simple" was unclear as a tone name, and "Proofread" is the name people know from Apple's writing tools for the same job. The behavior is the one the spec describes. Saved settings and requests that still use the old names load as the new ones.
 - **WM_PASTE for classic edit boxes.** The spec says paste is simulated with Ctrl+V. A classic Windows edit box (and a WinForms text box built on one) gets a WM_PASTE message instead. That box tries to open the clipboard only once, and a background app that reads the clipboard while Ctrl is held made about 1 paste in 8 land on nothing. WM_PASTE presses no key and returns after the paste. Rich edit boxes, browsers, and every other app still get Ctrl+V. No Enter is ever sent either way.
 - **Window corners on Windows 11.** With acrylic turned on, Windows draws the frame, and its rounded corner radius is 8 px, not 16 px. When acrylic is not available (Windows 10) the popup draws its own 16 px corners on a solid background.
 - **Channel title rule for "Mail".** Title words match whole words only, so "Mailchimp" does not count as email.

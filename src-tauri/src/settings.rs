@@ -59,7 +59,7 @@ impl Default for Settings {
     fn default() -> Self {
         Settings {
             hotkey: default_hotkey(),
-            default_tone: "Simple".into(),
+            default_tone: "Clear".into(),
             default_length: "Same".into(),
             default_toggles: vec![],
             drafts: 2,
@@ -103,14 +103,15 @@ impl Settings {
     }
 
     fn normalize(&mut self) {
-        use crate::protocol::{LENGTHS, TONES, TOGGLES};
+        use crate::protocol::{current_name, known_toggles, LENGTHS, TONES};
+        self.default_tone = current_name(&self.default_tone).to_string();
         if !TONES.contains(&self.default_tone.as_str()) {
-            self.default_tone = "Simple".into();
+            self.default_tone = "Clear".into();
         }
         if !LENGTHS.contains(&self.default_length.as_str()) {
             self.default_length = "Same".into();
         }
-        self.default_toggles.retain(|t| TOGGLES.contains(&t.as_str()));
+        known_toggles(&mut self.default_toggles);
         self.drafts = self.drafts.clamp(1, 4);
         if self.hotkey.trim().is_empty() {
             self.hotkey = default_hotkey();
@@ -217,7 +218,7 @@ mod tests {
     fn defaults_match_spec() {
         let s = Settings::default();
         assert_eq!(s.hotkey, "Ctrl+Alt+R");
-        assert_eq!((s.default_tone.as_str(), s.default_length.as_str()), ("Simple", "Same"));
+        assert_eq!((s.default_tone.as_str(), s.default_length.as_str()), ("Clear", "Same"));
         assert!(s.default_toggles.is_empty());
         assert_eq!(s.drafts, 2);
         // Picked in the M1 report: the fastest model that passed the quality checks.
@@ -247,12 +248,22 @@ mod tests {
         std::fs::create_dir_all(p.parent().unwrap()).unwrap();
         std::fs::write(&p, r#"{"default_tone":"Pirate","drafts":99,"hotkey":"","theme":"neon"}"#).unwrap();
         let s = Settings::load(&p);
-        assert_eq!(s.default_tone, "Simple");
+        assert_eq!(s.default_tone, "Clear");
         assert_eq!(s.drafts, 4);
         assert_eq!(s.hotkey, "Ctrl+Alt+R");
         assert_eq!(s.theme, "system");
         std::fs::write(&p, "not json").unwrap();
         assert_eq!(Settings::load(&p), Settings::default());
+    }
+
+    #[test]
+    fn old_tone_and_toggle_names_load_as_new_ones() {
+        let p = tmp("rename");
+        std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+        std::fs::write(&p, r#"{"default_tone":"Simple","default_toggles":["Fix errors only","Softer"]}"#).unwrap();
+        let s = Settings::load(&p);
+        assert_eq!(s.default_tone, "Clear");
+        assert_eq!(s.default_toggles, vec!["Proofread".to_string(), "Softer".to_string()]);
     }
 
     #[test]

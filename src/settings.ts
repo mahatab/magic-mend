@@ -290,7 +290,7 @@ function render() {
     item("Default tone", "", chips(TONES, () => s.default_tone, (v) => (s.default_tone = v), "Default tone")),
     item("Default length", "", chips(LENGTHS, () => s.default_length, (v) => (s.default_length = v), "Default length")),
     item("Default toggles", "", toggleChips()),
-    item("Number of drafts", "Fix errors only always returns one.", drafts, "drafts"),
+    item("Number of drafts", "Proofread always returns one.", drafts, "drafts"),
     item("Warm mode", "Keeps one Claude or ChatGPT process ready so drafts start faster.", sw(() => s.warm_mode, (v) => (s.warm_mode = v), "Warm mode")),
   );
 
