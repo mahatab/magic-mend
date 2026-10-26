@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/mahatab/magic-mend/releases/latest"><img src="https://img.shields.io/badge/release-v1.1.0-4C5CE8" alt="Release v1.1.0" /></a>
-  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS-1B1D24?logo=windows&logoColor=white" alt="Windows | macOS" />
+  <a href="https://github.com/mahatab/magic-mend/releases/latest"><img src="https://img.shields.io/badge/release-v1.1.0-A33B2E" alt="Release v1.1.0" /></a>
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS-1C1B19?logo=windows&logoColor=white" alt="Windows | macOS" />
   <img src="https://img.shields.io/badge/tauri-v2-24C8D8?logo=tauri&logoColor=white" alt="Tauri v2" />
   <img src="https://img.shields.io/badge/rust-1.93-DEA584?logo=rust&logoColor=white" alt="Rust" />
   <img src="https://img.shields.io/badge/typescript-5.9-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
@@ -40,7 +40,7 @@ You select text and press the hotkey. Magic Mend copies the selection (and puts 
 ## Download
 
 <p>
-  <a href="https://github.com/mahatab/magic-mend/releases/download/v1.1.0/Magic.Mend_1.1.0_x64-setup.exe"><img src="https://img.shields.io/badge/Download%20for%20Windows-1.7%20MB-4C5CE8?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" /></a>
+  <a href="https://github.com/mahatab/magic-mend/releases/download/v1.1.0/Magic.Mend_1.1.0_x64-setup.exe"><img src="https://img.shields.io/badge/Download%20for%20Windows-1.7%20MB-A33B2E?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows" /></a>
   &nbsp;
   <a href="https://github.com/mahatab/magic-mend/releases/download/v1.1.0/Magic.Mend_1.1.0_universal.dmg"><img src="https://img.shields.io/badge/Download%20for%20macOS-4.9%20MB-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS" /></a>
 </p>
@@ -71,7 +71,7 @@ The first launch opens a short setup wizard. It finds `claude` and `codex`, chec
 ### Tones, Lengths, and Toggles
 - **Six tones**: Clear (default), Respectful, Warm, Casual, Professional, Firm
 - **Three lengths**: Shorter, Same (default), Fuller
-- **Proofread** ![Popular](https://img.shields.io/badge/popular-4C5CE8): corrects spelling, grammar, and word slips while keeping your own words, and returns one draft
+- **Proofread** ![Popular](https://img.shields.io/badge/popular-A33B2E): corrects spelling, grammar, and word slips while keeping your own words, and returns one draft
 - **Softer** turns demands into suggestions (*"you can adjust"* instead of *"adjust"*)
 - **Less thankful** keeps at most one thank-you and one apology
 - Every chip change redoes the drafts, and five quick clicks still send just one request
@@ -118,7 +118,7 @@ The first launch opens a short setup wizard. It finds `claude` and `codex`, chec
 
 ### Polished Details
 - **Light and dark** themes that follow your system, with a translucent acrylic background on Windows 11 and vibrancy on macOS
-- **Streaming drafts** that fade in word by word, with a soft shimmer while the first words are on their way
+- **Streaming drafts** that fade in word by word, with plain placeholder lines that fade slowly while the first words are on their way
 - **Reduced motion** respected everywhere
 - **Accessible**: WCAG AA contrast, visible focus rings, screen reader labels on every control, zero axe-core violations
 - **Plain error messages** that name the service and the fix: command missing, signed out, plan limit reached, offline, model not on your plan, or a 30 second timeout with Retry

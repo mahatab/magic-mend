@@ -316,9 +316,8 @@ header {
   display: block;
   height: 11px;
   border-radius: 6px;
-  background: linear-gradient(90deg, var(--shimmer-a) 0%, var(--shimmer-b) 50%, var(--shimmer-a) 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.2s linear infinite;
+  background: var(--placeholder);
+  animation: breathe 1.6s ease-in-out infinite alternate;
 }
 .skeleton i:nth-child(1) {
   width: 92%;
@@ -329,12 +328,13 @@ header {
 .skeleton i:nth-child(3) {
   width: 46%;
 }
-@keyframes shimmer {
+/* Plain placeholder lines that fade slowly, with no moving gradient. */
+@keyframes breathe {
   from {
-    background-position: 200% 0;
+    opacity: 0.6;
   }
   to {
-    background-position: -200% 0;
+    opacity: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {

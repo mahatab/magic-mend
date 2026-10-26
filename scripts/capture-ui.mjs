@@ -37,7 +37,7 @@ async function go(c, url) {
 }
 
 async function shoot(c, selector, file) {
-  await c.eval(`document.getAnimations().forEach(a => a.finish()), 1`);
+  await c.eval(`document.getAnimations().forEach(a => { try { a.finish() } catch {} }), 1`);
   const box = await c.eval(`(() => { const r = document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; })()`);
   const r = await c.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: true, clip: { ...box, scale: 1 } });
   writeFileSync(join(OUT, file), Buffer.from(r.data, "base64"));

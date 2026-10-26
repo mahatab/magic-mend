@@ -4,31 +4,31 @@
   --font-size: 14px;
   --label-size: 11px;
 
-  /* Soft indigo near #5B6CFF, darkened slightly so white text passes WCAG AA (5.2:1). */
-  --accent: #4c5ce8;
-  --accent-hover: #4352de;
-  --accent-press: #3a48cc;
+  /* Running stitch: paper, ink, and one madder red thread. White on the accent is 6.5:1. */
+  --accent: #a33b2e;
+  --accent-hover: #922f23;
+  --accent-press: #7f271d;
   --on-accent: #ffffff;
-  --accent-soft: rgba(76, 92, 232, 0.12);
-  --focus: #3d4fe6;
+  --accent-soft: rgba(163, 59, 46, 0.1);
+  --focus: #1c1b19;
 
-  --surface: #f7f7fa;
-  --surface-translucent: rgba(247, 247, 250, 0.78);
+  --surface: #f5f4f1;
+  --surface-translucent: rgba(245, 244, 241, 0.8);
   --card: #ffffff;
-  --card-border: rgba(20, 24, 40, 0.08);
-  --field: rgba(20, 24, 40, 0.04);
-  --line: rgba(20, 24, 40, 0.09);
-  --text: #1b1d24;
-  --muted: #5d6372;
-  --chip-border: rgba(20, 24, 40, 0.18);
-  --chip-hover: rgba(20, 24, 40, 0.05);
-  --danger: #b42318;
-  --danger-soft: rgba(180, 35, 24, 0.08);
-  --success: #12805c;
-  --shimmer-a: rgba(20, 24, 40, 0.06);
-  --shimmer-b: rgba(20, 24, 40, 0.12);
-  --shadow-card: 0 1px 2px rgba(16, 20, 40, 0.06), 0 2px 8px rgba(16, 20, 40, 0.05);
-  --shadow-window: 0 12px 40px rgba(16, 20, 40, 0.22);
+  --card-border: rgba(28, 27, 25, 0.1);
+  --field: rgba(28, 27, 25, 0.04);
+  --line: rgba(28, 27, 25, 0.1);
+  --text: #1c1b19;
+  --muted: #5f5c57;
+  --chip-border: rgba(28, 27, 25, 0.2);
+  --chip-hover: rgba(28, 27, 25, 0.05);
+  /* Plum, not red, so an error never reads as a selected chip. */
+  --danger: #8e1f4f;
+  --danger-soft: rgba(142, 31, 79, 0.08);
+  --success: #2f6b45;
+  --placeholder: rgba(28, 27, 25, 0.1);
+  --shadow-card: 0 1px 2px rgba(28, 27, 25, 0.06), 0 2px 8px rgba(28, 27, 25, 0.04);
+  --shadow-window: 0 12px 40px rgba(28, 27, 25, 0.22);
 
   --radius-window: 16px;
   --radius-card: 12px;
@@ -43,54 +43,52 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --accent: #7b88ff;
-    --accent-hover: #8c97ff;
-    --accent-press: #6b79f5;
-    --on-accent: #0e1020;
-    --accent-soft: rgba(123, 136, 255, 0.18);
-    --focus: #a3acff;
-    --surface: #1d1f26;
-    --surface-translucent: rgba(29, 31, 38, 0.74);
-    --card: #262932;
+    --accent: #f08a77;
+    --accent-hover: #f39c8b;
+    --accent-press: #e47863;
+    --on-accent: #1c1b1a;
+    --accent-soft: rgba(240, 138, 119, 0.16);
+    --focus: #efede9;
+    --surface: #1c1b1a;
+    --surface-translucent: rgba(28, 27, 26, 0.76);
+    --card: #272625;
     --card-border: rgba(255, 255, 255, 0.07);
     --field: rgba(255, 255, 255, 0.05);
     --line: rgba(255, 255, 255, 0.08);
-    --text: #eceef3;
-    --muted: #a5abb9;
+    --text: #efede9;
+    --muted: #aba7a0;
     --chip-border: rgba(255, 255, 255, 0.2);
     --chip-hover: rgba(255, 255, 255, 0.06);
-    --danger: #ff8a80;
-    --danger-soft: rgba(255, 138, 128, 0.1);
-    --success: #5fd3a6;
-    --shimmer-a: rgba(255, 255, 255, 0.05);
-    --shimmer-b: rgba(255, 255, 255, 0.11);
+    --danger: #f28bb5;
+    --danger-soft: rgba(242, 139, 181, 0.1);
+    --success: #82c79a;
+    --placeholder: rgba(255, 255, 255, 0.1);
     --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.2);
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --accent: #7b88ff;
-  --accent-hover: #8c97ff;
-  --accent-press: #6b79f5;
-  --on-accent: #0e1020;
-  --accent-soft: rgba(123, 136, 255, 0.18);
-  --focus: #a3acff;
-  --surface: #1d1f26;
-  --surface-translucent: rgba(29, 31, 38, 0.74);
-  --card: #262932;
+  --accent: #f08a77;
+  --accent-hover: #f39c8b;
+  --accent-press: #e47863;
+  --on-accent: #1c1b1a;
+  --accent-soft: rgba(240, 138, 119, 0.16);
+  --focus: #efede9;
+  --surface: #1c1b1a;
+  --surface-translucent: rgba(28, 27, 26, 0.76);
+  --card: #272625;
   --card-border: rgba(255, 255, 255, 0.07);
   --field: rgba(255, 255, 255, 0.05);
   --line: rgba(255, 255, 255, 0.08);
-  --text: #eceef3;
-  --muted: #a5abb9;
+  --text: #efede9;
+  --muted: #aba7a0;
   --chip-border: rgba(255, 255, 255, 0.2);
   --chip-hover: rgba(255, 255, 255, 0.06);
-  --danger: #ff8a80;
-  --danger-soft: rgba(255, 138, 128, 0.1);
-  --success: #5fd3a6;
-  --shimmer-a: rgba(255, 255, 255, 0.05);
-  --shimmer-b: rgba(255, 255, 255, 0.11);
+  --danger: #f28bb5;
+  --danger-soft: rgba(242, 139, 181, 0.1);
+  --success: #82c79a;
+  --placeholder: rgba(255, 255, 255, 0.1);
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.2);
   color-scheme: dark;
 }
